@@ -20,7 +20,9 @@ function SuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber") || "ALN-28491";
   const paymentId = searchParams.get("paymentId") || "";
-  const total = searchParams.get("total") || "799";
+  const rawTotal = searchParams.get("total") || "799";
+  const cleanedTotal = rawTotal.replace(/^[₹\s]+/, "");
+  const displayTotal = `₹${cleanedTotal}`;
   const phone = searchParams.get("phone") || "";
   const method = searchParams.get("method") || (paymentId ? "razorpay" : "whatsapp");
 
@@ -77,7 +79,7 @@ function SuccessContent() {
 
           <div>
             <span className="text-xs text-muted-foreground block">Total Amount</span>
-            <p className="text-lg font-bold text-foreground mt-0.5">₹{total}</p>
+            <p className="text-lg font-bold text-foreground mt-0.5">{displayTotal}</p>
           </div>
 
           <div>
@@ -130,7 +132,7 @@ function SuccessContent() {
 
           <a
             href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(
-              `Hi Alnaya Team! ✨ I just completed my order #${orderNumber} for ₹${total}. Please share updates on dispatch! 💖`
+              `Hi Alnaya Team! ✨ I just completed my order #${orderNumber} for ${displayTotal}. Please share updates on dispatch! 💖`
             )}`}
             target="_blank"
             rel="noreferrer"

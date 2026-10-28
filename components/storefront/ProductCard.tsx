@@ -134,12 +134,12 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Compact Product Details */}
-      <div className="p-2.5 sm:p-3 flex-1 flex flex-col justify-between">
+      <div className="p-2 sm:p-3 flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between gap-1 text-[10px] text-muted-foreground mb-1">
-            <span className="capitalize truncate max-w-[100px]">{product.category}</span>
+          <div className="flex items-center justify-between gap-1 text-[9px] sm:text-[10px] text-muted-foreground mb-1">
+            <span className="capitalize truncate max-w-[80px] sm:max-w-[100px]">{product.category}</span>
             {product.rating && (
-              <span className="flex items-center gap-0.5 font-medium text-foreground text-[10px]">
+              <span className="flex items-center gap-0.5 font-medium text-foreground text-[9px] sm:text-[10px]">
                 <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
                 <span>{product.rating}</span>
               </span>
@@ -147,20 +147,20 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           <Link href={`/products/${product.slug}`} className="block group-hover:text-primary transition-colors">
-            <h3 className="text-xs sm:text-sm font-semibold text-foreground line-clamp-1" title={product.title}>
+            <h3 className="text-[11px] xs:text-xs sm:text-sm font-semibold text-foreground line-clamp-1" title={product.title}>
               {product.title}
             </h3>
           </Link>
         </div>
 
         {/* Price & Mobile Add Button */}
-        <div className="pt-2 mt-1.5 border-t border-border/40 flex items-center justify-between">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xs sm:text-sm font-bold text-foreground">
+        <div className="pt-1.5 sm:pt-2 mt-1 sm:mt-1.5 border-t border-border/40 flex items-center justify-between gap-1">
+          <div className="flex items-baseline gap-1 min-w-0 flex-wrap">
+            <span className="text-[11px] xs:text-xs sm:text-sm font-bold text-foreground whitespace-nowrap">
               {formatPrice(effectivePrice, selectedCurrency)}
             </span>
             {salePrice && (
-              <span className="text-[10px] text-muted-foreground line-through">
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground line-through whitespace-nowrap">
                 {formatPrice(regularPrice, selectedCurrency)}
               </span>
             )}
@@ -169,7 +169,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Mobile only add button with instant feedback */}
           <button
             onClick={handleQuickAdd}
-            className={`sm:hidden min-w-[32px] min-h-[32px] p-1.5 rounded-lg flex items-center justify-center transition-all active:scale-90 ${
+            className={`sm:hidden min-w-[24px] min-h-[24px] p-1 rounded-md flex items-center justify-center transition-all active:scale-90 ${
               isAdded
                 ? "bg-emerald-600 text-white"
                 : "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -177,7 +177,7 @@ export function ProductCard({ product }: ProductCardProps) {
             aria-label="Add to cart"
             title="Add to shopping bag"
           >
-            {isAdded ? <Check className="w-3.5 h-3.5" /> : <ShoppingBag className="w-3.5 h-3.5" />}
+            {isAdded ? <Check className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
           </button>
         </div>
       </div>

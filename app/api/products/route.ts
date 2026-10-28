@@ -41,6 +41,10 @@ function formatProduct(p: any) {
   };
 }
 
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
+};
+
 export async function GET() {
   try {
     const dbProducts = await prisma.product.findMany({
@@ -49,15 +53,15 @@ export async function GET() {
 
     if (dbProducts.length === 0) {
       // Return fallback products if DB empty
-      return NextResponse.json(fallbackProducts);
+      return NextResponse.json(fallbackProducts, { headers: CACHE_HEADERS });
     }
 
     // Format DB products into application Product interface
     const formatted = dbProducts.map(formatProduct);
-    return NextResponse.json(formatted);
+    return NextResponse.json(formatted, { headers: CACHE_HEADERS });
   } catch (err) {
     console.error("GET /api/products error:", err);
-    return NextResponse.json(fallbackProducts);
+    return NextResponse.json(fallbackProducts, { headers: CACHE_HEADERS });
   }
 }
 

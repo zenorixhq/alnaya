@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { storeConfig } from "@/config/store.config";
-import { sampleOrders } from "@/data/mockData";
+import { sampleOrders, categories as defaultCategories } from "@/data/mockData";
 import { useProductStore } from "@/store/useProductStore";
 import { formatPrice } from "@/lib/utils";
-import { Order, OrderStatus, Product } from "@/types/store";
+import { Order, OrderStatus, Product, Category } from "@/types/store";
 import {
   TrendingUp,
   ShoppingBag,
@@ -39,7 +39,9 @@ import {
   ShieldCheck,
   Instagram,
   Camera,
+  Sparkles,
 } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 
 export default function AdminDashboardPage() {
   // Authentication State
@@ -49,21 +51,90 @@ export default function AdminDashboardPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
 
-  const [orders, setOrders] = useState<Order[]>(sampleOrders);
+  const [orders, setOrders] = useState<Order[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("alnaya_admin_orders");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return sampleOrders;
+  });
   const products = useProductStore((s) => s.products);
   const fetchProducts = useProductStore((s) => s.fetchProducts);
   const addProduct = useProductStore((s) => s.addProduct);
   const updateProduct = useProductStore((s) => s.updateProduct);
   const deleteProduct = useProductStore((s) => s.deleteProduct);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "orders" | "inventory" | "config" | "reviews">("inventory");
+  const [activeTab, setActiveTab] = useState<"overview" | "orders" | "inventory" | "config" | "reviews" | "collections" | "reels">("inventory");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Curated Collections (Category Cards) State
+  const [categoriesList, setCategoriesList] = useState<Category[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("alnaya_categories");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return defaultCategories;
+  });
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [categoryForm, setCategoryForm] = useState({
+    id: "",
+    name: "",
+    slug: "",
+    description: "",
+    image: "",
+  });
+  const [updatingCatId, setUpdatingCatId] = useState<string | null>(null);
+
   // Reviews, Video Reels, Screenshots & Instagram Videos State
-  const [reviewsList, setReviewsList] = useState<any[]>([]);
-  const [videosList, setVideosList] = useState<any[]>([]);
-  const [feedbackScreenshotsList, setFeedbackScreenshotsList] = useState<any[]>([]);
-  const [instagramVideosList, setInstagramVideosList] = useState<any[]>([]);
+  const [reviewsList, setReviewsList] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("alnaya_admin_reviews");
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [videosList, setVideosList] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("alnaya_admin_videos");
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [feedbackScreenshotsList, setFeedbackScreenshotsList] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("alnaya_admin_screenshots");
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [instagramVideosList, setInstagramVideosList] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("alnaya_admin_instavideos");
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [editingInstaVideo, setEditingInstaVideo] = useState<any | null>(null);
+  const [updatingInstaVideoId, setUpdatingInstaVideoId] = useState<string | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isScreenshotModalOpen, setIsScreenshotModalOpen] = useState(false);
@@ -89,11 +160,10 @@ export default function AdminDashboardPage() {
 
   const [instaVideoForm, setInstaVideoForm] = useState({
     title: "Jewelry Styling Reel",
-    handle: "@gleamnest.in",
+    handle: "@alnaya.in",
     caption: "",
     videoUrl: "",
     poster: "",
-    views: "15.4K views",
     instagramLink: "",
   });
 
@@ -103,7 +173,6 @@ export default function AdminDashboardPage() {
     title: "",
     videoUrl: "",
     poster: "",
-    views: "18.4K views",
     productTitle: "",
     productSlug: "",
     productPrice: 150,
@@ -132,21 +201,45 @@ export default function AdminDashboardPage() {
   });
 
   const fetchReviewsAndVideos = () => {
-    fetch(`/api/reviews?t=${Date.now()}`, { cache: "no-store" })
+    fetch("/api/reviews")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data.reviews)) setReviewsList(data.reviews);
-        if (Array.isArray(data.videoReels)) setVideosList(data.videoReels);
-        if (Array.isArray(data.feedbackScreenshots)) setFeedbackScreenshotsList(data.feedbackScreenshots);
-        if (Array.isArray(data.instagramVideos)) setInstagramVideosList(data.instagramVideos);
+        if (Array.isArray(data.reviews)) {
+          setReviewsList(data.reviews);
+          try { sessionStorage.setItem("alnaya_admin_reviews", JSON.stringify(data.reviews)); } catch (e) {}
+        }
+        if (Array.isArray(data.videoReels)) {
+          setVideosList(data.videoReels);
+          try { sessionStorage.setItem("alnaya_admin_videos", JSON.stringify(data.videoReels)); } catch (e) {}
+        }
+        if (Array.isArray(data.feedbackScreenshots)) {
+          setFeedbackScreenshotsList(data.feedbackScreenshots);
+          try { sessionStorage.setItem("alnaya_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
+        }
+        if (Array.isArray(data.instagramVideos)) {
+          setInstagramVideosList(data.instagramVideos);
+          try { sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(data.instagramVideos)); } catch (e) {}
+        }
       })
       .catch((err) => console.error("Error fetching reviews:", err));
+  };
+
+  const fetchCategories = () => {
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategoriesList(data);
+          try { sessionStorage.setItem("alnaya_categories", JSON.stringify(data)); } catch (e) {}
+        }
+      })
+      .catch((err) => console.error("Error fetching categories:", err));
   };
 
   useEffect(() => {
     // Check if merchant is already authenticated
     if (typeof window !== "undefined") {
-      const auth = localStorage.getItem("gleamnest_admin_auth");
+      const auth = localStorage.getItem("alnaya_admin_auth");
       if (auth === "true") {
         setIsAuthenticated(true);
       } else {
@@ -161,13 +254,13 @@ export default function AdminDashboardPage() {
     const cleanPassword = loginPassword.trim();
 
     // Accepted Merchant Credentials:
-    // Username: admin@gleamnest.in or admin
-    // Password: gleamnest@2026 or GleamNest@2026
+    // Username: admin@alnaya.in or admin
+    // Password: alnaya@2026 or Alnaya@2026
     if (
-      (cleanEmail === "admin@gleamnest.in" || cleanEmail === "admin") &&
-      (cleanPassword === "gleamnest@2026" || cleanPassword === "GleamNest@2026")
+      (cleanEmail === "admin@alnaya.in" || cleanEmail === "admin") &&
+      (cleanPassword === "alnaya@2026" || cleanPassword === "Alnaya@2026")
     ) {
-      localStorage.setItem("gleamnest_admin_auth", "true");
+      localStorage.setItem("alnaya_admin_auth", "true");
       setIsAuthenticated(true);
       setLoginError("");
     } else {
@@ -176,7 +269,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("gleamnest_admin_auth");
+    localStorage.removeItem("alnaya_admin_auth");
     setIsAuthenticated(false);
     setLoginPassword("");
   };
@@ -185,11 +278,15 @@ export default function AdminDashboardPage() {
     if (isAuthenticated) {
       fetchProducts();
       fetchReviewsAndVideos();
+      fetchCategories();
 
       fetch("/api/orders")
         .then((res) => res.json())
         .then((data) => {
-          if (Array.isArray(data) && data.length > 0) setOrders(data);
+          if (Array.isArray(data) && data.length > 0) {
+            setOrders(data);
+            try { sessionStorage.setItem("alnaya_admin_orders", JSON.stringify(data)); } catch (e) {}
+          }
         })
         .catch((err) => console.error("Error fetching orders:", err));
     }
@@ -221,18 +318,447 @@ export default function AdminDashboardPage() {
   const [uploadProgressText, setUploadProgressText] = useState("");
   const [isSavingItem, setIsSavingItem] = useState(false);
 
+  // Media Optimization & Upload
+  const compressImageIfNeeded = async (file: File, maxDim = 1400, quality = 0.82): Promise<File> => {
+    if (!file.type.startsWith("image/")) return file;
+    // Don't re-encode vector or animated images
+    if (file.type === "image/svg+xml" || file.type === "image/gif") return file;
+    // Already lightweight and compact
+    if (file.size <= 100 * 1024) return file;
+
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // WebP delivers 30-40% smaller file size with zero perceptible quality loss
+          const supportsWebp = canvas.toDataURL("image/webp").indexOf("data:image/webp") === 0;
+          const targetMime = supportsWebp ? "image/webp" : "image/jpeg";
+          const targetExt = supportsWebp ? ".webp" : ".jpg";
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob && blob.size < file.size) {
+                const cleanBase = file.name.replace(/\.[^.]+$/, "");
+                const optimized = new File([blob], `${cleanBase}${targetExt}`, {
+                  type: targetMime,
+                  lastModified: Date.now(),
+                });
+                resolve(optimized);
+              } else {
+                resolve(file);
+              }
+            },
+            targetMime,
+            quality
+          );
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const generateVideoPoster = async (file: File): Promise<File | null> => {
+    if (!file.type.startsWith("video/") && !file.name.match(/\.(mp4|mov|webm|m4v)$/i)) {
+      return null;
+    }
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      const videoUrl = URL.createObjectURL(file);
+      video.src = videoUrl;
+      video.muted = true;
+      video.playsInline = true;
+      video.crossOrigin = "anonymous";
+      video.preload = "auto";
+
+      const cleanup = () => {
+        URL.revokeObjectURL(videoUrl);
+        video.remove();
+      };
+
+      const timeout = setTimeout(() => {
+        cleanup();
+        resolve(null);
+      }, 7000);
+
+      video.onloadeddata = () => {
+        // Seek to 0.5s or 15% to grab an active preview frame (avoid initial black frame)
+        const targetTime = Math.min(1.0, (video.duration || 2) * 0.15);
+        video.currentTime = targetTime;
+      };
+
+      video.onseeked = () => {
+        try {
+          const width = video.videoWidth || 720;
+          const height = video.videoHeight || 1280;
+          const maxDim = 1000;
+          let targetW = width;
+          let targetH = height;
+          if (targetW > maxDim || targetH > maxDim) {
+            if (targetW > targetH) {
+              targetH = Math.round((height * maxDim) / width);
+              targetW = maxDim;
+            } else {
+              targetW = Math.round((width * maxDim) / height);
+              targetH = maxDim;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            clearTimeout(timeout);
+            cleanup();
+            resolve(null);
+            return;
+          }
+
+          ctx.drawImage(video, 0, 0, targetW, targetH);
+          canvas.toBlob(
+            (blob) => {
+              clearTimeout(timeout);
+              cleanup();
+              if (blob) {
+                const cleanBase = file.name.replace(/\.[^.]+$/, "");
+                const posterFile = new File([blob], `${cleanBase}-poster.jpg`, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                });
+                resolve(posterFile);
+              } else {
+                resolve(null);
+              }
+            },
+            "image/jpeg",
+            0.82
+          );
+        } catch (e) {
+          clearTimeout(timeout);
+          cleanup();
+          resolve(null);
+        }
+      };
+
+      video.onerror = () => {
+        clearTimeout(timeout);
+        cleanup();
+        resolve(null);
+      };
+    });
+  };
+
+  const compressVideoIfNeeded = async (
+    file: File,
+    onProgress?: (percent: number, currentMB: number, targetMB: number) => void
+  ): Promise<File> => {
+    // Only compress video files larger than 2.5 MB
+    const isVideo = file.type.startsWith("video/") || file.name.match(/\.(mp4|mov|webm|m4v|avi|mkv)$/i);
+    if (!isVideo) return file;
+    if (file.size <= 2.5 * 1024 * 1024) return file;
+
+    // Check browser MediaRecorder and Canvas captureStream support
+    if (typeof window === "undefined" || !window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+      console.warn("Browser does not support in-browser video compression. Skipping.");
+      return file;
+    }
+
+    return new Promise((resolve) => {
+      // 45-second fallback timeout
+      const timeout = setTimeout(() => {
+        console.warn("Video compression timed out, proceeding with original file.");
+        resolve(file);
+      }, 45000);
+
+      const video = document.createElement("video");
+      const videoUrl = URL.createObjectURL(file);
+      video.src = videoUrl;
+      video.muted = true;
+      video.playsInline = true;
+      video.crossOrigin = "anonymous";
+      video.preload = "auto";
+
+      video.onloadedmetadata = async () => {
+        try {
+          const origWidth = video.videoWidth || 1280;
+          const origHeight = video.videoHeight || 720;
+          const duration = video.duration || 10;
+
+          // Skip client compression if video is extremely long (> 120s) to avoid freezing UI
+          if (duration > 120) {
+            clearTimeout(timeout);
+            URL.revokeObjectURL(videoUrl);
+            resolve(file);
+            return;
+          }
+
+          // Target 720p maximum resolution with preserved aspect ratio
+          const isPortrait = origHeight > origWidth;
+          const maxLongDim = 1280;
+          const maxShortDim = 720;
+
+          let targetWidth = origWidth;
+          let targetHeight = origHeight;
+
+          if (isPortrait) {
+            if (targetWidth > maxShortDim) {
+              targetHeight = Math.round((origHeight * maxShortDim) / origWidth);
+              targetWidth = maxShortDim;
+            }
+            if (targetHeight > maxLongDim) {
+              targetWidth = Math.round((targetWidth * maxLongDim) / targetHeight);
+              targetHeight = maxLongDim;
+            }
+          } else {
+            if (targetWidth > maxLongDim) {
+              targetHeight = Math.round((origHeight * maxLongDim) / origWidth);
+              targetWidth = maxLongDim;
+            }
+            if (targetHeight > maxShortDim) {
+              targetWidth = Math.round((targetWidth * maxShortDim) / targetHeight);
+              targetHeight = maxShortDim;
+            }
+          }
+
+          // Codecs strictly require even dimensions
+          targetWidth = Math.max(2, Math.floor(targetWidth / 2) * 2);
+          targetHeight = Math.max(2, Math.floor(targetHeight / 2) * 2);
+
+          const canvas = document.createElement("canvas");
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext("2d", { alpha: false });
+          if (!ctx) {
+            clearTimeout(timeout);
+            URL.revokeObjectURL(videoUrl);
+            resolve(file);
+            return;
+          }
+
+          // Capture canvas stream at 30fps
+          const canvasStream = canvas.captureStream(30);
+
+          // Capture audio from video element if available
+          try {
+            const vidElementStream = (video as any).captureStream
+              ? (video as any).captureStream()
+              : (video as any).mozCaptureStream
+              ? (video as any).mozCaptureStream()
+              : null;
+
+            if (vidElementStream) {
+              const audioTracks = vidElementStream.getAudioTracks();
+              if (audioTracks && audioTracks.length > 0) {
+                canvasStream.addTrack(audioTracks[0]);
+              }
+            }
+          } catch (audioErr) {
+            console.warn("Could not capture audio track:", audioErr);
+          }
+
+          // Determine optimal supported mime type
+          const candidateMimes = [
+            "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+            "video/mp4",
+            "video/webm;codecs=vp9,opus",
+            "video/webm;codecs=vp8,opus",
+            "video/webm",
+          ];
+          let chosenMime = "";
+          let chosenExt = ".webm";
+          for (const m of candidateMimes) {
+            if (MediaRecorder.isTypeSupported(m)) {
+              chosenMime = m;
+              chosenExt = m.includes("mp4") ? ".mp4" : ".webm";
+              break;
+            }
+          }
+
+          // Bitrate: ~1.4 Mbps video bitrate yields crystal clear 720p reels at ~1.5 - 2.8 MB
+          const targetBitrate = 1400000;
+          let mediaRecorder: MediaRecorder;
+          try {
+            mediaRecorder = new MediaRecorder(canvasStream, {
+              ...(chosenMime ? { mimeType: chosenMime } : {}),
+              videoBitsPerSecond: targetBitrate,
+            });
+          } catch (e) {
+            mediaRecorder = new MediaRecorder(canvasStream);
+          }
+
+          const chunks: Blob[] = [];
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) {
+              chunks.push(e.data);
+            }
+          };
+
+          let isDone = false;
+          const finish = () => {
+            if (isDone) return;
+            isDone = true;
+            clearTimeout(timeout);
+            URL.revokeObjectURL(videoUrl);
+
+            try {
+              const outputBlob = new Blob(chunks, { type: chosenMime || "video/webm" });
+              if (outputBlob.size < file.size && outputBlob.size > 10000) {
+                const cleanBase = file.name.replace(/\.[^.]+$/, "");
+                const compressedFile = new File([outputBlob], `${cleanBase}-opt${chosenExt}`, {
+                  type: (chosenMime || "video/webm").split(";")[0],
+                  lastModified: Date.now(),
+                });
+                resolve(compressedFile);
+              } else {
+                resolve(file);
+              }
+            } catch (err) {
+              resolve(file);
+            }
+          };
+
+          mediaRecorder.onstop = finish;
+          mediaRecorder.onerror = () => {
+            clearTimeout(timeout);
+            URL.revokeObjectURL(videoUrl);
+            resolve(file);
+          };
+
+          mediaRecorder.start(250);
+
+          let animId: number;
+          const render = () => {
+            if (video.paused || video.ended) return;
+            ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+
+            if (duration > 0 && onProgress) {
+              const pct = Math.min(99, Math.round((video.currentTime / duration) * 100));
+              const curMB = file.size / (1024 * 1024);
+              const estMB = Math.max(0.8, (targetBitrate * duration) / (8 * 1024 * 1024));
+              onProgress(pct, curMB, estMB);
+            }
+
+            if ("requestVideoFrameCallback" in video) {
+              (video as any).requestVideoFrameCallback(render);
+            } else {
+              animId = requestAnimationFrame(render);
+            }
+          };
+
+          video.onended = () => {
+            cancelAnimationFrame(animId);
+            setTimeout(() => {
+              if (mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+              }
+            }, 200);
+          };
+
+          video.onerror = () => {
+            clearTimeout(timeout);
+            URL.revokeObjectURL(videoUrl);
+            resolve(file);
+          };
+
+          await video.play();
+          render();
+        } catch (err) {
+          console.warn("Video compression encountered error, using original file:", err);
+          clearTimeout(timeout);
+          URL.revokeObjectURL(videoUrl);
+          resolve(file);
+        }
+      };
+
+      video.onerror = () => {
+        clearTimeout(timeout);
+        URL.revokeObjectURL(videoUrl);
+        resolve(file);
+      };
+    });
+  };
+
   const uploadFileToServer = async (file: File, folder: "screenshots" | "videos" | "images") => {
     setIsUploading(true);
-    setUploadProgressText(`Uploading ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)...`);
     try {
+      let fileToUpload = file;
+
+      // 1. Convert images to low size immediately (crisp 1400px, 0.82 WebP/JPEG, ~80-160KB)
+      if (file.type.startsWith("image/") && file.size > 100 * 1024) {
+        const origSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        setUploadProgressText(`Optimizing image (${origSizeMB} MB ➔ converting to fast web format)...`);
+        fileToUpload = await compressImageIfNeeded(file);
+        const newSizeKB = Math.round(fileToUpload.size / 1024);
+        setUploadProgressText(`Image optimized to ${newSizeKB} KB! Uploading...`);
+      }
+      // 2. Convert videos to low size immediately (720p 30fps ~1.4Mbps, ~1.5 - 3MB)
+      else if ((file.type.startsWith("video/") || folder === "videos") && file.size > 2.5 * 1024 * 1024) {
+        const origSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        setUploadProgressText(`Compressing video (original: ${origSizeMB} MB ➔ converting to fast web video)...`);
+        fileToUpload = await compressVideoIfNeeded(file, (percent, curMB, tgtMB) => {
+          setUploadProgressText(`Compressing video: ${percent}% (reducing ${curMB.toFixed(1)} MB to ~${tgtMB.toFixed(1)} MB)...`);
+        });
+        const newSizeMB = (fileToUpload.size / (1024 * 1024)).toFixed(1);
+        setUploadProgressText(`Video compressed to ${newSizeMB} MB! Uploading to cloud...`);
+      } else {
+        setUploadProgressText(`Uploading ${fileToUpload.name}...`);
+      }
+
+      // 1. Direct client-to-cloud Vercel Blob upload (supports files up to 150MB directly to CDN)
+      try {
+        const cleanName = `${folder}/${Date.now()}-${fileToUpload.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const newBlob = await upload(cleanName, fileToUpload, {
+          access: "public",
+          handleUploadUrl: "/api/upload/blob",
+        });
+        if (newBlob && newBlob.url) {
+          return newBlob.url;
+        }
+      } catch (blobErr: any) {
+        console.warn("Direct blob upload unavailable, trying server API route:", blobErr?.message);
+      }
+
+      // 2. Server API route upload fallback
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", fileToUpload);
       formData.append("folder", folder);
 
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
+
+      if (res.status === 413) {
+        throw new Error(
+          "Video file exceeds the serverless limit. Please enable Vercel Blob in your Vercel Dashboard (Storage -> Create Blob) for unlimited uploads up to 150MB, or paste an Instagram / direct video URL."
+        );
+      }
 
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -294,16 +820,32 @@ export default function AdminDashboardPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 80 * 1024 * 1024) {
-      alert("Video file is larger than 80MB. Please choose a smaller video clip.");
+    if (file.size > 150 * 1024 * 1024) {
+      alert("Video file is larger than 150MB. Please choose a smaller video clip.");
       return;
     }
 
     try {
+      // Auto-extract thumbnail poster from video if none is set
+      if (!videoForm.poster) {
+        generateVideoPoster(file).then(async (posterFile) => {
+          if (posterFile) {
+            try {
+              const posterUrl = await uploadFileToServer(posterFile, "images");
+              if (posterUrl) {
+                setVideoForm((prev) => ({ ...prev, poster: prev.poster || posterUrl }));
+              }
+            } catch (pErr) {
+              console.warn("Poster auto-upload skipped:", pErr);
+            }
+          }
+        });
+      }
+
       const publicUrl = await uploadFileToServer(file, "videos");
       setVideoForm((prev) => ({ ...prev, videoUrl: publicUrl }));
     } catch (err: any) {
-      alert("Error uploading video: " + (err.message || "Upload failed"));
+      alert("Video Upload Notice: " + (err.message || "Upload failed") + "\n\nTip: You can also paste an Instagram Reel or direct video URL.");
     } finally {
       e.target.value = "";
     }
@@ -347,7 +889,6 @@ export default function AdminDashboardPage() {
         title: "",
         videoUrl: "",
         poster: "",
-        views: "18.4K views",
         productTitle: "",
         productSlug: "",
         productPrice: 150,
@@ -448,20 +989,146 @@ export default function AdminDashboardPage() {
   };
 
   // Instagram Video ("Follow The House") Handlers
+  const handleInstaCardVideoUpload = async (videoId: string | number, file: File) => {
+    setUpdatingInstaVideoId(String(videoId));
+    try {
+      const publicUrl = await uploadFileToServer(file, "videos");
+      if (!publicUrl) throw new Error("Video upload failed");
+
+      // Auto-extract thumbnail poster from video if none was previously set
+      let autoPosterUrl: string | undefined;
+      const videoToUpdate = instagramVideosList.find((v) => String(v.id) === String(videoId));
+      if (!videoToUpdate?.poster) {
+        try {
+          const posterFile = await generateVideoPoster(file);
+          if (posterFile) {
+            autoPosterUrl = await uploadFileToServer(posterFile, "images");
+          }
+        } catch (pErr) {
+          console.warn("Auto-poster upload skipped:", pErr);
+        }
+      }
+
+      // Update state locally
+      setInstagramVideosList((prev) =>
+        prev.map((v) =>
+          String(v.id) === String(videoId)
+            ? { ...v, videoUrl: publicUrl, ...(autoPosterUrl ? { poster: autoPosterUrl } : {}) }
+            : v
+        )
+      );
+
+      // Persist to DB via PUT /api/reviews
+      await fetch("/api/reviews", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...(videoToUpdate || {}),
+          id: videoId,
+          type: "instagramVideo",
+          videoUrl: publicUrl,
+          ...(autoPosterUrl ? { poster: autoPosterUrl } : {}),
+        }),
+      });
+
+      fetchReviewsAndVideos();
+    } catch (err: any) {
+      console.error("Failed to upload video reel:", err);
+      alert("Failed to upload video: " + (err?.message || "Unknown error"));
+    } finally {
+      setUpdatingInstaVideoId(null);
+    }
+  };
+
+  const handleInstaCardPosterUpload = async (videoId: string | number, file: File) => {
+    setUpdatingInstaVideoId(String(videoId));
+    try {
+      const publicUrl = await uploadFileToServer(file, "images");
+      if (!publicUrl) throw new Error("Image upload failed");
+
+      // Update state locally
+      setInstagramVideosList((prev) =>
+        prev.map((v) => (String(v.id) === String(videoId) ? { ...v, poster: publicUrl } : v))
+      );
+
+      // Persist to DB via PUT /api/reviews
+      const videoToUpdate = instagramVideosList.find((v) => String(v.id) === String(videoId));
+      await fetch("/api/reviews", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...(videoToUpdate || {}),
+          id: videoId,
+          type: "instagramVideo",
+          poster: publicUrl,
+        }),
+      });
+
+      fetchReviewsAndVideos();
+    } catch (err: any) {
+      console.error("Failed to upload poster:", err);
+      alert("Failed to upload cover image: " + (err?.message || "Unknown error"));
+    } finally {
+      setUpdatingInstaVideoId(null);
+    }
+  };
+
+  const handleOpenAddInstaVideo = () => {
+    setEditingInstaVideo(null);
+    setInstaVideoForm({
+      title: "",
+      handle: "@alnaya.in",
+      caption: "",
+      videoUrl: "",
+      poster: "",
+      instagramLink: "https://www.instagram.com/alnaya.in/",
+    });
+    setIsInstaVideoModalOpen(true);
+  };
+
+  const handleOpenEditInstaVideo = (video: any) => {
+    setEditingInstaVideo(video);
+    setInstaVideoForm({
+      title: video.title || "",
+      handle: video.handle || "@alnaya.in",
+      caption: video.caption || "",
+      videoUrl: video.videoUrl || "",
+      poster: video.poster || "",
+      instagramLink: video.instagramLink || "",
+    });
+    setIsInstaVideoModalOpen(true);
+  };
+
   const handleInstaVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 80 * 1024 * 1024) {
-      alert("Video file is larger than 80MB. Please choose a smaller video clip.");
+    if (file.size > 150 * 1024 * 1024) {
+      alert("Video file is larger than 150MB. Please choose a smaller video clip.");
       return;
     }
 
     try {
+      // Auto-extract thumbnail poster from video if none is set
+      if (!instaVideoForm.poster) {
+        generateVideoPoster(file).then(async (posterFile) => {
+          if (posterFile) {
+            try {
+              const posterUrl = await uploadFileToServer(posterFile, "images");
+              if (posterUrl) {
+                setInstaVideoForm((prev) => ({ ...prev, poster: prev.poster || posterUrl }));
+              }
+            } catch (pErr) {
+              console.warn("Auto-poster upload skipped:", pErr);
+            }
+          }
+        });
+      }
+
       const publicUrl = await uploadFileToServer(file, "videos");
       setInstaVideoForm((prev) => ({ ...prev, videoUrl: publicUrl }));
     } catch (err: any) {
-      alert("Error uploading video reel: " + (err.message || "Upload failed"));
+      alert("Video Upload Notice: " + (err.message || "Upload failed") + "\n\nTip: You can also paste an Instagram Reel or direct video URL.");
     } finally {
       e.target.value = "";
     }
@@ -489,28 +1156,46 @@ export default function AdminDashboardPage() {
     }
     setIsSavingItem(true);
     try {
-      const res = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...instaVideoForm, type: "instagramVideo" }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to add Instagram video");
+      if (editingInstaVideo) {
+        // PUT
+        const res = await fetch("/api/reviews", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...instaVideoForm,
+            id: editingInstaVideo.id,
+            type: "instagramVideo",
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Failed to update Instagram video");
+        }
+      } else {
+        // POST
+        const res = await fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...instaVideoForm, type: "instagramVideo" }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Failed to add Instagram video");
+        }
       }
       setIsInstaVideoModalOpen(false);
+      setEditingInstaVideo(null);
       setInstaVideoForm({
         title: "Jewelry Styling Reel",
-        handle: "@gleamnest.in",
+        handle: "@alnaya.in",
         caption: "",
         videoUrl: "",
         poster: "",
-        views: "15.4K views",
         instagramLink: "",
       });
       fetchReviewsAndVideos();
     } catch (err: any) {
-      alert(err.message || "Error adding Instagram video");
+      alert(err.message || "Error saving Instagram video");
     } finally {
       setIsSavingItem(false);
     }
@@ -532,6 +1217,139 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Curated Collections / Category Cards Handlers
+  const handleCategoryCardImageUpload = async (catId: string, file: File) => {
+    setUpdatingCatId(catId);
+    try {
+      const imageUrl = await uploadFileToServer(file, "images");
+      if (!imageUrl) throw new Error("Image upload failed");
+
+      // Update state immediately
+      setCategoriesList((prev) =>
+        prev.map((c) => (c.id === catId ? { ...c, image: imageUrl } : c))
+      );
+
+      // Persist to Neon PostgreSQL via PUT /api/categories
+      const catToUpdate = categoriesList.find((c) => c.id === catId);
+      const res = await fetch("/api/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...(catToUpdate || {}),
+          id: catId,
+          image: imageUrl,
+        }),
+      });
+
+      const data = await res.json();
+      if (Array.isArray(data.categories)) {
+        setCategoriesList(data.categories);
+      }
+    } catch (err: any) {
+      console.error("Failed to update category card image:", err);
+      alert("Failed to upload and update category image: " + (err?.message || "Unknown error"));
+    } finally {
+      setUpdatingCatId(null);
+    }
+  };
+
+  const handleOpenEditCategory = (cat: Category) => {
+    setEditingCategory(cat);
+    setCategoryForm({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description || "",
+      image: cat.image,
+    });
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleOpenAddCategory = () => {
+    setEditingCategory(null);
+    setCategoryForm({
+      id: `cat-${Date.now()}`,
+      name: "",
+      slug: "",
+      description: "",
+      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800",
+    });
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleCategoryModalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const publicUrl = await uploadFileToServer(file, "images");
+      setCategoryForm((prev) => ({ ...prev, image: publicUrl }));
+    } catch (err: any) {
+      alert("Image upload notice: " + (err.message || "Failed to upload image"));
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const handleSaveCategoryModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!categoryForm.name.trim() || !categoryForm.slug.trim()) {
+      alert("Category name and slug are required.");
+      return;
+    }
+    setIsSavingItem(true);
+    try {
+      if (editingCategory) {
+        const res = await fetch("/api/categories", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(categoryForm),
+        });
+        const data = await res.json();
+        if (Array.isArray(data.categories)) {
+          setCategoriesList(data.categories);
+        } else {
+          setCategoriesList((prev) =>
+            prev.map((c) => (c.id === categoryForm.id ? { ...c, ...categoryForm } : c))
+          );
+        }
+      } else {
+        const res = await fetch("/api/categories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(categoryForm),
+        });
+        const data = await res.json();
+        if (Array.isArray(data.categories)) {
+          setCategoriesList(data.categories);
+        } else {
+          setCategoriesList((prev) => [...prev, { ...categoryForm, productCount: 0 }]);
+        }
+      }
+      setIsCategoryModalOpen(false);
+    } catch (err: any) {
+      console.error("Error saving category:", err);
+      alert("Failed to save category card: " + (err?.message || "Unknown error"));
+    } finally {
+      setIsSavingItem(false);
+    }
+  };
+
+  const handleDeleteCategory = async (catId: string) => {
+    if (!confirm("Are you sure you want to remove this category card from the homepage?")) return;
+    try {
+      const res = await fetch(`/api/categories?id=${encodeURIComponent(catId)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (Array.isArray(data.categories)) {
+        setCategoriesList(data.categories);
+      } else {
+        setCategoriesList((prev) => prev.filter((c) => c.id !== catId));
+      }
+    } catch (err) {
+      console.error("Error deleting category:", err);
+    }
+  };
 
   const handleStockAdjust = async (productId: string, delta: number) => {
     const prod = products.find((p) => p.id === productId);
@@ -592,21 +1410,23 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image is larger than 5MB. Please choose an optimized image under 5MB.");
+    if (file.size > 25 * 1024 * 1024) {
+      alert("Image is larger than 25MB. Please choose a smaller image.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
-      setFormState((prev) => ({ ...prev, imageUrl: dataUrl }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const publicUrl = await uploadFileToServer(file, "images");
+      setFormState((prev) => ({ ...prev, imageUrl: publicUrl }));
+    } catch (err: any) {
+      alert("Error uploading image: " + (err.message || "Upload failed"));
+    } finally {
+      e.target.value = "";
+    }
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -719,14 +1539,14 @@ export default function AdminDashboardPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Admin Username or Email</span>
-                <span className="text-[10px] text-muted-foreground font-mono">admin@gleamnest.in</span>
+                <span className="text-[10px] text-muted-foreground font-mono">admin@alnaya.in</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
                   required
                   autoFocus
-                  placeholder="admin@gleamnest.in"
+                  placeholder="admin@alnaya.in"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 pl-10 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -738,7 +1558,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Secret Password</span>
-                <span className="text-[10px] text-muted-foreground font-mono">gleamnest@2026</span>
+                <span className="text-[10px] text-muted-foreground font-mono">alnaya@2026</span>
               </label>
               <div className="relative">
                 <input
@@ -886,6 +1706,30 @@ export default function AdminDashboardPage() {
           >
             <MessageSquare className="w-4 h-4" />
             <span>Reviews & Videos ({reviewsList.length + videosList.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("collections")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+              activeTab === "collections"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-[#C5A059]" />
+            <span>Curated Collections Cards ({categoriesList.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("reels")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+              activeTab === "reels"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <Instagram className="w-4 h-4 text-[#E1306C]" />
+            <span>Follow The House (Reels) ({instagramVideosList.length})</span>
           </button>
         </div>
 
@@ -1248,7 +2092,7 @@ export default function AdminDashboardPage() {
                       rel="noreferrer"
                       className="text-primary hover:underline font-mono text-[11px]"
                     >
-                      @gleamnest.in ↗
+                      @alnaya.in ↗
                     </a>
                   </p>
                   <p>
@@ -1259,7 +2103,7 @@ export default function AdminDashboardPage() {
                       rel="noreferrer"
                       className="text-primary hover:underline font-mono text-[11px]"
                     >
-                      GleamNest Official Page ↗
+                      Alnaya Official Page ↗
                     </a>
                   </p>
                   <p>
@@ -1284,8 +2128,8 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
                   <p>Portal URL: <strong className="text-foreground font-mono">/admin</strong></p>
-                  <p>Username / Email: <strong className="text-foreground font-mono">admin@gleamnest.in</strong> (or <span className="font-mono">admin</span>)</p>
-                  <p>Default Password: <strong className="text-foreground font-mono">gleamnest@2026</strong></p>
+                  <p>Username / Email: <strong className="text-foreground font-mono">admin@alnaya.in</strong> (or <span className="font-mono">admin</span>)</p>
+                  <p>Default Password: <strong className="text-foreground font-mono">alnaya@2026</strong></p>
                   <p>Session Security: <strong className="text-emerald-700">Encrypted Local Storage Authentication</strong></p>
                 </div>
               </div>
@@ -1490,10 +2334,7 @@ export default function AdminDashboardPage() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30 flex flex-col justify-between p-3 text-white">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] bg-black/60 px-2 py-0.5 rounded-full font-medium">
-                              {video.views || "15K views"}
-                            </span>
+                          <div className="flex items-center justify-end">
                             <span className="text-[10px] bg-pink-600/80 px-2 py-0.5 rounded-full font-medium">
                               Reel
                             </span>
@@ -1505,7 +2346,7 @@ export default function AdminDashboardPage() {
 
                           <div>
                             <p className="text-xs font-bold line-clamp-1 text-white">{video.title}</p>
-                            <p className="text-[10px] text-white/80">{video.handle || "@gleamnest.in"}</p>
+                            <p className="text-[10px] text-white/80">{video.handle || "@alnaya.in"}</p>
                           </div>
                         </div>
                       </div>
@@ -1640,9 +2481,7 @@ export default function AdminDashboardPage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 flex flex-col justify-between p-3 text-white">
-                        <span className="text-[10px] bg-black/60 px-2 py-0.5 rounded-full font-medium self-start">
-                          {video.views}
-                        </span>
+                        <div />
 
                         <a
                           href={video.videoUrl}
@@ -1683,6 +2522,386 @@ export default function AdminDashboardPage() {
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Tab: Curated Collections / Homepage Category Cards */}
+        {activeTab === "collections" && (
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#C5A059]" />
+                  <h3 className="text-base font-bold text-foreground">
+                    Curated Collections Cards ({categoriesList.length})
+                  </h3>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage the category cards displayed on the Homepage &quot;Shop by Category&quot; section. Upload high-res jewelry photos, change titles, or edit category details.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleOpenAddCategory}
+                  className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-xs flex items-center gap-1.5 shadow-sm hover:bg-primary/90 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Collection Card</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Grid of Homepage Category Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {categoriesList.map((cat, index) => (
+                <div
+                  key={cat.id || cat.slug || index}
+                  className="group relative rounded-xl border border-border/80 bg-background overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col"
+                >
+                  {/* Card Visual Preview (matching homepage aspect-[4/5] ratio) */}
+                  <div className="relative aspect-[4/5] w-full overflow-hidden bg-stone-100 dark:bg-stone-900">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none" />
+
+                    {/* Order Index Badge */}
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-semibold text-white/90 border border-white/10">
+                      Card #{index + 1}
+                    </div>
+
+                    {/* Quick Direct Upload Overlay / Button */}
+                    <div className="absolute top-2.5 right-2.5">
+                      <label
+                        htmlFor={`cat-img-upload-${cat.id}`}
+                        className={`px-2.5 py-1.5 rounded-lg bg-black/70 hover:bg-black text-white text-[11px] font-medium backdrop-blur-sm border border-white/20 shadow-md cursor-pointer flex items-center gap-1.5 transition-all ${
+                          updatingCatId === cat.id ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                        title="Upload a new photo for this collection card"
+                      >
+                        <Camera className="w-3.5 h-3.5 text-[#C5A059]" />
+                        <span>Change Card Image</span>
+                      </label>
+                      <input
+                        id={`cat-img-upload-${cat.id}`}
+                        type="file"
+                        accept="image/*"
+                        disabled={updatingCatId === cat.id || isUploading}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleCategoryCardImageUpload(cat.id, f);
+                          e.target.value = "";
+                        }}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Uploading progress indicator */}
+                    {updatingCatId === cat.id && (
+                      <div className="absolute inset-0 bg-black/75 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-10">
+                        <Clock className="w-6 h-6 text-[#C5A059] animate-spin mb-2" />
+                        <span className="text-xs font-bold text-white">Uploading &amp; Saving...</span>
+                        <span className="text-[10px] text-white/70 mt-1">Updating cloud storage</span>
+                      </div>
+                    )}
+
+                    {/* Text Preview Overlay matching storefront */}
+                    <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none">
+                      <p className="text-[10px] uppercase tracking-widest text-[#EADBBE] font-medium">
+                        Collection
+                      </p>
+                      <h4 className="text-sm font-bold leading-tight font-serif text-white drop-shadow">
+                        {cat.name}
+                      </h4>
+                      {cat.description && (
+                        <p className="text-[10px] text-white/80 line-clamp-1 mt-0.5">
+                          {cat.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Actions & Info Bar */}
+                  <div className="p-3 bg-card border-t border-border flex items-center justify-between gap-2 mt-auto">
+                    <div className="min-w-0 flex-1">
+                      <span className="font-bold text-xs text-foreground block truncate">
+                        {cat.name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-mono block truncate">
+                        /{cat.slug}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditCategory(cat)}
+                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        title="Edit title & description"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+
+                      <Link
+                        href={`/products?category=${cat.slug}`}
+                        target="_blank"
+                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        title="View collection on storefront"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCategory(cat.id)}
+                        className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors"
+                        title="Remove collection card"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab: Follow The House Video Reels */}
+        {activeTab === "reels" && (
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Instagram className="w-5 h-5 text-[#E1306C]" />
+                  <h3 className="text-base font-bold text-foreground">
+                    Follow The House — Instagram Video Reels ({instagramVideosList.length})
+                  </h3>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage the playable jewelry videos featured in the homepage &quot;FOLLOW THE HOUSE&quot; section. Upload MP4 video reels from your phone/PC, change thumbnails, or edit reel details.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <a
+                  href="https://www.instagram.com/alnaya.in/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors"
+                >
+                  <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
+                  <span>@alnaya.in ↗</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={handleOpenAddInstaVideo}
+                  className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-xs flex items-center gap-1.5 shadow-sm hover:bg-primary/90 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Upload New Reel</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Grid of Follow The House Video Cards */}
+            {instagramVideosList.length === 0 ? (
+              <div className="p-12 rounded-xl border border-dashed border-border text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-pink-500/10 text-[#E1306C] flex items-center justify-center mx-auto">
+                  <Instagram className="w-6 h-6" />
+                </div>
+                <p className="text-sm font-bold text-foreground">No Video Reels Added Yet</p>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  Upload MP4 styling videos, shower tests, or unboxing reels from your device to feature on the homepage.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleOpenAddInstaVideo}
+                  className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 shadow-sm"
+                >
+                  + Upload First Video Reel
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                {instagramVideosList.map((video, index) => {
+                  const isDirectVideo =
+                    video.videoUrl &&
+                    (video.videoUrl.includes(".mp4") ||
+                      video.videoUrl.includes(".webm") ||
+                      video.videoUrl.includes("blob.vercel-storage.com") ||
+                      video.videoUrl.startsWith("/uploads/") ||
+                      video.videoUrl.startsWith("data:video") ||
+                      video.videoUrl.includes("assets.mixkit.co"));
+
+                  return (
+                    <div
+                      key={video.id || index}
+                      className="group relative rounded-xl border border-border/80 bg-background overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col"
+                    >
+                      {/* Reel Video Preview Container */}
+                      <div className="relative aspect-[9/15] w-full overflow-hidden bg-stone-900">
+                        {isDirectVideo ? (
+                          <video
+                            src={video.videoUrl}
+                            poster={video.poster}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <img
+                            src={
+                              video.poster ||
+                              "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=700"
+                            }
+                            alt={video.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        )}
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/35 pointer-events-none" />
+
+                        {/* Top Badges */}
+                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-semibold text-white/90 border border-white/10">
+                            Reel #{index + 1}
+                          </span>
+                        </div>
+
+                        {/* Direct 1-Click Upload Buttons */}
+                        <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5">
+                          {/* 1-Click Change Video (MP4) */}
+                          <label
+                            htmlFor={`reel-vid-file-${video.id}`}
+                            className={`px-2.5 py-1.5 rounded-lg bg-black/80 hover:bg-black text-white text-[11px] font-medium backdrop-blur-sm border border-white/20 shadow-md cursor-pointer flex items-center gap-1.5 transition-all ${
+                              updatingInstaVideoId === String(video.id)
+                                ? "opacity-50 pointer-events-none"
+                                : ""
+                            }`}
+                            title="Upload new video reel file (MP4/WebM) from your device"
+                          >
+                            <Upload className="w-3.5 h-3.5 text-pink-400" />
+                            <span>Change Video</span>
+                          </label>
+                          <input
+                            id={`reel-vid-file-${video.id}`}
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime,video/*"
+                            disabled={updatingInstaVideoId === String(video.id) || isUploading}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleInstaCardVideoUpload(video.id, f);
+                              e.target.value = "";
+                            }}
+                            className="hidden"
+                          />
+
+                          {/* 1-Click Change Cover / Thumbnail */}
+                          <label
+                            htmlFor={`reel-poster-file-${video.id}`}
+                            className={`px-2.5 py-1.5 rounded-lg bg-black/80 hover:bg-black text-white text-[11px] font-medium backdrop-blur-sm border border-white/20 shadow-md cursor-pointer flex items-center gap-1.5 transition-all ${
+                              updatingInstaVideoId === String(video.id)
+                                ? "opacity-50 pointer-events-none"
+                                : ""
+                            }`}
+                            title="Upload new cover image from your device"
+                          >
+                            <Camera className="w-3.5 h-3.5 text-[#C5A059]" />
+                            <span>Change Cover</span>
+                          </label>
+                          <input
+                            id={`reel-poster-file-${video.id}`}
+                            type="file"
+                            accept="image/*"
+                            disabled={updatingInstaVideoId === String(video.id) || isUploading}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleInstaCardPosterUpload(video.id, f);
+                              e.target.value = "";
+                            }}
+                            className="hidden"
+                          />
+                        </div>
+
+                        {/* Uploading progress indicator */}
+                        {updatingInstaVideoId === String(video.id) && (
+                          <div className="absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-10">
+                            <Clock className="w-6 h-6 text-pink-400 animate-spin mb-2" />
+                            <span className="text-xs font-bold text-white">Uploading &amp; Saving Reel...</span>
+                            <span className="text-[10px] text-white/70 mt-1">Direct upload to Cloud CDN</span>
+                          </div>
+                        )}
+
+                        {/* Bottom Text Details */}
+                        <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none space-y-0.5">
+                          <p className="text-[10px] text-[#F3DFB0] font-mono tracking-wider">
+                            {video.handle || "@alnaya.in"}
+                          </p>
+                          <h4 className="text-xs sm:text-sm font-bold leading-tight text-white drop-shadow line-clamp-1">
+                            {video.title}
+                          </h4>
+                          {video.caption && (
+                            <p className="text-[11px] text-white/80 line-clamp-1 font-light drop-shadow-sm">
+                              {video.caption}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Card Actions Footer */}
+                      <div className="p-3 bg-card border-t border-border flex items-center justify-between gap-2 mt-auto">
+                        <div className="min-w-0 flex-1">
+                          <span className="font-bold text-xs text-foreground block truncate">
+                            {video.title}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-mono block truncate">
+                            {video.handle || "@alnaya.in"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditInstaVideo(video)}
+                            className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            title="Edit reel caption, title, or links"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+
+                          <a
+                            href={video.instagramLink || video.videoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            title="View video link / Instagram"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteInstaVideo(video.id)}
+                            className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors"
+                            title="Remove video reel"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1858,14 +3077,23 @@ export default function AdminDashboardPage() {
                     <ImageIcon className="w-3.5 h-3.5 text-primary" />
                     <span>Product Image *</span>
                   </label>
-                  <span className="text-[11px] text-muted-foreground">Device upload or URL</span>
+                  <span className="text-[11px] text-muted-foreground">Auto-compressed to fast web format</span>
                 </div>
+
+                {isUploading && (
+                  <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-medium flex items-center gap-2 animate-pulse">
+                    <Clock className="w-3.5 h-3.5 animate-spin shrink-0" />
+                    <span>{uploadProgressText || "Optimizing and uploading photo..."}</span>
+                  </div>
+                )}
 
                 {/* File picker */}
                 <div>
                   <label
                     htmlFor="admin-file-upload"
-                    className="w-full px-3 py-2.5 rounded-lg border border-dashed border-border hover:border-primary bg-background hover:bg-muted/40 cursor-pointer flex items-center justify-center gap-2 text-xs font-medium text-foreground transition-colors"
+                    className={`w-full px-3 py-2.5 rounded-lg border border-dashed border-border hover:border-primary bg-background hover:bg-muted/40 cursor-pointer flex items-center justify-center gap-2 text-xs font-medium text-foreground transition-colors ${
+                      isUploading ? "opacity-50 pointer-events-none" : ""
+                    }`}
                   >
                     <Upload className="w-4 h-4 text-primary" />
                     <span>Choose Photo from Device / Phone</span>
@@ -2288,28 +3516,15 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Product Slug</label>
-                  <input
-                    type="text"
-                    placeholder="clover-bracelet-gold"
-                    value={videoForm.productSlug}
-                    onChange={(e) => setVideoForm({ ...videoForm, productSlug: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Views Badge</label>
-                  <input
-                    type="text"
-                    placeholder="18.4K views"
-                    value={videoForm.views}
-                    onChange={(e) => setVideoForm({ ...videoForm, views: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">Product Slug</label>
+                <input
+                  type="text"
+                  placeholder="clover-bracelet-gold"
+                  value={videoForm.productSlug}
+                  onChange={(e) => setVideoForm({ ...videoForm, productSlug: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
+                />
               </div>
 
               <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
@@ -2433,11 +3648,10 @@ export default function AdminDashboardPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Customer Name *</label>
+                  <label className="text-xs font-semibold text-foreground">Customer Name (Optional)</label>
                   <input
                     type="text"
-                    required
-                    placeholder="e.g. Sneha Thomas"
+                    placeholder="Leave blank for Anonymous"
                     value={screenshotForm.customerName}
                     onChange={(e) => setScreenshotForm({ ...screenshotForm, customerName: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
@@ -2525,9 +3739,13 @@ export default function AdminDashboardPage() {
           <div className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-10 my-8 animate-in fade-in zoom-in-95">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-foreground">Add Instagram Video</h3>
+                <h3 className="text-base font-bold text-foreground">
+                  {editingInstaVideo ? "Edit Follow The House Reel" : "Add Follow The House Reel"}
+                </h3>
                 <p className="text-xs text-muted-foreground">
-                  Paste Instagram reel link OR upload styling video from device
+                  {editingInstaVideo
+                    ? "Update video file, cover thumbnail, caption, or Instagram link"
+                    : "Upload styling reel (MP4) from device OR paste Instagram reel link"}
                 </p>
               </div>
               <button
@@ -2592,17 +3810,29 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {instaVideoForm.videoUrl && (
-                  <div className="pt-2 flex items-center justify-between text-xs border-t border-border/60">
-                    <span className="text-emerald-600 font-semibold truncate max-w-[280px]">
-                      ✓ Video Linked ({instaVideoForm.videoUrl.slice(-25)})
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setInstaVideoForm({ ...instaVideoForm, videoUrl: "" })}
-                      className="text-[11px] text-red-600 hover:underline"
-                    >
-                      Clear
-                    </button>
+                  <div className="pt-2 space-y-2 border-t border-border/60">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-emerald-600 font-semibold truncate max-w-[280px]">
+                        ✓ Video Attached ({instaVideoForm.videoUrl.slice(-30)})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setInstaVideoForm({ ...instaVideoForm, videoUrl: "" })}
+                        className="text-[11px] text-red-600 hover:underline"
+                      >
+                        Remove Video
+                      </button>
+                    </div>
+                    {instaVideoForm.videoUrl.startsWith("http") && !instaVideoForm.videoUrl.includes("instagram.com/reel") && (
+                      <div className="w-28 aspect-[9/14] rounded-lg overflow-hidden border border-border bg-black">
+                        <video
+                          src={instaVideoForm.videoUrl}
+                          controls
+                          muted
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -2676,7 +3906,7 @@ export default function AdminDashboardPage() {
                   <label className="text-xs font-semibold text-foreground">Instagram Handle</label>
                   <input
                     type="text"
-                    placeholder="@gleamnest.in"
+                    placeholder="@alnaya.in"
                     value={instaVideoForm.handle}
                     onChange={(e) => setInstaVideoForm({ ...instaVideoForm, handle: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
@@ -2684,28 +3914,15 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Views Badge</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 28.4K"
-                    value={instaVideoForm.views}
-                    onChange={(e) => setInstaVideoForm({ ...instaVideoForm, views: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Instagram Profile / Reel Link</label>
-                  <input
-                    type="text"
-                    placeholder="https://www.instagram.com/reel/..."
-                    value={instaVideoForm.instagramLink}
-                    onChange={(e) => setInstaVideoForm({ ...instaVideoForm, instagramLink: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">Instagram Profile / Reel Link</label>
+                <input
+                  type="text"
+                  placeholder="https://www.instagram.com/reel/..."
+                  value={instaVideoForm.instagramLink}
+                  onChange={(e) => setInstaVideoForm({ ...instaVideoForm, instagramLink: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
+                />
               </div>
 
               <div className="space-y-1">
@@ -2734,10 +3951,190 @@ export default function AdminDashboardPage() {
                   className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 shadow-md disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {isSavingItem && <Clock className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{isSavingItem ? "Saving..." : "Save Instagram Video"}</span>
+                  <span>{isSavingItem ? "Saving..." : editingInstaVideo ? "Update Video Reel" : "Save Video Reel"}</span>
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Category Card Add / Edit Modal */}
+      {isCategoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setIsCategoryModalOpen(false)}
+          />
+
+          <div className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-10 my-8 animate-in fade-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-foreground">
+                  {editingCategory ? "Edit Curated Collection Card" : "Add New Collection Card"}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Customize the title, photo, and URL slug shown on the homepage grid.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCategoryModalOpen(false)}
+                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCategoryModal} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">Collection Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Necklaces & Chains"
+                  value={categoryForm.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setCategoryForm((prev) => ({
+                      ...prev,
+                      name,
+                      slug: !editingCategory
+                        ? name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")
+                        : prev.slug,
+                    }));
+                  }}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">Category Slug (URL Path) *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. necklaces-and-chains"
+                  value={categoryForm.slug}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">Subtitle / Short Description</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Waterproof everyday pendants & chains"
+                  value={categoryForm.description}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+
+              {/* Card Image Upload & URL */}
+              <div className="space-y-2 border border-border p-3.5 rounded-xl bg-muted/20">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5 text-primary" />
+                    <span>Card Photo *</span>
+                  </label>
+                  <span className="text-[11px] text-muted-foreground">Auto-compressed to fast web format</span>
+                </div>
+
+                {isUploading && (
+                  <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-medium flex items-center gap-2 animate-pulse">
+                    <Clock className="w-3.5 h-3.5 animate-spin shrink-0" />
+                    <span>{uploadProgressText || "Optimizing and uploading photo..."}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label
+                    htmlFor="category-card-modal-upload"
+                    className={`w-full px-3 py-2 rounded-lg border border-dashed border-border hover:border-primary bg-background hover:bg-muted/40 cursor-pointer flex items-center justify-center gap-2 text-xs font-medium text-foreground transition-colors ${
+                      isUploading ? "opacity-50 pointer-events-none" : ""
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5 text-primary" />
+                    <span>Upload Image from Device</span>
+                  </label>
+                  <input
+                    id="category-card-modal-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCategoryModalImageUpload}
+                    className="hidden"
+                    disabled={isUploading || isSavingItem}
+                  />
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Or paste image URL: https://..."
+                  value={categoryForm.image}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, image: e.target.value })}
+                  className="w-full px-3 py-1.5 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
+                />
+
+                {categoryForm.image && (
+                  <div className="pt-2 flex items-center gap-3">
+                    <div className="w-16 h-20 rounded-lg overflow-hidden border border-border bg-card">
+                      <img
+                        src={categoryForm.image}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="text-xs">
+                      <p className="font-semibold text-foreground">Card Photo Attached ✓</p>
+                      <button
+                        type="button"
+                        onClick={() => setCategoryForm({ ...categoryForm, image: "" })}
+                        className="text-[11px] text-red-600 hover:underline mt-1 block"
+                      >
+                        Remove Photo
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryModalOpen(false)}
+                  disabled={isSavingItem || isUploading}
+                  className="px-4 py-2 rounded-xl border border-border text-xs font-semibold hover:bg-muted disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingItem || isUploading || !categoryForm.name}
+                  className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 shadow-md disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {isSavingItem && <Clock className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isSavingItem ? "Saving..." : editingCategory ? "Update Card" : "Add Card"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Global Real-Time Media Processing & Upload Status Floating Banner */}
+      {isUploading && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3.5 px-4 py-3 bg-neutral-900/95 text-white rounded-2xl shadow-2xl border border-[#C5A059]/50 backdrop-blur-md transition-all animate-in fade-in slide-in-from-bottom-3">
+          <div className="relative w-5 h-5 shrink-0">
+            <div className="w-5 h-5 rounded-full border-2 border-[#C5A059]/30 border-t-[#C5A059] animate-spin" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-[#F7EEDD] flex items-center gap-1.5">
+              <span>Optimizing Media</span>
+            </p>
+            <p className="text-[11px] text-stone-300 font-mono mt-0.5 max-w-[320px] truncate">
+              {uploadProgressText || "Compressing to lightweight web format..."}
+            </p>
           </div>
         </div>
       )}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
 import { formatPrice, getProductPrices } from "@/lib/utils";
-import { X, Star, ShoppingBag, Plus, Minus, ArrowRight } from "lucide-react";
+import { X, Star, ShoppingBag, Plus, Minus, ArrowRight, ChevronDown } from "lucide-react";
+import { getProductSizeInfo } from "@/lib/productSizes";
 
 export function QuickViewModal() {
   const product = useCartStore((s) => s.quickViewProduct);
@@ -14,6 +15,15 @@ export function QuickViewModal() {
 
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
+
+  const sizeInfo = getProductSizeInfo(product || undefined);
+  const [selectedSize, setSelectedSize] = useState<string>(() => sizeInfo?.defaultSize || "");
+
+  useEffect(() => {
+    if (sizeInfo) {
+      setSelectedSize(sizeInfo.defaultSize);
+    }
+  }, [product?.id]);
 
   if (!product) return null;
 
@@ -33,15 +43,21 @@ export function QuickViewModal() {
   }
 
   const handleAddToCart = () => {
-    const hasVariants =
-      product.variantAttributes && product.variantAttributes.length > 0;
+    const combinedOptions: { [key: string]: string } = { ...currentOptions };
+    if (sizeInfo && selectedSize) {
+      combinedOptions[sizeInfo.label] = selectedSize;
+    }
+
+    const hasVariants = Object.keys(combinedOptions).length > 0;
     const variantId = hasVariants
-      ? Object.entries(currentOptions)
-          .map(([k, v]) => `${k}-${v}`)
+      ? Object.entries(combinedOptions)
+          .map(([k, v]) => `${k}-${v.replace(/\s+/g, "_")}`)
           .join("_")
       : undefined;
     const variantName = hasVariants
-      ? Object.values(currentOptions).join(" / ")
+      ? Object.entries(combinedOptions)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(" / ")
       : undefined;
 
     addItem(
@@ -51,7 +67,7 @@ export function QuickViewModal() {
         ? {
             id: variantId || "standard",
             name: variantName || "Standard",
-            options: currentOptions,
+            options: combinedOptions,
           }
         : undefined
     );
@@ -128,31 +144,59 @@ export function QuickViewModal() {
                 {product.description}
               </p>
 
-              {/* Variant Attribute Selectors */}
-              {product.variantAttributes?.map((attr) => (
-                <div key={attr.name} className="space-y-1.5">
-                  <span className="text-xs font-semibold text-foreground">
-                    {attr.name}: <span className="font-normal text-muted-foreground">{currentOptions[attr.name]}</span>
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {attr.options.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() =>
-                          setSelectedOptions({ ...currentOptions, [attr.name]: option })
-                        }
-                        className={`px-3 py-1 text-xs rounded-md font-medium border transition-all ${
-                          currentOptions[attr.name] === option
-                            ? "border-primary bg-primary text-primary-foreground font-semibold"
-                            : "border-border bg-card text-foreground hover:bg-muted"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
+              {/* Ring / Bangle Dedicated Size Dropdown */}
+              {sizeInfo && (
+                <div className="space-y-1.5 p-2.5 rounded-lg bg-muted/30 border border-border/80">
+                  <div className="flex justify-between items-center text-xs">
+                    <label htmlFor="quickview-size-select" className="font-semibold text-foreground">
+                      {sizeInfo.label}: <span className="font-bold text-primary">{selectedSize}</span>
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <select
+                      id="quickview-size-select"
+                      value={selectedSize}
+                      onChange={(e) => setSelectedSize(e.target.value)}
+                      className="w-full appearance-none px-3 py-2 text-xs font-semibold rounded-lg border border-border bg-background text-foreground focus:ring-1 focus:ring-primary outline-none transition-all pr-8 cursor-pointer shadow-sm hover:border-primary/50"
+                    >
+                      {sizeInfo.options.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Other Variant Attribute Selectors */}
+              {product.variantAttributes
+                ?.filter((attr) => !/size/i.test(attr.name))
+                .map((attr) => (
+                  <div key={attr.name} className="space-y-1.5">
+                    <span className="text-xs font-semibold text-foreground">
+                      {attr.name}: <span className="font-normal text-muted-foreground">{currentOptions[attr.name]}</span>
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {attr.options.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() =>
+                            setSelectedOptions({ ...currentOptions, [attr.name]: option })
+                          }
+                          className={`px-3 py-1 text-xs rounded-md font-medium border transition-all ${
+                            currentOptions[attr.name] === option
+                              ? "border-primary bg-primary text-primary-foreground font-semibold"
+                              : "border-border bg-card text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
 
               {/* Quantity */}
               <div className="space-y-1.5 pt-2">

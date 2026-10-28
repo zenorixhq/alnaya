@@ -28,15 +28,31 @@ function ProductCatalogContent() {
   const products = useProductStore((s) => s.products);
   const fetchProducts = useProductStore((s) => s.fetchProducts);
   const hasLoaded = useProductStore((s) => s.hasLoaded);
-  const [categoryList, setCategoryList] = useState<Category[]>(defaultCategories);
+  const [categoryList, setCategoryList] = useState<Category[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("alnaya_categories");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return defaultCategories;
+  });
 
   // Sync with database on mount
   useEffect(() => {
     fetchProducts();
-    fetch(`/api/categories?t=${Date.now()}`, { cache: "no-store" })
+    fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setCategoryList(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setCategoryList(data);
+          try {
+            sessionStorage.setItem("alnaya_categories", JSON.stringify(data));
+          } catch (e) {}
+        }
       })
       .catch(() => {});
   }, [fetchProducts]);

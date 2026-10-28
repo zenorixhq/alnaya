@@ -77,9 +77,9 @@ export function AboutUsSection() {
             </div>
           </div>
 
-          {/* Right Column: Number 04 + Enlarged Portrait Photo on Desktop */}
-          <div className="md:col-span-6 flex flex-col justify-center items-start md:items-end">
-            <div className="flex flex-col items-start w-full max-w-[260px] sm:max-w-[300px] md:max-w-[360px] lg:max-w-[400px] md:ml-auto">
+          {/* Right Column: Number 04 + Enlarged Portrait Photo on Desktop (Right-aligned on mobile & desktop) */}
+          <div className="md:col-span-6 flex flex-col justify-center items-end">
+            <div className="flex flex-col items-start w-full max-w-[260px] sm:max-w-[300px] md:max-w-[360px] lg:max-w-[400px] ml-auto">
               <span className="font-editorial text-xs italic text-[#8F7842] block mb-1.5 tracking-wider">
                 04
               </span>

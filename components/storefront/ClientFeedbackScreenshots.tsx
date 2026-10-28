@@ -102,10 +102,10 @@ export function ClientFeedbackScreenshots({ className = "" }: ClientFeedbackScre
               <span>Real Customer Conversations</span>
             </div>
             <h2 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-normal text-[#1C1917] tracking-tight">
-              Client Feedback & Screenshots
+              Client Feedback
             </h2>
             <p className="text-xs sm:text-sm text-stone-600 max-w-xl font-light">
-              Real WhatsApp chats, direct messages, and unboxing reviews sent by our verified jewelry collectors across India & Qatar.
+              Real WhatsApp chats, direct messages, and unboxing reviews sent by our verified jewelry collectors across India.
             </p>
           </div>
 

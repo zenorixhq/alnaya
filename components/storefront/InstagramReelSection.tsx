@@ -113,12 +113,8 @@ function AutoPlayingInstaCard({
 
       {/* Gradient Dark Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/35 flex flex-col justify-between p-3.5 sm:p-4 text-white pointer-events-none">
-        {/* Top Badges */}
-        <div className="flex items-center justify-between text-xs pointer-events-auto">
-          <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{vid.views ? `${vid.views} views` : "Reel"}</span>
-          </div>
+        {/* Top Badges (View count removed) */}
+        <div className="flex items-center justify-end text-xs pointer-events-auto">
 
           <div className="flex items-center gap-1.5">
             {isDirectVideo && (

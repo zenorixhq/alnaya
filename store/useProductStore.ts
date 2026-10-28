@@ -2,6 +2,23 @@ import { create } from "zustand";
 import { Product } from "@/types/store";
 import { products as fallbackProducts } from "@/data/mockData";
 
+function getInitialProducts(): Product[] {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = sessionStorage.getItem("alnaya_products_catalog");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      // Ignore if sessionStorage error
+    }
+  }
+  return fallbackProducts;
+}
+
 interface ProductStore {
   products: Product[];
   isLoading: boolean;
@@ -17,19 +34,23 @@ interface ProductStore {
 }
 
 export const useProductStore = create<ProductStore>((set, get) => ({
-  products: fallbackProducts,
+  products: getInitialProducts(),
   isLoading: false,
-  hasLoaded: false,
+  hasLoaded: true,
   error: null,
 
   fetchProducts: async () => {
     try {
-      set({ isLoading: true, error: null });
-      const res = await fetch("/api/products", { cache: "no-store" });
+      const res = await fetch("/api/products");
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         set({ products: data, hasLoaded: true, isLoading: false });
+        if (typeof window !== "undefined") {
+          try {
+            sessionStorage.setItem("alnaya_products_catalog", JSON.stringify(data));
+          } catch (e) {}
+        }
       } else {
         set({ hasLoaded: true, isLoading: false });
       }
@@ -54,11 +75,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       }
 
       const createdProduct = await res.json();
-      // Prepend newly created product to state
-      set((state) => ({
-        products: [createdProduct, ...state.products],
-        isLoading: false,
-      }));
+      const updatedProducts = [createdProduct, ...get().products.filter((p) => p.id !== createdProduct.id)];
+      set({ products: updatedProducts, isLoading: false });
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("alnaya_products_catalog", JSON.stringify(updatedProducts));
+        } catch (e) {}
+      }
 
       return createdProduct;
     } catch (err: any) {
@@ -83,10 +106,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       }
 
       const updated = await res.json();
-      set((state) => ({
-        products: state.products.map((p) => (p.id === id ? { ...p, ...updated } : p)),
-        isLoading: false,
-      }));
+      const updatedProducts = get().products.map((p) => (p.id === id ? { ...p, ...updated } : p));
+      set({ products: updatedProducts, isLoading: false });
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("alnaya_products_catalog", JSON.stringify(updatedProducts));
+        } catch (e) {}
+      }
 
       return updated;
     } catch (err: any) {
@@ -105,10 +131,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
 
       if (!res.ok) throw new Error("Failed to delete product");
 
-      set((state) => ({
-        products: state.products.filter((p) => p.id !== id),
-        isLoading: false,
-      }));
+      const updatedProducts = get().products.filter((p) => p.id !== id);
+      set({ products: updatedProducts, isLoading: false });
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("alnaya_products_catalog", JSON.stringify(updatedProducts));
+        } catch (e) {}
+      }
 
       return true;
     } catch (err: any) {

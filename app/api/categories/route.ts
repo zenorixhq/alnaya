@@ -6,38 +6,24 @@ import { Category } from "@/types/store";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+};
+
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
   Pragma: "no-cache",
   Expires: "0",
 };
 
-let isTableInitialized = false;
-async function ensureTable() {
-  if (isTableInitialized) return;
-  try {
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "SiteContent" (
-        "key" TEXT PRIMARY KEY,
-        "value" TEXT NOT NULL,
-        "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    isTableInitialized = true;
-  } catch (e) {
-    console.warn("Could not auto-ensure SiteContent table for categories:", e);
-  }
-}
-
 async function getStoredCategories(): Promise<Category[]> {
   try {
-    await ensureTable();
-    const rows: any = await prisma.$queryRawUnsafe(`
-      SELECT "value" FROM "SiteContent" WHERE "key" = 'site_categories' LIMIT 1;
-    `);
-    if (rows && rows.length > 0 && rows[0]?.value) {
-      const parsed = JSON.parse(rows[0].value);
-      if (Array.isArray(parsed) && parsed.length > 0 && parsed.some((c: any) => c.slug === "minimal-chains")) {
+    const row = await prisma.siteContent.findUnique({
+      where: { key: "site_categories" },
+    });
+    if (row?.value) {
+      const parsed = JSON.parse(row.value);
+      if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed;
       }
     }
@@ -49,15 +35,12 @@ async function getStoredCategories(): Promise<Category[]> {
 
 async function saveCategories(categoriesList: Category[]): Promise<boolean> {
   try {
-    await ensureTable();
     const jsonStr = JSON.stringify(categoriesList);
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO "SiteContent" ("key", "value", "updatedAt")
-       VALUES ('site_categories', $1, CURRENT_TIMESTAMP)
-       ON CONFLICT ("key")
-       DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = CURRENT_TIMESTAMP;`,
-      jsonStr
-    );
+    await prisma.siteContent.upsert({
+      where: { key: "site_categories" },
+      update: { value: jsonStr },
+      create: { key: "site_categories", value: jsonStr },
+    });
     return true;
   } catch (err) {
     console.error("Error saving site_categories to DB:", err);
@@ -67,7 +50,7 @@ async function saveCategories(categoriesList: Category[]): Promise<boolean> {
 
 export async function GET() {
   const categoriesList = await getStoredCategories();
-  return NextResponse.json(categoriesList, { headers: NO_CACHE_HEADERS });
+  return NextResponse.json(categoriesList, { headers: CACHE_HEADERS });
 }
 
 export async function POST(req: Request) {
