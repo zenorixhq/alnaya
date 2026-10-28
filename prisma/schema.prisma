@@ -1,0 +1,57 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  title            String
+  shortDescription String
+  description      String
+  price            Float
+  salePrice        Float?
+  priceQatar       Float?
+  salePriceQatar   Float?
+  category         String
+  subcategory      String?
+  tags             String   // Comma-separated or JSON string
+  images           String   // JSON array of image URLs
+  rating           Float    @default(5.0)
+  reviewCount      Int      @default(0)
+  inStock          Boolean  @default(true)
+  stockCount       Int      @default(10)
+  featured         Boolean  @default(false)
+  isNewArrival     Boolean  @default(false)
+  isBestSeller     Boolean  @default(false)
+  variantJson      String?  // JSON for sizes, colors, variants
+  specsJson        String?  // JSON for technical specifications
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  itemsJson       String
+  subtotal        Float
+  discountTotal   Float    @default(0)
+  shippingFee     Float    @default(0)
+  taxTotal        Float    @default(0)
+  grandTotal      Float
+  paymentMethod   String
+  paymentStatus   String   @default("pending") // pending, paid, failed
+  orderStatus     String   @default("processing") // pending, processing, shipped, delivered, cancelled
+  razorpayOrderId String?
+  razorpayPaymentId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

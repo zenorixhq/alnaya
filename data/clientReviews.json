@@ -1,0 +1,146 @@
+{
+  "reviews": [
+    {
+      "id": "rev-1",
+      "author": "Isabella M.",
+      "location": "Kochi, Kerala",
+      "piece": "Statement Ring & Clover Bangle",
+      "rating": 5,
+      "quote": "Every piece feels like a whisper of the old couture houses. The gold finish is beyond reproach, and zero tarnish after 2 months of daily wear."
+    },
+    {
+      "id": "rev-2",
+      "author": "Camille R.",
+      "location": "Kannur, Kerala",
+      "piece": "White Stone Charm Chain",
+      "rating": 5,
+      "quote": "My solitaire arrived in a velvet box that already felt like an heirloom. The stone is extraordinary, and the WhatsApp ordering was so personal."
+    },
+    {
+      "id": "rev-3",
+      "author": "Sofia A.",
+      "location": "Bengaluru, Karnataka",
+      "piece": "Clover Bracelet - Gold",
+      "rating": 5,
+      "quote": "The atelier answered every question personally on WhatsApp. Rare, and quite lovely. Fast 2-day delivery across South India."
+    },
+    {
+      "id": "rev-4",
+      "author": "Meera K.",
+      "location": "Mumbai, Maharashtra",
+      "piece": "Simple Pearl Chain",
+      "rating": 5,
+      "quote": "I was skeptical about waterproof claims at this price point, but I've showered and swum in this necklace for weeks without a hint of fading."
+    }
+  ],
+  "videoReels": [
+    {
+      "id": "vid-1",
+      "influencer": "Ananya Sanil",
+      "handle": "@ananya.styling",
+      "title": "100% Waterproof Shower Test 💧",
+      "poster": "https://images.unsplash.com/photo-1611591475806-039775089201?auto=format&fit=crop&q=80&w=700",
+      "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-woman-wearing-jewelry-in-front-of-a-mirror-42407-large.mp4",
+      "views": "18.4K views",
+      "productTitle": "Clover Bracelet - Gold",
+      "productSlug": "clover-bracelet-gold",
+      "productPrice": 150
+    },
+    {
+      "id": "vid-2",
+      "influencer": "Devika Menon",
+      "handle": "@devika_curates",
+      "title": "Unboxing & Daily Stack Review ✨",
+      "poster": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&q=80&w=700",
+      "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-close-up-of-a-woman-showing-a-gold-ring-42409-large.mp4",
+      "views": "24.1K views",
+      "productTitle": "Statement Ring",
+      "productSlug": "statement-ring",
+      "productPrice": 140
+    }
+  ],
+  "feedbackScreenshots": [
+    {
+      "id": "fb-1",
+      "title": "WhatsApp Order Confirmation & Review",
+      "customerName": "Anjali Nambiar",
+      "location": "Kochi, Kerala",
+      "piece": "Statement Ring & Pearl Chain",
+      "imageUrl": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&q=80&w=800",
+      "caption": "“Received the parcel today! The packing is so pretty and the ring quality is just woww 😍 Wore it in the shower already and zero color fade! Definitely ordering the bracelet next!”",
+      "date": "Verified 2 days ago"
+    },
+    {
+      "id": "fb-2",
+      "title": "Instagram DM Delivery Feedback",
+      "customerName": "Sneha Thomas",
+      "location": "Calicut, Kerala",
+      "piece": "Clover Bangle (Size 2-6)",
+      "imageUrl": "https://images.unsplash.com/photo-1611591475806-039775089201?auto=format&fit=crop&q=80&w=800",
+      "caption": "“Hey team GleamNest, bangle arrived via DTDC in 2 days. The 304 steel mirror finish looks like 22K gold. Size 2-6 fits my wrist perfectly according to your size guide! ❤️”",
+      "date": "Verified 5 days ago"
+    },
+    {
+      "id": "fb-3",
+      "title": "Gift Order Surprise Feedback",
+      "customerName": "Rhea Kapoor",
+      "location": "Bengaluru, Karnataka",
+      "piece": "Four-Leaf Clover Charm Set",
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800",
+      "caption": "“Thank you for sharing the photo confirmation on WhatsApp before dispatch! My bestie loved the surprise gift box. 100% hypoallergenic too, zero rashes on her skin.”",
+      "date": "Verified 1 week ago"
+    },
+    {
+      "id": "fb-4",
+      "title": "Waterproof Everyday Wear Review",
+      "customerName": "Dr. Pooja M.",
+      "location": "Thiruvananthapuram, Kerala",
+      "piece": "Waterproof Croissant Hoops",
+      "imageUrl": "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&q=80&w=800",
+      "caption": "“As a doctor I wash my hands 30+ times a day. These rings haven't tarnished a bit even with hospital sanitizers! Truly surgical grade steel. Highly recommend!”",
+      "date": "Verified 2 weeks ago"
+    }
+  ],
+  "instagramVideos": [
+    {
+      "id": "insta-1",
+      "title": "Daily Jewelry Stack & Styling Glow",
+      "handle": "@gleamnest.in",
+      "caption": "Waterproof & anti-tarnish everyday luxury crafted in 304 & 306 steel ✨",
+      "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-woman-wearing-jewelry-in-front-of-a-mirror-42407-large.mp4",
+      "poster": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&q=80&w=700",
+      "views": "28.4K",
+      "instagramLink": "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
+    },
+    {
+      "id": "insta-2",
+      "title": "Anti-Tarnish Water & Perfume Test",
+      "handle": "@gleamnest.in",
+      "caption": "Shower safe, sweatproof, and designed to never turn green 💧",
+      "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-close-up-of-a-woman-showing-a-gold-ring-42409-large.mp4",
+      "poster": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=700",
+      "views": "34.1K",
+      "instagramLink": "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
+    },
+    {
+      "id": "insta-3",
+      "title": "Unboxing the GleamNest Velvet Pouch",
+      "handle": "@gleamnest.in",
+      "caption": "Every order packed with real care. Pan-India delivery via DTDC & India Post 📦",
+      "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-holding-a-gold-ring-in-hand-42410-large.mp4",
+      "poster": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&q=80&w=700",
+      "views": "19.8K",
+      "instagramLink": "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
+    },
+    {
+      "id": "insta-4",
+      "title": "Earrings & Hoops Real Mirror Finish",
+      "handle": "@gleamnest.in",
+      "caption": "Lightweight, hypoallergenic, and crafted for all-day sensitive ear wear ✨",
+      "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-woman-wearing-jewelry-in-front-of-a-mirror-42407-large.mp4",
+      "poster": "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&q=80&w=700",
+      "views": "22.5K",
+      "instagramLink": "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
+    }
+  ]
+}

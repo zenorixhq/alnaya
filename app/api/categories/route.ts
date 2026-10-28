@@ -1,0 +1,181 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { categories as defaultCategories } from "@/data/mockData";
+import { Category } from "@/types/store";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
+let isTableInitialized = false;
+async function ensureTable() {
+  if (isTableInitialized) return;
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "SiteContent" (
+        "key" TEXT PRIMARY KEY,
+        "value" TEXT NOT NULL,
+        "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    isTableInitialized = true;
+  } catch (e) {
+    console.warn("Could not auto-ensure SiteContent table for categories:", e);
+  }
+}
+
+async function getStoredCategories(): Promise<Category[]> {
+  try {
+    await ensureTable();
+    const rows: any = await prisma.$queryRawUnsafe(`
+      SELECT "value" FROM "SiteContent" WHERE "key" = 'site_categories' LIMIT 1;
+    `);
+    if (rows && rows.length > 0 && rows[0]?.value) {
+      const parsed = JSON.parse(rows[0].value);
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed.some((c: any) => c.slug === "minimal-chains")) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn("Error reading site_categories from DB:", err);
+  }
+  return defaultCategories;
+}
+
+async function saveCategories(categoriesList: Category[]): Promise<boolean> {
+  try {
+    await ensureTable();
+    const jsonStr = JSON.stringify(categoriesList);
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO "SiteContent" ("key", "value", "updatedAt")
+       VALUES ('site_categories', $1, CURRENT_TIMESTAMP)
+       ON CONFLICT ("key")
+       DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = CURRENT_TIMESTAMP;`,
+      jsonStr
+    );
+    return true;
+  } catch (err) {
+    console.error("Error saving site_categories to DB:", err);
+    return false;
+  }
+}
+
+export async function GET() {
+  const categoriesList = await getStoredCategories();
+  return NextResponse.json(categoriesList, { headers: NO_CACHE_HEADERS });
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+
+    // If whole list is passed: { categories: [...] }
+    if (Array.isArray(body.categories)) {
+      const success = await saveCategories(body.categories);
+      if (!success) {
+        return NextResponse.json({ error: "Failed to persist categories to database" }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, categories: body.categories }, { headers: NO_CACHE_HEADERS });
+    }
+
+    // Adding a single new category
+    const currentList = await getStoredCategories();
+    const slug =
+      body.slug ||
+      body.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
+
+    const newCategory: Category = {
+      id: body.id || `cat-${Date.now()}`,
+      slug,
+      name: body.name || "New Collection",
+      description: body.description || "",
+      image: body.image || "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800",
+      productCount: typeof body.productCount === "number" ? body.productCount : 0,
+    };
+
+    const updated = [...currentList, newCategory];
+    await saveCategories(updated);
+    return NextResponse.json({ success: true, item: newCategory, categories: updated }, { headers: NO_CACHE_HEADERS });
+  } catch (err: any) {
+    console.error("Error in POST /api/categories:", err);
+    return NextResponse.json({ error: err.message || "Failed to update category" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, image, name, description, slug } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Category ID is required" }, { status: 400 });
+    }
+
+    const currentList = await getStoredCategories();
+    let found = false;
+
+    const updated = currentList.map((cat) => {
+      if (cat.id === id || cat.slug === slug || cat.slug === id) {
+        found = true;
+        return {
+          ...cat,
+          image: image !== undefined ? image : cat.image,
+          name: name !== undefined ? name : cat.name,
+          description: description !== undefined ? description : cat.description,
+          slug: slug !== undefined ? slug : cat.slug,
+        };
+      }
+      return cat;
+    });
+
+    if (!found) {
+      // If not in default list yet, add it
+      updated.push({
+        id,
+        slug: slug || id,
+        name: name || id,
+        description: description || "",
+        image: image || "",
+        productCount: 0,
+      });
+    }
+
+    const success = await saveCategories(updated);
+    if (!success) {
+      return NextResponse.json({ error: "Failed to update category in database" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, categories: updated }, { headers: NO_CACHE_HEADERS });
+  } catch (err: any) {
+    console.error("Error in PUT /api/categories:", err);
+    return NextResponse.json({ error: err.message || "Failed to update category" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Category ID is required" }, { status: 400 });
+    }
+
+    const currentList = await getStoredCategories();
+    const updated = currentList.filter((cat) => cat.id !== id && cat.slug !== id);
+
+    await saveCategories(updated);
+    return NextResponse.json({ success: true, categories: updated }, { headers: NO_CACHE_HEADERS });
+  } catch (err: any) {
+    console.error("Error in DELETE /api/categories:", err);
+    return NextResponse.json({ error: err.message || "Failed to delete category" }, { status: 500 });
+  }
+}
