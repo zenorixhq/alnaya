@@ -144,13 +144,18 @@ export default function CheckoutPage() {
         return;
       }
 
+      const logoUrl =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/alnaya-logo.png`
+          : "https://alnaya-ten.vercel.app/alnaya-logo.png";
+
       const options = {
         key: orderData.key,
         amount: orderData.amount,
         currency: "INR",
         name: "Alnaya",
         description: `Order #${orderNumber} (${items.length} item${items.length > 1 ? "s" : ""})`,
-        image: "/alnaya-logo.png",
+        image: logoUrl,
         order_id: orderData.id,
         prefill: {
           name: formData.fullName,
@@ -167,9 +172,19 @@ export default function CheckoutPage() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 orderCreationId: orderData.id,
-                razorpayPaymentId: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
                 razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
                 razorpaySignature: response.razorpay_signature,
+                customer: formData,
+                items,
+                orderNumber,
+                subtotal,
+                discountTotal: discount,
+                shippingFee: shipping,
+                grandTotal,
                 orderDetails: {
                   orderNumber,
                   items,
@@ -223,7 +238,7 @@ export default function CheckoutPage() {
     <>
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
       />
 
       <div className="min-h-screen bg-background">
