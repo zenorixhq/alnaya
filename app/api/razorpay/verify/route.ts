@@ -28,7 +28,9 @@ export async function POST(req: Request) {
     const grandTotal = body.grandTotal ?? pricing.grandTotal ?? 0;
 
     const keySecret =
-      process.env.RAZORPAY_KEY_SECRET || "8wuzUACt6uNAoei0UDu35bFD";
+      process.env.RAZORPAY_KEY_SECRET ||
+      process.env.RAZORPAY_SECRET ||
+      "8wuzUACt6uNAoei0UDu35bFD";
 
     // Verify cryptographic signature if secret is defined and not placeholder
     if (keySecret && !keySecret.includes("YourKeySecretHere") && razorpay_order_id && razorpay_payment_id) {

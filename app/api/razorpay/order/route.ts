@@ -7,9 +7,13 @@ export async function POST(req: Request) {
     const { amount, currency = "INR", receipt } = await req.json();
 
     const keyId =
-      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_TmUYZteH5PfrHp";
+      process.env.RAZORPAY_KEY_ID ||
+      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+      "rzp_test_TmUYZteH5PfrHp";
     const keySecret =
-      process.env.RAZORPAY_KEY_SECRET || "8wuzUACt6uNAoei0UDu35bFD";
+      process.env.RAZORPAY_KEY_SECRET ||
+      process.env.RAZORPAY_SECRET ||
+      "8wuzUACt6uNAoei0UDu35bFD";
 
     // Call Razorpay Orders API
     if (keyId && keySecret && !keyId.includes("YourKeyIdHere")) {
