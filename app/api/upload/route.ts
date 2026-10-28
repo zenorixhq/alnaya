@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +25,7 @@ export async function POST(req: Request) {
     // 1. If Vercel Blob is configured (via BLOB_READ_WRITE_TOKEN env variable)
     if (process.env.BLOB_READ_WRITE_TOKEN) {
       try {
+        const { put } = await import("@vercel/blob");
         const blob = await put(`uploads/${safeFolder}/${fileName}`, file, {
           access: "public",
           addRandomSuffix: true,
