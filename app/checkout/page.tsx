@@ -165,6 +165,16 @@ export default function CheckoutPage() {
         theme: {
           color: "#502146", // Royal Plum
         },
+        options: {
+          checkout: {
+            method: {
+              upi: true,
+              card: true,
+              netbanking: true,
+              wallet: true,
+            },
+          },
+        },
         handler: async function (response: any) {
           try {
             const verifyRes = await fetch("/api/razorpay/verify", {
