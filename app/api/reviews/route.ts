@@ -23,13 +23,26 @@ function getInitialData() {
   };
 }
 
+function cleanContentString(raw: string): string {
+  return raw
+    .replace(/@?gleamnest\.in/gi, "@alnaya.in")
+    .replace(/gleamnest/gi, "alnaya")
+    .replace(/304\s*(&|and)\s*306(\s*grade)?\s*steel/gi, "radiant finish")
+    .replace(/304\s*(&|and)\s*306/gi, "hallmark")
+    .replace(/anti-?tarnish/gi, "waterproof")
+    .replace(/pvd\s*coating/gi, "radiant finish")
+    .replace(/pvd/gi, "radiant finish");
+}
+
 function sanitizeData(parsed: any) {
   if (!parsed || typeof parsed !== "object") return getInitialData();
-  if (!Array.isArray(parsed.reviews)) parsed.reviews = [];
-  if (!Array.isArray(parsed.videoReels)) parsed.videoReels = [];
-  if (!Array.isArray(parsed.feedbackScreenshots)) parsed.feedbackScreenshots = [];
-  if (!Array.isArray(parsed.instagramVideos)) parsed.instagramVideos = [];
-  return parsed;
+  const cleanedStr = cleanContentString(JSON.stringify(parsed));
+  const cleaned = JSON.parse(cleanedStr);
+  if (!Array.isArray(cleaned.reviews)) cleaned.reviews = [];
+  if (!Array.isArray(cleaned.videoReels)) cleaned.videoReels = [];
+  if (!Array.isArray(cleaned.feedbackScreenshots)) cleaned.feedbackScreenshots = [];
+  if (!Array.isArray(cleaned.instagramVideos)) cleaned.instagramVideos = [];
+  return cleaned;
 }
 
 async function readData() {
@@ -49,10 +62,19 @@ async function readData() {
       where: { key: "client_reviews" },
     });
     if (row?.value) {
-      const parsed = JSON.parse(row.value);
+      const originalVal = row.value;
+      const cleanedVal = cleanContentString(originalVal);
+      const parsed = JSON.parse(cleanedVal);
       const sanitized = sanitizeData(parsed);
-      if (!Array.isArray(sanitized.instagramVideos)) {
+      if (!Array.isArray(sanitized.instagramVideos) || sanitized.instagramVideos.length === 0) {
         sanitized.instagramVideos = fileData.instagramVideos || [];
+      }
+      // If the database contained any stale references, update it asynchronously to heal permanently
+      if (originalVal !== cleanedVal) {
+        prisma.siteContent.update({
+          where: { key: "client_reviews" },
+          data: { value: JSON.stringify(sanitized) },
+        }).catch((err) => console.warn("Failed to auto-heal DB row:", err));
       }
       return sanitized;
     }

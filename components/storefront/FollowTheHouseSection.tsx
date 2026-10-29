@@ -1,12 +1,16 @@
 "use client";
 
-import { Instagram } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Instagram, Play, Volume2, VolumeX, X, ExternalLink } from "lucide-react";
 
-interface HousePanel {
-  id: number;
+export interface HousePanel {
+  id: string | number;
   image: string;
+  videoUrl?: string;
   alt: string;
   caption?: string;
+  handle?: string;
+  instagramLink?: string;
 }
 
 const defaultPanels: HousePanel[] = [
@@ -15,35 +19,105 @@ const defaultPanels: HousePanel[] = [
     image: "/images/follow-house/panel-1.jpg",
     alt: "Alnaya Fine Jewelry - Celestial star, crescent moon, and cross charm pendant chains",
     caption: "Celestial Charms & Star Pendants",
+    handle: "@alnaya.in",
+    instagramLink: "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
   },
   {
     id: 2,
     image: "/images/follow-house/panel-2.jpg",
     alt: "Alnaya Fine Jewelry - Dainty gold waist chain worn with traditional festive attire",
     caption: "Dainty Gold Waist Chain",
+    handle: "@alnaya.in",
+    instagramLink: "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
   },
   {
     id: 3,
     image: "/images/follow-house/panel-3.jpg",
     alt: "Alnaya Fine Jewelry - Minimalist crystal cross neck chain",
     caption: "Minimal Cross Neck Chain",
+    handle: "@alnaya.in",
+    instagramLink: "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
   },
   {
     id: 4,
     image: "/images/follow-house/panel-4.jpg",
     alt: "Alnaya Fine Jewelry - Artisan statement jhumka earrings in gold and silver finish",
     caption: "Artisan Jhumka Collection",
+    handle: "@alnaya.in",
+    instagramLink: "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
   },
   {
     id: 5,
     image: "/images/follow-house/panel-5.jpg",
     alt: "Alnaya Fine Jewelry - Pavé crystal cross pendant necklace",
     caption: "Pavé Cross Pendant Necklace",
+    handle: "@alnaya.in",
+    instagramLink: "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
   },
 ];
 
 export function FollowTheHouseSection() {
   const instagramUrl = "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203";
+  const [panels, setPanels] = useState<HousePanel[]>(defaultPanels);
+  const [activeVideoModal, setActiveVideoModal] = useState<HousePanel | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const modalVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Fetch live Follow The House items from Admin Panel / API
+  useEffect(() => {
+    const fetchPanels = () => {
+      fetch("/api/reviews?t=" + Date.now())
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data.instagramVideos) && data.instagramVideos.length > 0) {
+            const mapped: HousePanel[] = data.instagramVideos.map((item: any, idx: number) => ({
+              id: item.id || idx + 1,
+              image:
+                item.poster ||
+                (defaultPanels[idx % defaultPanels.length] && defaultPanels[idx % defaultPanels.length].image) ||
+                "/images/follow-house/panel-1.jpg",
+              videoUrl: item.videoUrl || "",
+              alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
+              caption: item.title || item.caption || "",
+              handle: item.handle ? item.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in",
+              instagramLink:
+                item.instagramLink && !item.instagramLink.includes("gleamnest")
+                  ? item.instagramLink
+                  : instagramUrl,
+            }));
+            setPanels(mapped);
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchPanels();
+
+    // Re-sync if admin updates in another tab
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "alnaya_admin_instavideos" || e.key === "alnaya_follow_house_updated") {
+        fetchPanels();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [instagramUrl]);
+
+  const handlePanelClick = (e: React.MouseEvent, panel: HousePanel) => {
+    const isDirectVideo =
+      panel.videoUrl &&
+      (panel.videoUrl.endsWith(".mp4") ||
+        panel.videoUrl.endsWith(".webm") ||
+        panel.videoUrl.includes("blob.vercel-storage.com") ||
+        panel.videoUrl.startsWith("/uploads/") ||
+        panel.videoUrl.startsWith("data:video") ||
+        panel.videoUrl.includes("assets.mixkit.co"));
+
+    if (isDirectVideo) {
+      e.preventDefault();
+      setActiveVideoModal(panel);
+    }
+  };
 
   return (
     <section className="w-full bg-[#FAF7F2] py-14 sm:py-20 md:py-24 text-[#1C1917] overflow-hidden border-t border-[#EADBBE]/60">
@@ -68,48 +142,168 @@ export function FollowTheHouseSection() {
         {/* Enclosed 5-Tile Mosaic Frame */}
         <div className="rounded-3xl border border-[#EADBBE] bg-[#FFFDF9] shadow-[0_8px_30px_rgba(143,114,52,0.06)] p-3 sm:p-5 lg:p-6 overflow-hidden">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 items-stretch">
-            {defaultPanels.map((panel, idx) => (
-              <a
-                key={panel.id}
-                href={instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group relative block overflow-hidden rounded-2xl bg-stone-900 focus:outline-none shadow-sm hover:shadow-md transition-all duration-300 ${
-                  idx === 0 ? "col-span-2 sm:col-span-1 aspect-[16/10] sm:aspect-[3/4] lg:aspect-[3/4]" : "aspect-[3/4]"
-                }`}
-                title={`Follow @alnaya.in on Instagram - ${panel.caption || panel.alt}`}
-              >
-                <img
-                  src={panel.image}
-                  alt={panel.alt}
-                  className="w-full h-full object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-105"
-                  loading="lazy"
-                />
+            {panels.map((panel, idx) => {
+              const hasPlayableVideo =
+                panel.videoUrl &&
+                (panel.videoUrl.endsWith(".mp4") ||
+                  panel.videoUrl.endsWith(".webm") ||
+                  panel.videoUrl.includes("blob.vercel-storage.com") ||
+                  panel.videoUrl.startsWith("/uploads/") ||
+                  panel.videoUrl.startsWith("data:video") ||
+                  panel.videoUrl.includes("assets.mixkit.co"));
 
-                {/* Hover Darkening & Centered Instagram Badge */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors duration-300 flex items-center justify-center p-3 sm:p-4">
-                  <div className="opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all duration-300 flex items-center gap-1.5 bg-white/95 backdrop-blur-md text-[#1C1917] px-3 py-1.5 rounded-full shadow-xl text-xs font-medium">
-                    <Instagram className="w-3.5 h-3.5 text-[#C5A059]" />
-                    <span className="font-editorial text-xs sm:text-sm tracking-wide lowercase">@alnaya.in</span>
-                  </div>
-                </div>
+              return (
+                <a
+                  key={panel.id || idx}
+                  href={panel.instagramLink || instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => handlePanelClick(e, panel)}
+                  className={`group relative block overflow-hidden rounded-2xl bg-stone-900 focus:outline-none shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
+                    idx === 0
+                      ? "col-span-2 sm:col-span-1 aspect-[16/10] sm:aspect-[3/4] lg:aspect-[3/4]"
+                      : "aspect-[3/4]"
+                  }`}
+                  title={`Follow @alnaya.in on Instagram - ${panel.caption || panel.alt}`}
+                >
+                  <img
+                    src={panel.image}
+                    alt={panel.alt}
+                    className="w-full h-full object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-105"
+                    loading="lazy"
+                  />
 
-                {/* Editorial Caption Gradient Overlay */}
-                {panel.caption && (
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-3 pt-6 transition-opacity duration-300 opacity-90 lg:opacity-0 lg:group-hover:opacity-100">
-                    <p className="text-white text-[11px] sm:text-xs font-medium tracking-wide line-clamp-1">
-                      {panel.caption}
-                    </p>
-                    <p className="text-[#F3DFB0] text-[9px] sm:text-[10px] font-light tracking-wider uppercase mt-0.5">
-                      View on Instagram →
-                    </p>
+                  {/* Play Video Badge if Reel has video file */}
+                  {hasPlayableVideo && (
+                    <div className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-md group-hover:scale-110 transition-transform">
+                      <Play className="w-3.5 h-3.5 fill-white translate-x-0.5 text-white" />
+                    </div>
+                  )}
+
+                  {/* Hover Darkening & Centered Instagram Badge */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors duration-300 flex items-center justify-center p-3 sm:p-4">
+                    <div className="opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all duration-300 flex items-center gap-1.5 bg-white/95 backdrop-blur-md text-[#1C1917] px-3 py-1.5 rounded-full shadow-xl text-xs font-medium">
+                      {hasPlayableVideo ? (
+                        <>
+                          <Play className="w-3.5 h-3.5 text-[#C5A059] fill-[#C5A059]" />
+                          <span className="font-editorial text-xs sm:text-sm tracking-wide">Watch Reel</span>
+                        </>
+                      ) : (
+                        <>
+                          <Instagram className="w-3.5 h-3.5 text-[#C5A059]" />
+                          <span className="font-editorial text-xs sm:text-sm tracking-wide lowercase">@alnaya.in</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                )}
-              </a>
-            ))}
+
+                  {/* Editorial Caption Gradient Overlay */}
+                  {panel.caption && (
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-3 pt-6 transition-opacity duration-300 opacity-90 lg:opacity-0 lg:group-hover:opacity-100">
+                      <p className="text-white text-[11px] sm:text-xs font-medium tracking-wide line-clamp-1">
+                        {panel.caption}
+                      </p>
+                      <p className="text-[#F3DFB0] text-[9px] sm:text-[10px] font-light tracking-wider uppercase mt-0.5">
+                        {hasPlayableVideo ? "Play Video Reel 🎬" : "View on Instagram →"}
+                      </p>
+                    </div>
+                  )}
+                </a>
+              );
+            })}
           </div>
         </div>
       </div>
+
+      {/* Playable Instagram Video Reel Modal */}
+      {activeVideoModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setActiveVideoModal(null)}
+        >
+          <div
+            className="relative w-full max-w-sm sm:max-w-md bg-stone-900 rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 inset-x-0 z-10 flex items-center justify-between text-white">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-pink-500/20 text-[#E1306C] flex items-center justify-center border border-white/20">
+                  <Instagram className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-editorial text-sm font-semibold leading-tight text-white">
+                    {activeVideoModal.caption || activeVideoModal.alt}
+                  </h4>
+                  <p className="text-[10px] text-stone-300 lowercase font-mono">
+                    {activeVideoModal.handle || "@alnaya.in"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:bg-black transition-colors"
+                  aria-label="Toggle mute"
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveVideoModal(null)}
+                  className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white hover:bg-black transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Video Player */}
+            <div className="relative aspect-[9/16] w-full bg-black flex items-center justify-center">
+              {activeVideoModal.videoUrl ? (
+                <video
+                  ref={modalVideoRef}
+                  src={activeVideoModal.videoUrl}
+                  poster={activeVideoModal.image}
+                  autoPlay
+                  loop
+                  playsInline
+                  muted={isMuted}
+                  controls={false}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={activeVideoModal.image}
+                  alt={activeVideoModal.alt}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+
+            {/* Modal Footer with Instagram CTA */}
+            <div className="p-4 bg-stone-950 border-t border-white/10 flex items-center justify-between gap-3">
+              <span className="text-xs text-stone-300 font-light truncate">
+                {activeVideoModal.caption || "Follow @alnaya.in on Instagram"}
+              </span>
+              <a
+                href={activeVideoModal.instagramLink || instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-full bg-[#E1306C] hover:bg-[#c9245c] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
+              >
+                <span>Instagram</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

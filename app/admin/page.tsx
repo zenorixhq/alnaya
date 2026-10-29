@@ -131,7 +131,8 @@ export default function AdminDashboardPage() {
     if (typeof window !== "undefined") {
       try {
         const cached = sessionStorage.getItem("alnaya_admin_instavideos");
-        if (cached) return JSON.parse(cached);
+        if (cached && !cached.toLowerCase().includes("gleamnest")) return JSON.parse(cached);
+        sessionStorage.removeItem("alnaya_admin_instavideos");
       } catch (e) {}
     }
     return [];
@@ -240,8 +241,15 @@ export default function AdminDashboardPage() {
           try { sessionStorage.setItem("alnaya_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
         }
         if (Array.isArray(data.instagramVideos)) {
-          setInstagramVideosList(data.instagramVideos);
-          try { sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(data.instagramVideos)); } catch (e) {}
+          const cleanInsta = data.instagramVideos.map((v: any) => ({
+            ...v,
+            handle: "@alnaya.in",
+            caption: (v.caption || "").replace(/gleamnest/gi, "alnaya").replace(/304\s*(&|and)\s*306/gi, "radiant finish"),
+            title: (v.title || "").replace(/gleamnest/gi, "alnaya"),
+            instagramLink: (v.instagramLink || "").replace(/gleamnest/gi, "alnaya"),
+          }));
+          setInstagramVideosList(cleanInsta);
+          try { sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(cleanInsta)); } catch (e) {}
         }
       })
       .catch((err) => console.error("Error fetching reviews:", err));
@@ -3030,14 +3038,14 @@ export default function AdminDashboardPage() {
                         {/* Bottom Text Details */}
                         <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none space-y-0.5">
                           <p className="text-[10px] text-[#F3DFB0] font-mono tracking-wider">
-                            {video.handle || "@alnaya.in"}
+                            {video.handle ? video.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in"}
                           </p>
                           <h4 className="text-xs sm:text-sm font-bold leading-tight text-white drop-shadow line-clamp-1">
                             {video.title}
                           </h4>
                           {video.caption && (
                             <p className="text-[11px] text-white/80 line-clamp-1 font-light drop-shadow-sm">
-                              {video.caption}
+                              {video.caption.replace(/gleamnest/gi, "alnaya").replace(/304\s*(&|and)\s*306/gi, "radiant finish")}
                             </p>
                           )}
                         </div>
@@ -3050,7 +3058,7 @@ export default function AdminDashboardPage() {
                             {video.title}
                           </span>
                           <span className="text-[10px] text-muted-foreground font-mono block truncate">
-                            {video.handle || "@alnaya.in"}
+                            {video.handle ? video.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in"}
                           </span>
                         </div>
 
