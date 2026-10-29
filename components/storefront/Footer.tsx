@@ -45,7 +45,7 @@ export function Footer() {
                 href={storeConfig.brand.socials.instagram || "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203"}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-[#C5A059] hover:border-[#C5A059]/60 hover:bg-[#C5A059]/10 transition-all"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-purple-400 hover:border-purple-400/60 hover:bg-purple-500/10 transition-all"
                 aria-label="Instagram"
               >
                 <Instagram className="w-4 h-4" />
@@ -75,7 +75,7 @@ export function Footer() {
 
           {/* Column 2: Collections (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
-            <h5 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#C5A059]">
+            <h5 className="text-[11px] font-bold uppercase tracking-[0.2em] text-purple-300">
               Collections
             </h5>
             <ul className="space-y-2 text-xs sm:text-[13px] text-stone-400">
@@ -100,12 +100,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=offer-products" className="text-amber-400 hover:text-white transition-colors flex items-center gap-1 font-semibold">
+                <Link href="/products?category=offer-products" className="text-purple-300 hover:text-white transition-colors flex items-center gap-1 font-semibold">
                   <span>✦ Offer Products</span>
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-[#C5A059] hover:underline transition-colors flex items-center gap-1 pt-1 font-medium">
+                <Link href="/products" className="text-purple-300 hover:underline transition-colors flex items-center gap-1 pt-1 font-medium">
                   <span>All 12 Categories</span>
                   <span>→</span>
                 </Link>
@@ -115,7 +115,7 @@ export function Footer() {
 
           {/* Column 3: Client Care & Policies (3 cols) */}
           <div className="lg:col-span-3 space-y-3">
-            <h5 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#C5A059]">
+            <h5 className="text-[11px] font-bold uppercase tracking-[0.2em] text-purple-300">
               Client Concierge
             </h5>
             <ul className="space-y-2 text-xs sm:text-[13px] text-stone-400">
@@ -169,7 +169,7 @@ export function Footer() {
 
           {/* Column 4: Newsletter / Stay Informed (3 cols) */}
           <div className="lg:col-span-3 space-y-3">
-            <h5 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#C5A059]">
+            <h5 className="text-[11px] font-bold uppercase tracking-[0.2em] text-purple-300">
               Stay in Touch
             </h5>
             <p className="text-xs text-stone-400 leading-relaxed font-light">
@@ -177,8 +177,8 @@ export function Footer() {
             </p>
 
             {subscribed ? (
-              <div className="p-3 rounded-xl bg-[#C5A059]/10 border border-[#C5A059]/30 text-xs text-[#FAF7F2] font-medium flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#C5A059] flex-shrink-0" />
+              <div className="p-3 rounded-xl bg-purple-900/30 border border-purple-400/30 text-xs text-[#FAF7F2] font-medium flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-purple-300 flex-shrink-0" />
                 <span>Thank you! Your 5% first purchase voucher (ALNAYA5) has been sent.</span>
               </div>
             ) : (
@@ -189,11 +189,11 @@ export function Footer() {
                   placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-3.5 pr-20 py-2.5 text-xs rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-stone-500 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition-all font-light"
+                  className="w-full pl-3.5 pr-20 py-2.5 text-xs rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-stone-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all font-light"
                 />
                 <button
                   type="submit"
-                  className="absolute right-1 px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#C5A059] text-[#1C1917] hover:bg-[#D5B069] transition-all flex items-center gap-1 shadow-sm active:scale-95"
+                  className="absolute right-1 px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#7E22CE] text-white hover:bg-[#6B21A8] transition-all flex items-center gap-1 shadow-sm active:scale-95"
                 >
                   <span>Join</span>
                   <ArrowRight className="w-3 h-3" />

@@ -38,22 +38,22 @@ export function AnnouncementBar() {
           {/* First sequence */}
           {tickerItems.map((item, idx) => (
             <div key={`ticker-a-${idx}`} className="flex items-center gap-2">
-              <Sparkles className="w-3 h-3 text-[#C5A059] flex-shrink-0 animate-pulse" />
+              <Sparkles className="w-3 h-3 text-purple-400 flex-shrink-0 animate-pulse" />
               <span className="tracking-wide uppercase text-[11px] sm:text-xs font-semibold text-[#F7EEDD]">
                 {item}
               </span>
-              <span className="text-[#C5A059]/50 text-xs ml-3 font-serif">✦</span>
+              <span className="text-purple-400/60 text-xs ml-3 font-serif">✦</span>
             </div>
           ))}
 
           {/* Duplicate sequence for continuous seamless scrolling */}
           {tickerItems.map((item, idx) => (
             <div key={`ticker-b-${idx}`} className="flex items-center gap-2">
-              <Sparkles className="w-3 h-3 text-[#C5A059] flex-shrink-0 animate-pulse" />
+              <Sparkles className="w-3 h-3 text-purple-400 flex-shrink-0 animate-pulse" />
               <span className="tracking-wide uppercase text-[11px] sm:text-xs font-semibold text-[#F7EEDD]">
                 {item}
               </span>
-              <span className="text-[#C5A059]/50 text-xs ml-3 font-serif">✦</span>
+              <span className="text-purple-400/60 text-xs ml-3 font-serif">✦</span>
             </div>
           ))}
         </div>

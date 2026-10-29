@@ -466,7 +466,7 @@ export function PolicyModal({
                     Clear guidelines to protect both our valued customers and brand authenticity.
                   </p>
                 </div>
-                <span className="self-start sm:self-auto text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                <span className="self-start sm:self-auto text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 border border-purple-500/20">
                   Strict Unboxing Video Required
                 </span>
               </div>

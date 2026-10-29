@@ -15,7 +15,7 @@ export function AboutUsSection() {
           <div className="lg:col-span-5 flex flex-col justify-between self-stretch space-y-8 sm:space-y-12 lg:space-y-0 py-1">
             {/* Top Display Headline */}
             <div>
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-[#8F7234] block mb-2 sm:mb-3">
+              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-[#7E22CE] block mb-2 sm:mb-3">
                 ABOUT THE HOUSE
               </span>
               <h2 className="font-editorial text-3xl sm:text-4xl md:text-5xl lg:text-[2.75rem] xl:text-[3.25rem] font-normal tracking-tight text-[#1C1917] leading-[1.12]">
@@ -32,7 +32,7 @@ export function AboutUsSection() {
               <div>
                 <Link
                   href="/products"
-                  className="group inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold uppercase tracking-[0.2em] text-[#1C1917] pb-1 border-b border-[#1C1917] hover:text-[#8F7234] hover:border-[#8F7234] transition-all duration-300"
+                  className="group inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold uppercase tracking-[0.2em] text-[#1C1917] pb-1 border-b border-[#1C1917] hover:text-[#7E22CE] hover:border-[#7E22CE] transition-all duration-300"
                 >
                   <span>SHOP NOW</span>
                   <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />

@@ -234,8 +234,8 @@ export function InstagramReelSection() {
         {/* Section Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#C5A059] animate-pulse" />
-            <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-[#8F7234] font-medium block">
+            <span className="w-2 h-2 rounded-full bg-[#7E22CE] animate-pulse" />
+            <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-[#7E22CE] font-medium block">
               FOLLOW THE HOUSE
             </span>
           </div>
@@ -244,10 +244,10 @@ export function InstagramReelSection() {
             href="https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-editorial text-3xl sm:text-5xl md:text-6xl font-normal tracking-tight text-[#1C1917] hover:text-[#C5A059] transition-colors"
+            className="inline-flex items-center gap-2 font-editorial text-3xl sm:text-5xl md:text-6xl font-normal tracking-tight text-[#1C1917] hover:text-[#7E22CE] transition-colors"
           >
             <span>@alnaya.in</span>
-            <Instagram className="w-6 h-6 sm:w-8 sm:h-8 text-[#C5A059]" />
+            <Instagram className="w-6 h-6 sm:w-8 sm:h-8 text-[#7E22CE]" />
           </a>
           <p className="text-xs sm:text-sm text-stone-600 font-light max-w-md mx-auto">
             Swipe through our latest styling reels, water tests, and styling inspiration.

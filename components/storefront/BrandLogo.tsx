@@ -41,14 +41,14 @@ export function BrandLogo({
                 theme === "dark" ? "text-white" : "text-foreground"
               }`}
             >
-              ALNAYA<span className={`text-sm ${theme === "dark" ? "text-amber-300 font-semibold" : "text-primary font-light"}`}>.IN</span>
+              ALNAYA<span className={`text-sm ${theme === "dark" ? "text-purple-300 font-semibold" : "text-primary font-light"}`}>.IN</span>
             </span>
-            <span className="text-[10px] text-amber-500">✦</span>
+            <span className="text-[10px] text-[#7E22CE]">✦</span>
           </div>
           {showTagline && (
             <span
               className={`font-editorial italic text-[10px] sm:text-[11.5px] tracking-wide mt-[-2px] truncate max-w-[210px] sm:max-w-none ${
-                theme === "dark" ? "text-amber-200/80" : "text-primary/90"
+                theme === "dark" ? "text-purple-200/90" : "text-primary/90"
               }`}
             >
               {storeConfig.meta.tagline}

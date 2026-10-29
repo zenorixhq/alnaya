@@ -131,18 +131,18 @@ export function Header() {
                     className={`text-xs xl:text-sm font-medium tracking-wide transition-colors whitespace-nowrap flex items-center gap-1 ${
                       isDarkNav
                         ? isActive
-                          ? "text-amber-300 font-semibold"
+                          ? "text-purple-300 font-semibold"
                           : link.highlight
-                          ? "text-amber-300 font-semibold hover:text-white"
+                          ? "text-purple-300 font-semibold hover:text-white"
                           : "text-white/90 hover:text-white"
                         : isActive
-                        ? "text-[#8F7234] font-bold"
+                        ? "text-[#7E22CE] font-bold"
                         : link.highlight
-                        ? "text-[#8F7234] font-bold hover:text-[#1C1917]"
-                        : "text-[#1C1917] hover:text-[#8F7234]"
+                        ? "text-[#7E22CE] font-bold hover:text-[#581C87]"
+                        : "text-[#1C1917] hover:text-[#7E22CE]"
                     }`}
                   >
-                    {link.highlight && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                    {link.highlight && <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />}
                     <span>{link.label}</span>
                   </Link>
                 );
@@ -155,7 +155,7 @@ export function Header() {
                   className={`flex items-center gap-1 text-xs xl:text-sm font-medium transition-colors py-2 cursor-pointer whitespace-nowrap ${
                     isDarkNav
                       ? "text-white/90 hover:text-white"
-                      : "text-[#1C1917] hover:text-[#8F7234]"
+                      : "text-[#1C1917] hover:text-[#7E22CE]"
                   }`}
                 >
                   <span>Categories</span>
@@ -180,7 +180,7 @@ export function Header() {
                     <div className="pt-2 border-t border-[#EADBBE]/50 mt-1">
                       <Link
                         href="/products"
-                        className="block px-3 py-1.5 text-xs font-bold text-[#8F7234] hover:text-stone-900 transition-colors"
+                        className="block px-3 py-1.5 text-xs font-bold text-[#7E22CE] hover:text-stone-900 transition-colors"
                       >
                         ✦ View All Catalog
                       </Link>

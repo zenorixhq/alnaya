@@ -97,7 +97,7 @@ export function ClientFeedbackScreenshots({ className = "" }: ClientFeedbackScre
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#8F7234] uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#7E22CE] uppercase tracking-widest">
               <MessageCircle className="w-4 h-4 text-[#25D366]" />
               <span>Real Customer Conversations</span>
             </div>
@@ -176,7 +176,7 @@ export function ClientFeedbackScreenshots({ className = "" }: ClientFeedbackScre
               {/* Bottom Caption / Quote */}
               <div className="p-4 bg-[#FFFDF9] space-y-2 border-t border-[#EADBBE]/50">
                 {item.piece && (
-                  <div className="inline-block px-2 py-0.5 rounded-md bg-[#FAF5EB] text-[#8F7234] text-[10px] font-semibold">
+                  <div className="inline-block px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-semibold">
                     Piece: {item.piece}
                   </div>
                 )}
@@ -187,7 +187,7 @@ export function ClientFeedbackScreenshots({ className = "" }: ClientFeedbackScre
                 )}
                 <div className="flex items-center justify-between pt-1 text-[10px] text-stone-500">
                   <span>{item.date || "Verified WhatsApp Order"}</span>
-                  <span className="text-[#C5A059] font-medium flex items-center gap-0.5">
+                  <span className="text-purple-700 font-medium flex items-center gap-0.5">
                     <Heart className="w-3 h-3 fill-current text-rose-500" />
                     <span>Loved</span>
                   </span>
@@ -243,7 +243,7 @@ export function ClientFeedbackScreenshots({ className = "" }: ClientFeedbackScre
             {/* Modal Footer Caption */}
             <div className="p-5 bg-white border-t border-[#EADBBE] space-y-2">
               {zoomedScreenshot.piece && (
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#FAF5EB] text-[#8F7234] text-xs font-semibold">
+                <span className="inline-block px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold">
                   Verified Piece: {zoomedScreenshot.piece}
                 </span>
               )}

@@ -31,10 +31,10 @@ export function HeroEditorial() {
           
           {/* Subtle Atelier / Brand Eyebrow */}
           <div className="flex items-center gap-2">
-            <span className="w-6 h-[1px] bg-amber-400/80" />
-            <span className="text-[11px] sm:text-xs uppercase tracking-[0.28em] font-medium text-amber-200/90 flex items-center gap-1.5">
+            <span className="w-6 h-[1px] bg-purple-400/80" />
+            <span className="text-[11px] sm:text-xs uppercase tracking-[0.28em] font-medium text-purple-200/90 flex items-center gap-1.5">
               <span>{storeConfig?.meta?.name || "ALNAYA"} ATELIER</span>
-              <Sparkles className="w-3 h-3 text-amber-400" />
+              <Sparkles className="w-3 h-3 text-purple-400" />
             </span>
           </div>
 
@@ -53,17 +53,17 @@ export function HeroEditorial() {
           <div className="pt-1">
             <Link
               href="/products/celestial-jewel-drop-hanging-chain"
-              className="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/25 hover:border-amber-400/70 text-xs text-white/90 transition-all duration-300 group shadow-lg"
+              className="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/25 hover:border-purple-400/70 text-xs text-white/90 transition-all duration-300 group shadow-lg"
             >
               <img
                 src="/images/hero-royal-necklace.jpg"
                 alt="Celestial Jewel Drop Hanging Chain"
-                className="w-6 h-6 rounded-full object-cover border border-amber-400/70 group-hover:scale-110 transition-transform"
+                className="w-6 h-6 rounded-full object-cover border border-purple-400/70 group-hover:scale-110 transition-transform"
               />
               <span className="font-medium truncate max-w-[220px] sm:max-w-none">
                 Featured: Celestial Jewel Drop Hanging Chain • ₹299
               </span>
-              <ArrowRight className="w-3 h-3 text-amber-300 group-hover:translate-x-1 transition-transform shrink-0" />
+              <ArrowRight className="w-3 h-3 text-purple-300 group-hover:translate-x-1 transition-transform shrink-0" />
             </Link>
           </div>
 

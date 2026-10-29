@@ -27,7 +27,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#C5A059] uppercase tracking-widest">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#7E22CE] uppercase tracking-widest">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Curated Collections</span>
               </div>
@@ -37,7 +37,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/products"
-              className="text-xs sm:text-sm font-semibold text-[#8F7234] hover:text-[#1C1917] flex items-center gap-1 group transition-colors"
+              className="text-xs sm:text-sm font-semibold text-[#7E22CE] hover:text-[#581C87] flex items-center gap-1 group transition-colors"
             >
               <span>View All Categories</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -49,7 +49,7 @@ export default function HomePage() {
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                className="group relative aspect-[4/5] rounded-2xl overflow-hidden border border-[#EADBBE] shadow-sm bg-[#FFFDF9] hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(197,160,89,0.18)] transition-all duration-500 ease-out"
+                className="group relative aspect-[4/5] rounded-2xl overflow-hidden border border-[#EADBBE] shadow-sm bg-[#FFFDF9] hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(126,34,206,0.18)] transition-all duration-500 ease-out"
               >
                 <img
                   src={cat.image}
@@ -59,15 +59,15 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-3.5 sm:p-4 text-white transition-opacity duration-300">
                   {idx === 0 && (
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] text-[#EADBBE] font-medium tracking-wider uppercase">
+                      <span className="text-[10px] text-purple-200 font-medium tracking-wider uppercase">
                         🔥 Latest Drop
                       </span>
-                      <span className="text-[9px] font-bold bg-[#C5A059] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      <span className="text-[9px] font-bold bg-[#7E22CE] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
                         New
                       </span>
                     </div>
                   )}
-                  <h3 className="font-editorial text-sm sm:text-base font-semibold tracking-wide text-white group-hover:text-[#F3DFB0] transition-colors leading-snug mt-0.5">
+                  <h3 className="font-editorial text-sm sm:text-base font-semibold tracking-wide text-white group-hover:text-purple-200 transition-colors leading-snug mt-0.5">
                     {cat.name.replace(/\s*Collection/gi, "").trim()}
                   </h3>
                 </div>

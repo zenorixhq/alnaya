@@ -166,7 +166,7 @@ function AutoPlayingReelCard({
             {reel.handle}
           </p>
           {reel.productTitle && (
-            <span className="inline-block text-[9px] text-amber-300 font-semibold bg-white/10 px-1.5 py-0.5 rounded">
+            <span className="inline-block text-[9px] text-purple-300 font-semibold bg-white/10 px-1.5 py-0.5 rounded">
               {reel.productTitle}
             </span>
           )}
@@ -361,7 +361,7 @@ export function CustomerReviewsWithVideos() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* Header: The love we get */}
         <div className="text-center space-y-2">
-          <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-[#8F7234] font-medium block">
+          <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-[#7E22CE] font-medium block">
             IN THEIR WORDS
           </span>
           <h2 className="font-editorial text-3xl sm:text-5xl font-normal tracking-tight text-[#1C1917]">
@@ -375,7 +375,7 @@ export function CustomerReviewsWithVideos() {
           <div className="lg:col-span-5 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-stone-300/60">
               <span className="text-xs uppercase tracking-widest font-semibold text-stone-700 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                 <span>Client Reels</span>
               </span>
               <span className="text-[11px] text-stone-500">Real wear tests</span>
@@ -442,7 +442,7 @@ export function CustomerReviewsWithVideos() {
                     {/* Bottom: Piece & caption details revealed on hover */}
                     <div className="space-y-1">
                       {item.piece && (
-                        <span className="inline-block text-[9px] sm:text-[10px] text-amber-300 font-semibold bg-white/10 backdrop-blur-sm px-2 py-0.5 rounded">
+                        <span className="inline-block text-[9px] sm:text-[10px] text-purple-300 font-semibold bg-white/10 backdrop-blur-sm px-2 py-0.5 rounded">
                           Piece: {item.piece}
                         </span>
                       )}
@@ -506,7 +506,7 @@ export function CustomerReviewsWithVideos() {
             <div className="flex items-center justify-between pb-2 border-b border-stone-300/60">
               <div>
                 <span className="text-xs uppercase tracking-widest font-semibold text-stone-700 flex items-center gap-1.5">
-                  <Quote className="w-3.5 h-3.5 text-[#8F7234]" />
+                  <Quote className="w-3.5 h-3.5 text-[#7E22CE]" />
                   <span>Customer Review Quotes</span>
                 </span>
                 <p className="text-[11px] text-stone-500">Verified client testimonials & reviews</p>
@@ -551,7 +551,7 @@ export function CustomerReviewsWithVideos() {
               {reviewQuotes.map((item, idx) => (
                 <div
                   key={item.id || idx}
-                  className="w-[280px] xs:w-[320px] sm:w-[380px] min-w-[280px] xs:min-w-[320px] sm:min-w-[380px] flex-shrink-0 snap-start bg-[#FFFDF9] border border-[#EADBBE] rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md hover:border-[#8F7234]/50 transition-all"
+                  className="w-[280px] xs:w-[320px] sm:w-[380px] min-w-[280px] xs:min-w-[320px] sm:min-w-[380px] flex-shrink-0 snap-start bg-[#FFFDF9] border border-[#EADBBE] rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md hover:border-purple-400/50 transition-all"
                 >
                   <div className="space-y-3">
                     {/* Rating Stars & Quote Glyph */}
@@ -577,7 +577,7 @@ export function CustomerReviewsWithVideos() {
                       <p className="text-xs font-bold text-stone-900">{item.author}</p>
                       <p className="text-[11px] text-stone-500 font-light">{item.location}</p>
                       {item.piece && (
-                        <p className="text-[10px] text-[#8F7234] font-medium pt-0.5 truncate max-w-[200px]">
+                        <p className="text-[10px] text-purple-700 font-medium pt-0.5 truncate max-w-[200px]">
                           Piece: {item.piece}
                         </p>
                       )}
@@ -642,13 +642,13 @@ export function CustomerReviewsWithVideos() {
             {/* Modal Footer with Full Details Revealed on Click */}
             <div className="p-4 sm:p-5 bg-white border-t border-[#EADBBE] space-y-2.5 flex-shrink-0 overflow-y-auto max-h-[30vh]">
               {selectedScreenshot.piece && (
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#FAF5EB] text-[#8F7234] text-xs font-semibold">
+                <span className="inline-block px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold">
                   Verified Piece: {selectedScreenshot.piece}
                 </span>
               )}
               {selectedScreenshot.caption && (
                 <div className="space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#8F7234]">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-purple-700">
                     Customer Review:
                   </p>
                   <p className="text-xs sm:text-sm text-stone-800 leading-relaxed font-light italic bg-[#FAF7F2] p-3 rounded-xl border border-[#EADBBE]/70">
@@ -704,7 +704,7 @@ export function CustomerReviewsWithVideos() {
             <div className="p-4 bg-stone-950 flex items-center justify-between text-white border-t border-stone-800">
               <div>
                 <p className="text-xs font-semibold">{selectedVideo.productTitle}</p>
-                <p className="text-[11px] text-amber-400 font-mono">₹{selectedVideo.productPrice}</p>
+                <p className="text-[11px] text-purple-300 font-mono">₹{selectedVideo.productPrice}</p>
               </div>
 
               {selectedVideo.productSlug && selectedVideo.productSlug !== "all" && (

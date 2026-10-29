@@ -225,7 +225,7 @@ export default function AdminDashboardPage() {
   });
 
   const fetchReviewsAndVideos = () => {
-    fetch("/api/reviews")
+    fetch(`/api/reviews?t=${Date.now()}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.reviews)) {
@@ -832,14 +832,24 @@ export default function AdminDashboardPage() {
   const handleDeleteReview = async (id: string | number) => {
     if (!confirm("Are you sure you want to remove this client review?")) return;
     try {
-      // Optimistic update
-      setReviewsList((prev) => prev.filter((r) => String(r.id) !== String(id)));
-      const res = await fetch(`/api/reviews?type=review&id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const targetId = String(id).trim();
+      setReviewsList((prev) => {
+        const next = prev.filter((r) => String(r.id).trim() !== targetId);
+        try { sessionStorage.setItem("alnaya_admin_reviews", JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      const res = await fetch(`/api/reviews?type=review&id=${encodeURIComponent(targetId)}`, {
+        method: "DELETE",
+        cache: "no-store",
+      });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to delete review");
       }
-      fetchReviewsAndVideos();
+      if (Array.isArray(data.reviews)) {
+        setReviewsList(data.reviews);
+        try { sessionStorage.setItem("alnaya_admin_reviews", JSON.stringify(data.reviews)); } catch (e) {}
+      }
     } catch (err: any) {
       alert(err.message || "Error deleting review");
       fetchReviewsAndVideos();
@@ -935,13 +945,24 @@ export default function AdminDashboardPage() {
   const handleDeleteVideo = async (id: string | number) => {
     if (!confirm("Are you sure you want to remove this video reel?")) return;
     try {
-      setVideosList((prev) => prev.filter((v) => String(v.id) !== String(id)));
-      const res = await fetch(`/api/reviews?type=video&id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const targetId = String(id).trim();
+      setVideosList((prev) => {
+        const next = prev.filter((v) => String(v.id).trim() !== targetId);
+        try { sessionStorage.setItem("alnaya_admin_videos", JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      const res = await fetch(`/api/reviews?type=video&id=${encodeURIComponent(targetId)}`, {
+        method: "DELETE",
+        cache: "no-store",
+      });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to delete video reel");
       }
-      fetchReviewsAndVideos();
+      if (Array.isArray(data.videoReels)) {
+        setVideosList(data.videoReels);
+        try { sessionStorage.setItem("alnaya_admin_videos", JSON.stringify(data.videoReels)); } catch (e) {}
+      }
     } catch (err: any) {
       alert(err.message || "Error deleting video reel");
       fetchReviewsAndVideos();
@@ -1006,13 +1027,24 @@ export default function AdminDashboardPage() {
   const handleDeleteScreenshot = async (id: string | number) => {
     if (!confirm("Are you sure you want to remove this client feedback screenshot?")) return;
     try {
-      setFeedbackScreenshotsList((prev) => prev.filter((s) => String(s.id) !== String(id)));
-      const res = await fetch(`/api/reviews?type=screenshot&id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const targetId = String(id).trim();
+      setFeedbackScreenshotsList((prev) => {
+        const next = prev.filter((s) => String(s.id).trim() !== targetId);
+        try { sessionStorage.setItem("alnaya_admin_screenshots", JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      const res = await fetch(`/api/reviews?type=screenshot&id=${encodeURIComponent(targetId)}`, {
+        method: "DELETE",
+        cache: "no-store",
+      });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to delete feedback screenshot");
       }
-      fetchReviewsAndVideos();
+      if (Array.isArray(data.feedbackScreenshots)) {
+        setFeedbackScreenshotsList(data.feedbackScreenshots);
+        try { sessionStorage.setItem("alnaya_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
+      }
     } catch (err: any) {
       alert(err.message || "Error deleting feedback screenshot");
       fetchReviewsAndVideos();
@@ -1233,17 +1265,42 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteInstaVideo = async (id: string | number) => {
-    if (!confirm("Are you sure you want to remove this Instagram video?")) return;
+    if (!confirm("Are you sure you want to remove this reel from Follow The House?")) return;
     try {
-      setInstagramVideosList((prev) => prev.filter((v) => String(v.id) !== String(id)));
-      const res = await fetch(`/api/reviews?type=instagramVideo&id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const targetId = String(id).trim();
+      const updatedList = instagramVideosList.filter((v) => String(v.id).trim() !== targetId);
+      setInstagramVideosList(updatedList);
+      try {
+        sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(updatedList));
+        localStorage.setItem("alnaya_follow_house_updated", String(Date.now()));
+        window.dispatchEvent(new Event("storage"));
+      } catch (e) {}
+
+      const res = await fetch(`/api/reviews?type=instagramVideo&id=${encodeURIComponent(targetId)}`, {
+        method: "DELETE",
+        cache: "no-store",
+      });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to delete Instagram video");
+        throw new Error(data.error || "Failed to delete reel");
       }
-      fetchReviewsAndVideos();
+      if (Array.isArray(data.instagramVideos)) {
+        const cleanInsta = data.instagramVideos.map((v: any) => ({
+          ...v,
+          handle: "@alnaya.in",
+          caption: (v.caption || "").replace(/gleamnest/gi, "alnaya").replace(/304\s*(&|and)\s*306/gi, "radiant finish"),
+          title: (v.title || "").replace(/gleamnest/gi, "alnaya"),
+          instagramLink: (v.instagramLink || "").replace(/gleamnest/gi, "alnaya"),
+        }));
+        setInstagramVideosList(cleanInsta);
+        try {
+          sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(cleanInsta));
+          localStorage.setItem("alnaya_follow_house_updated", String(Date.now()));
+          window.dispatchEvent(new Event("storage"));
+        } catch (e) {}
+      }
     } catch (err: any) {
-      alert(err.message || "Error deleting Instagram video");
+      alert(err.message || "Error deleting reel");
       fetchReviewsAndVideos();
     }
   };

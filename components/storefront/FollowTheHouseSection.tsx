@@ -67,26 +67,30 @@ export function FollowTheHouseSection() {
   // Fetch live Follow The House items from Admin Panel / API
   useEffect(() => {
     const fetchPanels = () => {
-      fetch("/api/reviews?t=" + Date.now())
+      fetch("/api/reviews?t=" + Date.now(), { cache: "no-store" })
         .then((res) => res.json())
         .then((data) => {
-          if (Array.isArray(data.instagramVideos) && data.instagramVideos.length > 0) {
-            const mapped: HousePanel[] = data.instagramVideos.map((item: any, idx: number) => ({
-              id: item.id || idx + 1,
-              image:
-                item.poster ||
-                (defaultPanels[idx % defaultPanels.length] && defaultPanels[idx % defaultPanels.length].image) ||
-                "/images/follow-house/panel-1.jpg",
-              videoUrl: item.videoUrl || "",
-              alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
-              caption: item.title || item.caption || "",
-              handle: item.handle ? item.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in",
-              instagramLink:
-                item.instagramLink && !item.instagramLink.includes("gleamnest")
-                  ? item.instagramLink
-                  : instagramUrl,
-            }));
-            setPanels(mapped);
+          if (Array.isArray(data.instagramVideos)) {
+            if (data.instagramVideos.length > 0) {
+              const mapped: HousePanel[] = data.instagramVideos.map((item: any, idx: number) => ({
+                id: item.id || idx + 1,
+                image:
+                  item.poster ||
+                  (defaultPanels[idx % defaultPanels.length] && defaultPanels[idx % defaultPanels.length].image) ||
+                  "/images/follow-house/panel-1.jpg",
+                videoUrl: item.videoUrl || "",
+                alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
+                caption: item.title || item.caption || "",
+                handle: item.handle ? item.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in",
+                instagramLink:
+                  item.instagramLink && !item.instagramLink.includes("gleamnest")
+                    ? item.instagramLink
+                    : instagramUrl,
+              }));
+              setPanels(mapped);
+            } else {
+              setPanels([]);
+            }
           }
         })
         .catch(() => {});
@@ -130,11 +134,15 @@ export function FollowTheHouseSection() {
     }
   };
 
+  if (panels.length === 0) {
+    return null;
+  }
+
   return (
     <section className="w-full bg-[#FAF7F2] pt-14 sm:pt-20 md:pt-24 text-[#1C1917] overflow-hidden border-t border-[#EADBBE]/60">
       {/* Section Header matching Maison editorial reference */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-8 sm:mb-12">
-        <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.3em] text-[#8F7234] block mb-2 sm:mb-3">
+        <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.3em] text-[#7E22CE] block mb-2 sm:mb-3">
           FOLLOW THE HOUSE
         </span>
         <a
@@ -213,12 +221,12 @@ export function FollowTheHouseSection() {
                   <div className="opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all duration-300 flex items-center gap-1.5 bg-white/95 backdrop-blur-md text-[#1C1917] px-3.5 py-1.5 rounded-full shadow-xl text-xs font-medium">
                     {hasPlayableVideo ? (
                       <>
-                        <Play className="w-3.5 h-3.5 text-[#C5A059] fill-[#C5A059]" />
+                        <Play className="w-3.5 h-3.5 text-[#7E22CE] fill-[#7E22CE]" />
                         <span className="font-editorial text-xs sm:text-sm tracking-wide">Watch Reel</span>
                       </>
                     ) : (
                       <>
-                        <Instagram className="w-3.5 h-3.5 text-[#C5A059]" />
+                        <Instagram className="w-3.5 h-3.5 text-[#7E22CE]" />
                         <span className="font-editorial text-xs sm:text-sm tracking-wide lowercase">@alnaya.in</span>
                       </>
                     )}
@@ -231,7 +239,7 @@ export function FollowTheHouseSection() {
                     <p className="text-white text-xs sm:text-sm font-medium tracking-wide line-clamp-1">
                       {panel.caption}
                     </p>
-                    <p className="text-[#F3DFB0] text-[10px] sm:text-xs font-light tracking-wider uppercase mt-0.5">
+                    <p className="text-purple-200 text-[10px] sm:text-xs font-light tracking-wider uppercase mt-0.5">
                       {hasPlayableVideo ? "Play Video Reel 🎬" : "View on Instagram →"}
                     </p>
                   </div>

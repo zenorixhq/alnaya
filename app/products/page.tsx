@@ -278,8 +278,8 @@ function ProductCatalogContent() {
             <div
               className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 ${
                 selectedCategory === "all"
-                  ? "bg-white ring-2 ring-[#C5A059] border-[#C5A059] shadow-md -translate-y-0.5"
-                  : "bg-white border border-stone-200/90 shadow-sm hover:border-[#C5A059]/50 hover:shadow-md hover:-translate-y-0.5"
+                  ? "bg-white ring-2 ring-[#7E22CE] border-[#7E22CE] shadow-md -translate-y-0.5"
+                  : "bg-white border border-stone-200/90 shadow-sm hover:border-purple-300 hover:shadow-md hover:-translate-y-0.5"
               }`}
             >
               <img
@@ -291,7 +291,7 @@ function ProductCatalogContent() {
             <span
               className={`text-xs sm:text-[13px] text-center whitespace-nowrap mt-2 transition-colors ${
                 selectedCategory === "all"
-                  ? "font-bold text-[#8F7234]"
+                  ? "font-bold text-[#7E22CE]"
                   : "font-medium text-stone-700 group-hover:text-stone-900"
               }`}
             >
@@ -335,8 +335,8 @@ function ProductCatalogContent() {
                 <div
                   className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 ${
                     selectedCategory === cat.slug
-                      ? "bg-white ring-2 ring-[#C5A059] border-[#C5A059] shadow-md -translate-y-0.5"
-                      : "bg-white border border-stone-200/90 shadow-sm hover:border-[#C5A059]/50 hover:shadow-md hover:-translate-y-0.5"
+                      ? "bg-white ring-2 ring-[#7E22CE] border-[#7E22CE] shadow-md -translate-y-0.5"
+                      : "bg-white border border-stone-200/90 shadow-sm hover:border-purple-300 hover:shadow-md hover:-translate-y-0.5"
                   }`}
                 >
                   <img
@@ -348,7 +348,7 @@ function ProductCatalogContent() {
                 <span
                   className={`text-xs sm:text-[13px] text-center whitespace-nowrap mt-2 transition-colors truncate max-w-full ${
                     selectedCategory === cat.slug
-                      ? "font-bold text-[#8F7234]"
+                      ? "font-bold text-[#7E22CE]"
                       : "font-medium text-stone-700 group-hover:text-stone-900"
                   }`}
                   title={displayName}

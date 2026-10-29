@@ -66,7 +66,7 @@ async function readData() {
       const cleanedVal = cleanContentString(originalVal);
       const parsed = JSON.parse(cleanedVal);
       const sanitized = sanitizeData(parsed);
-      if (!Array.isArray(sanitized.instagramVideos) || sanitized.instagramVideos.length === 0) {
+      if (!Array.isArray(sanitized.instagramVideos)) {
         sanitized.instagramVideos = fileData.instagramVideos || [];
       }
       // If the database contained any stale references, update it asynchronously to heal permanently
@@ -115,13 +115,9 @@ async function writeData(data: any) {
   }
 }
 
-const CACHE_HEADERS = {
-  "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
-};
-
 export async function GET() {
   const data = await readData();
-  return NextResponse.json(data, { headers: CACHE_HEADERS });
+  return NextResponse.json(data, { headers: NO_CACHE_HEADERS });
 }
 
 export async function POST(req: Request) {
@@ -351,20 +347,37 @@ export async function DELETE(req: Request) {
     }
 
     const data = await readData();
-    const targetId = String(id).trim();
+    const targetId = decodeURIComponent(String(id)).trim().toLowerCase();
 
     if (type === "screenshot") {
-      data.feedbackScreenshots = (data.feedbackScreenshots || []).filter((s: any) => String(s.id).trim() !== targetId);
-    } else if (type === "instagramVideo") {
-      data.instagramVideos = (data.instagramVideos || []).filter((v: any) => String(v.id).trim() !== targetId);
+      data.feedbackScreenshots = (data.feedbackScreenshots || []).filter(
+        (s: any) => decodeURIComponent(String(s.id)).trim().toLowerCase() !== targetId
+      );
+    } else if (type === "instagramVideo" || type === "reel" || type === "followHouse") {
+      data.instagramVideos = (data.instagramVideos || []).filter(
+        (v: any) => decodeURIComponent(String(v.id)).trim().toLowerCase() !== targetId
+      );
     } else if (type === "video") {
-      data.videoReels = (data.videoReels || []).filter((v: any) => String(v.id).trim() !== targetId);
+      data.videoReels = (data.videoReels || []).filter(
+        (v: any) => decodeURIComponent(String(v.id)).trim().toLowerCase() !== targetId
+      );
     } else {
-      data.reviews = (data.reviews || []).filter((r: any) => String(r.id).trim() !== targetId);
+      data.reviews = (data.reviews || []).filter(
+        (r: any) => decodeURIComponent(String(r.id)).trim().toLowerCase() !== targetId
+      );
     }
 
     await writeData(data);
-    return NextResponse.json({ success: true }, { headers: NO_CACHE_HEADERS });
+    return NextResponse.json(
+      {
+        success: true,
+        instagramVideos: data.instagramVideos,
+        videoReels: data.videoReels,
+        reviews: data.reviews,
+        feedbackScreenshots: data.feedbackScreenshots,
+      },
+      { headers: NO_CACHE_HEADERS }
+    );
   } catch (err: any) {
     console.error("Error in DELETE /api/reviews:", err);
     return NextResponse.json(
