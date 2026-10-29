@@ -41,23 +41,23 @@ export function AboutUsSection() {
             </div>
           </div>
 
-          {/* 2. Right Dual Photography Spread (Matching user's reference) */}
+          {/* 2. Right Dual Photography Spread (Showcasing authentic pieces) */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-center">
-            {/* Center / Primary Image: Model showcasing necklace and earrings */}
-            <div className="sm:col-span-7 relative aspect-[5/6] overflow-hidden rounded-sm bg-stone-100 shadow-sm border border-[#EADBBE]/80 group">
+            {/* Primary Image: Model wearing Celestial Star Drop Hanging Chain */}
+            <div className="sm:col-span-7 relative aspect-[3/4] sm:aspect-[4/5] md:aspect-[5/6] overflow-hidden rounded-md bg-stone-100 shadow-sm border border-[#EADBBE]/80 group">
               <img
-                src="/images/about-model-smile.jpg"
-                alt="Alnaya Jewellery - Elegant and Professional Jewellery Design"
+                src="/images/about-model-necklace.jpg"
+                alt="Alnaya Jewellery - Celestial Star Drop Hanging Chain"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 loading="lazy"
               />
             </div>
 
-            {/* Right Secondary Image: Macro hand wearing diamond rings */}
-            <div className="sm:col-span-5 relative aspect-[4/5] sm:aspect-[5/6] overflow-hidden rounded-sm bg-stone-100 shadow-sm border border-[#EADBBE]/80 group">
+            {/* Secondary Image: Model wearing Radiant Concentric Circles Cuff Bracelet */}
+            <div className="sm:col-span-5 relative aspect-[3/4] sm:aspect-[4/5] md:aspect-[5/6] overflow-hidden rounded-md bg-stone-100 shadow-sm border border-[#EADBBE]/80 group">
               <img
-                src="/images/about-ring-macro.jpg"
-                alt="Alnaya Jewellery - Thoughtfully crafted rings"
+                src="/images/about-model-cuff.jpg"
+                alt="Alnaya Jewellery - Radiant Concentric Circles Cuff Bracelet"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 loading="lazy"
               />
