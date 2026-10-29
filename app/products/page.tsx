@@ -20,6 +20,31 @@ const ITEMS_PER_ROW = 4;
 const ROWS_PER_BATCH = 3;
 const BATCH_SIZE = ITEMS_PER_ROW * ROWS_PER_BATCH; // 12 items (3 rows of 4 items)
 
+const categoryIconMap: Record<string, string> = {
+  all: "/images/category-cards/all.png",
+  necklace: "/images/category-cards/necklace.png",
+  necklaces: "/images/category-cards/necklace.png",
+  "minimal-chains": "/images/category-cards/necklace.png",
+  "hanging-chains": "/images/category-cards/necklace.png",
+  "necklaces-and-chains": "/images/category-cards/necklace.png",
+  "traditional-sets": "/images/category-cards/necklace.png",
+  ring: "/images/category-cards/ring.png",
+  rings: "/images/category-cards/ring.png",
+  bracelet: "/images/category-cards/bracelet.png",
+  bracelets: "/images/category-cards/bracelet.png",
+  bangles: "/images/category-cards/bracelet.png",
+  "bangles-kada": "/images/category-cards/bracelet.png",
+  earring: "/images/category-cards/earrings.png",
+  earrings: "/images/category-cards/earrings.png",
+  "stud-and-hoops": "/images/category-cards/earrings.png",
+  jhumkas: "/images/category-cards/earrings.png",
+  "traditional-earrings": "/images/category-cards/earrings.png",
+  anklet: "/images/category-cards/bracelet.png",
+  anklets: "/images/category-cards/bracelet.png",
+  nosepin: "/images/category-cards/ring.png",
+  "offer-products": "/images/category-cards/necklace.png",
+};
+
 function ProductCatalogContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "all";
@@ -242,51 +267,101 @@ function ProductCatalogContent() {
         </div>
       </div>
 
-      {/* 2. Horizontal Category Filter Pills (All + 11 Categories) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none pt-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-        <button
-          onClick={() => setSelectedCategory("all")}
-          className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-            selectedCategory === "all"
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-          }`}
-        >
-          <span>All Pieces</span>
-          <span className="text-[10px] opacity-80">({products.length})</span>
-        </button>
-
-        {categoryList.map((cat) => {
-          const count = products.filter((p) => {
-            if (cat.slug === "new-arrivals") return p.isNewArrival || p.category === "new-arrivals";
-            if (cat.slug === "necklaces-and-chains" || cat.slug === "necklaces") return p.category === "necklaces-and-chains" || p.category === "necklaces" || /necklace|chain|pendant/i.test(p.title);
-            if (cat.slug === "bangles-kada") return p.category === "bangles-kada" || p.category === "bangles" || /bangle|kada|cuff/i.test(p.title);
-            if (cat.slug === "bracelets") return (p.category === "bracelets" && !/bangle|kada|cuff/i.test(p.title)) || /bracelet/i.test(p.title);
-            if (cat.slug === "watches") return p.category === "watches" || /watch/i.test(p.title);
-            if (cat.slug === "charms") return p.category === "charms" || /charm/i.test(p.title);
-            if (cat.slug === "hip-chains") return p.category === "hip-chains" || /hip chain|waist/i.test(p.title);
-            if (cat.slug === "kids-collection") return p.category === "kids-collection" || p.category === "kids" || /kid|child/i.test(p.title);
-            if (cat.slug === "anklets") return p.category === "anklets" || /anklet/i.test(p.title);
-            if (cat.slug === "rings") return p.category === "rings" || /ring/i.test(p.title);
-            if (cat.slug === "earrings") return p.category === "earrings" || /earring|stud|hoop/i.test(p.title);
-            return p.category === cat.slug;
-          }).length;
-
-          return (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.slug)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                selectedCategory === cat.slug
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+      {/* 2. Visual Category Cards Bar (Matching user's reference) */}
+      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-3 sm:p-4 rounded-3xl border border-stone-200/70 shadow-sm">
+        <div className="flex items-start gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-1 scrollbar-none scroll-smooth -mx-1 px-1">
+          {/* "All Pieces" Card */}
+          <button
+            onClick={() => setSelectedCategory("all")}
+            className="flex flex-col items-center shrink-0 group focus:outline-none w-[72px] sm:w-[84px] md:w-[92px]"
+          >
+            <div
+              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 ${
+                selectedCategory === "all"
+                  ? "bg-white ring-2 ring-[#C5A059] border-[#C5A059] shadow-md -translate-y-0.5"
+                  : "bg-white border border-stone-200/90 shadow-sm hover:border-[#C5A059]/50 hover:shadow-md hover:-translate-y-0.5"
               }`}
             >
-              <span>{cat.name}</span>
-              <span className="text-[10px] opacity-80">({count})</span>
-            </button>
-          );
-        })}
+              <img
+                src="/images/category-cards/all.png"
+                alt="All Pieces"
+                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <span
+              className={`text-xs sm:text-[13px] text-center whitespace-nowrap mt-2 transition-colors ${
+                selectedCategory === "all"
+                  ? "font-bold text-[#8F7234]"
+                  : "font-medium text-stone-700 group-hover:text-stone-900"
+              }`}
+            >
+              All
+            </span>
+            <span className="text-[10px] text-stone-400 font-mono -mt-0.5">
+              ({products.length})
+            </span>
+          </button>
+
+          {/* Category Cards */}
+          {categoryList.map((cat) => {
+            const count = products.filter((p) => {
+              if (cat.slug === "new-arrivals") return p.isNewArrival || p.category === "new-arrivals";
+              if (cat.slug === "necklaces-and-chains" || cat.slug === "necklaces") return p.category === "necklaces-and-chains" || p.category === "necklaces" || /necklace|chain|pendant/i.test(p.title);
+              if (cat.slug === "bangles-kada") return p.category === "bangles-kada" || p.category === "bangles" || /bangle|kada|cuff/i.test(p.title);
+              if (cat.slug === "bracelets") return (p.category === "bracelets" && !/bangle|kada|cuff/i.test(p.title)) || /bracelet/i.test(p.title);
+              if (cat.slug === "watches") return p.category === "watches" || /watch/i.test(p.title);
+              if (cat.slug === "charms") return p.category === "charms" || /charm/i.test(p.title);
+              if (cat.slug === "hip-chains") return p.category === "hip-chains" || /hip chain|waist/i.test(p.title);
+              if (cat.slug === "kids-collection") return p.category === "kids-collection" || p.category === "kids" || /kid|child/i.test(p.title);
+              if (cat.slug === "anklets") return p.category === "anklets" || /anklet/i.test(p.title);
+              if (cat.slug === "rings") return p.category === "rings" || /ring/i.test(p.title);
+              if (cat.slug === "earrings") return p.category === "earrings" || /earring|stud|hoop/i.test(p.title);
+              return p.category === cat.slug;
+            }).length;
+
+            const iconSrc =
+              categoryIconMap[cat.slug] ||
+              cat.image ||
+              "/images/category-cards/necklace.png";
+
+            const displayName = cat.name.replace(/\s*Collection/gi, "").trim();
+
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.slug)}
+                className="flex flex-col items-center shrink-0 group focus:outline-none w-[72px] sm:w-[84px] md:w-[92px]"
+              >
+                <div
+                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 ${
+                    selectedCategory === cat.slug
+                      ? "bg-white ring-2 ring-[#C5A059] border-[#C5A059] shadow-md -translate-y-0.5"
+                      : "bg-white border border-stone-200/90 shadow-sm hover:border-[#C5A059]/50 hover:shadow-md hover:-translate-y-0.5"
+                  }`}
+                >
+                  <img
+                    src={iconSrc}
+                    alt={displayName}
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <span
+                  className={`text-xs sm:text-[13px] text-center whitespace-nowrap mt-2 transition-colors truncate max-w-full ${
+                    selectedCategory === cat.slug
+                      ? "font-bold text-[#8F7234]"
+                      : "font-medium text-stone-700 group-hover:text-stone-900"
+                  }`}
+                  title={displayName}
+                >
+                  {displayName}
+                </span>
+                <span className="text-[10px] text-stone-400 font-mono -mt-0.5">
+                  ({count})
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 3. Filter Controls & Sort Bar */}
