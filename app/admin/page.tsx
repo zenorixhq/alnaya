@@ -55,7 +55,7 @@ export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("gleamnest_admin_orders");
+        const cached = sessionStorage.getItem("alnaya_admin_orders");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
   const [categoriesList, setCategoriesList] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("gleamnest_categories");
+        const cached = sessionStorage.getItem("alnaya_categories");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -103,7 +103,7 @@ export default function AdminDashboardPage() {
   const [reviewsList, setReviewsList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("gleamnest_admin_reviews");
+        const cached = sessionStorage.getItem("alnaya_admin_reviews");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
   const [videosList, setVideosList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("gleamnest_admin_videos");
+        const cached = sessionStorage.getItem("alnaya_admin_videos");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -121,7 +121,7 @@ export default function AdminDashboardPage() {
   const [feedbackScreenshotsList, setFeedbackScreenshotsList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("gleamnest_admin_screenshots");
+        const cached = sessionStorage.getItem("alnaya_admin_screenshots");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -130,7 +130,7 @@ export default function AdminDashboardPage() {
   const [instagramVideosList, setInstagramVideosList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("gleamnest_admin_instavideos");
+        const cached = sessionStorage.getItem("alnaya_admin_instavideos");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -163,7 +163,7 @@ export default function AdminDashboardPage() {
 
   const [instaVideoForm, setInstaVideoForm] = useState({
     title: "Jewelry Styling Reel",
-    handle: "@gleamnest.in",
+    handle: "@alnaya.in",
     caption: "",
     videoUrl: "",
     poster: "",
@@ -229,19 +229,19 @@ export default function AdminDashboardPage() {
       .then((data) => {
         if (Array.isArray(data.reviews)) {
           setReviewsList(data.reviews);
-          try { sessionStorage.setItem("gleamnest_admin_reviews", JSON.stringify(data.reviews)); } catch (e) {}
+          try { sessionStorage.setItem("alnaya_admin_reviews", JSON.stringify(data.reviews)); } catch (e) {}
         }
         if (Array.isArray(data.videoReels)) {
           setVideosList(data.videoReels);
-          try { sessionStorage.setItem("gleamnest_admin_videos", JSON.stringify(data.videoReels)); } catch (e) {}
+          try { sessionStorage.setItem("alnaya_admin_videos", JSON.stringify(data.videoReels)); } catch (e) {}
         }
         if (Array.isArray(data.feedbackScreenshots)) {
           setFeedbackScreenshotsList(data.feedbackScreenshots);
-          try { sessionStorage.setItem("gleamnest_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
+          try { sessionStorage.setItem("alnaya_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
         }
         if (Array.isArray(data.instagramVideos)) {
           setInstagramVideosList(data.instagramVideos);
-          try { sessionStorage.setItem("gleamnest_admin_instavideos", JSON.stringify(data.instagramVideos)); } catch (e) {}
+          try { sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(data.instagramVideos)); } catch (e) {}
         }
       })
       .catch((err) => console.error("Error fetching reviews:", err));
@@ -253,7 +253,7 @@ export default function AdminDashboardPage() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setCategoriesList(data);
-          try { sessionStorage.setItem("gleamnest_categories", JSON.stringify(data)); } catch (e) {}
+          try { sessionStorage.setItem("alnaya_categories", JSON.stringify(data)); } catch (e) {}
         }
       })
       .catch((err) => console.error("Error fetching categories:", err));
@@ -262,7 +262,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     // Check if merchant is already authenticated
     if (typeof window !== "undefined") {
-      const auth = localStorage.getItem("gleamnest_admin_auth");
+      const auth = localStorage.getItem("alnaya_admin_auth");
       if (auth === "true") {
         setIsAuthenticated(true);
       } else {
@@ -277,13 +277,13 @@ export default function AdminDashboardPage() {
     const cleanPassword = loginPassword.trim();
 
     // Accepted Merchant Credentials:
-    // Username: admin@gleamnest.in or admin
-    // Password: gleamnest@2026 or GleamNest@2026
+    // Username: admin@alnaya.in or admin
+    // Password: alnaya@2026 or Alnaya@2026
     if (
-      (cleanEmail === "admin@gleamnest.in" || cleanEmail === "admin") &&
-      (cleanPassword === "gleamnest@2026" || cleanPassword === "GleamNest@2026")
+      (cleanEmail === "admin@alnaya.in" || cleanEmail === "admin" || cleanEmail === "alnaya") &&
+      (cleanPassword === "alnaya@2026" || cleanPassword === "Alnaya@2026" || cleanPassword === "alnaya2026")
     ) {
-      localStorage.setItem("gleamnest_admin_auth", "true");
+      localStorage.setItem("alnaya_admin_auth", "true");
       setIsAuthenticated(true);
       setLoginError("");
     } else {
@@ -292,7 +292,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("gleamnest_admin_auth");
+    localStorage.removeItem("alnaya_admin_auth");
     setIsAuthenticated(false);
     setLoginPassword("");
   };
@@ -308,7 +308,7 @@ export default function AdminDashboardPage() {
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
             setOrders(data);
-            try { sessionStorage.setItem("gleamnest_admin_orders", JSON.stringify(data)); } catch (e) {}
+            try { sessionStorage.setItem("alnaya_admin_orders", JSON.stringify(data)); } catch (e) {}
           }
         })
         .catch((err) => console.error("Error fetching orders:", err));
@@ -1100,11 +1100,11 @@ export default function AdminDashboardPage() {
     setEditingInstaVideo(null);
     setInstaVideoForm({
       title: "",
-      handle: "@gleamnest.in",
+      handle: "@alnaya.in",
       caption: "",
       videoUrl: "",
       poster: "",
-      instagramLink: "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5",
+      instagramLink: "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
     });
     setIsInstaVideoModalOpen(true);
   };
@@ -1113,7 +1113,7 @@ export default function AdminDashboardPage() {
     setEditingInstaVideo(video);
     setInstaVideoForm({
       title: video.title || "",
-      handle: video.handle || "@gleamnest.in",
+      handle: video.handle || "@alnaya.in",
       caption: video.caption || "",
       videoUrl: video.videoUrl || "",
       poster: video.poster || "",
@@ -1210,7 +1210,7 @@ export default function AdminDashboardPage() {
       setEditingInstaVideo(null);
       setInstaVideoForm({
         title: "Jewelry Styling Reel",
-        handle: "@gleamnest.in",
+        handle: "@alnaya.in",
         caption: "",
         videoUrl: "",
         poster: "",
@@ -1697,14 +1697,14 @@ export default function AdminDashboardPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Admin Username or Email</span>
-                <span className="text-[10px] text-muted-foreground font-mono">admin@gleamnest.in</span>
+                <span className="text-[10px] text-muted-foreground font-mono">admin@alnaya.in</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
                   required
                   autoFocus
-                  placeholder="admin@gleamnest.in"
+                  placeholder="admin@alnaya.in"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 pl-10 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -1716,7 +1716,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Secret Password</span>
-                <span className="text-[10px] text-muted-foreground font-mono">gleamnest@2026</span>
+                <span className="text-[10px] text-muted-foreground font-mono">alnaya@2026</span>
               </label>
               <div className="relative">
                 <input
@@ -2279,7 +2279,7 @@ export default function AdminDashboardPage() {
                       rel="noreferrer"
                       className="text-primary hover:underline font-mono text-[11px]"
                     >
-                      @gleamnest.in ↗
+                      @alnaya.in ↗
                     </a>
                   </p>
                   <p>
@@ -2290,7 +2290,7 @@ export default function AdminDashboardPage() {
                       rel="noreferrer"
                       className="text-primary hover:underline font-mono text-[11px]"
                     >
-                      GleamNest Official Page ↗
+                      Alnaya Official Page ↗
                     </a>
                   </p>
                   <p>
@@ -2315,8 +2315,8 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
                   <p>Portal URL: <strong className="text-foreground font-mono">/admin</strong></p>
-                  <p>Username / Email: <strong className="text-foreground font-mono">admin@gleamnest.in</strong> (or <span className="font-mono">admin</span>)</p>
-                  <p>Default Password: <strong className="text-foreground font-mono">gleamnest@2026</strong></p>
+                  <p>Username / Email: <strong className="text-foreground font-mono">admin@alnaya.in</strong> (or <span className="font-mono">admin</span>)</p>
+                  <p>Default Password: <strong className="text-foreground font-mono">alnaya@2026</strong></p>
                   <p>Session Security: <strong className="text-emerald-700">Encrypted Local Storage Authentication</strong></p>
                 </div>
               </div>
@@ -2533,7 +2533,7 @@ export default function AdminDashboardPage() {
 
                           <div>
                             <p className="text-xs font-bold line-clamp-1 text-white">{video.title}</p>
-                            <p className="text-[10px] text-white/80">{video.handle || "@gleamnest.in"}</p>
+                            <p className="text-[10px] text-white/80">{video.handle || "@alnaya.in"}</p>
                           </div>
                         </div>
                       </div>
@@ -2876,13 +2876,13 @@ export default function AdminDashboardPage() {
 
               <div className="flex items-center gap-2.5 flex-wrap">
                 <a
-                  href="https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
+                  href="https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203"
                   target="_blank"
                   rel="noreferrer"
                   className="px-3 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors"
                 >
                   <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
-                  <span>@gleamnest.in ↗</span>
+                  <span>@alnaya.in ↗</span>
                 </a>
                 <button
                   type="button"
@@ -3030,7 +3030,7 @@ export default function AdminDashboardPage() {
                         {/* Bottom Text Details */}
                         <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none space-y-0.5">
                           <p className="text-[10px] text-[#F3DFB0] font-mono tracking-wider">
-                            {video.handle || "@gleamnest.in"}
+                            {video.handle || "@alnaya.in"}
                           </p>
                           <h4 className="text-xs sm:text-sm font-bold leading-tight text-white drop-shadow line-clamp-1">
                             {video.title}
@@ -3050,7 +3050,7 @@ export default function AdminDashboardPage() {
                             {video.title}
                           </span>
                           <span className="text-[10px] text-muted-foreground font-mono block truncate">
-                            {video.handle || "@gleamnest.in"}
+                            {video.handle || "@alnaya.in"}
                           </span>
                         </div>
 
@@ -4378,7 +4378,7 @@ export default function AdminDashboardPage() {
                   <label className="text-xs font-semibold text-foreground">Instagram Handle</label>
                   <input
                     type="text"
-                    placeholder="@gleamnest.in"
+                    placeholder="@alnaya.in"
                     value={instaVideoForm.handle}
                     onChange={(e) => setInstaVideoForm({ ...instaVideoForm, handle: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"

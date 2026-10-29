@@ -101,7 +101,7 @@ export function PolicyModal({
             <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
             <div>
               <h3 className="text-base sm:text-lg font-bold text-foreground">
-                GleamNest Customer Care & Policy Guide
+                Alnaya Customer Care & Policy Guide
               </h3>
               <p className="text-[11px] text-muted-foreground">
                 Official specifications, sizing charts, and store policies
@@ -166,7 +166,7 @@ export function PolicyModal({
                     Ring & Bangle Size Guide
                   </h4>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Official GleamNest size charts and easy measurement instructions.
+                    Official Alnaya size charts and easy measurement instructions.
                   </p>
                 </div>
 
@@ -285,7 +285,7 @@ export function PolicyModal({
                     <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 text-xs text-foreground flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
                       <span>
-                        <strong>Adjustable Rings:</strong> Most GleamNest statement and band rings feature an open-ended adjustable comfort band that fits sizes 5 through 9 seamlessly without needing tools.
+                        <strong>Adjustable Rings:</strong> Most Alnaya statement and band rings feature an open-ended adjustable comfort band that fits sizes 5 through 9 seamlessly without needing tools.
                       </span>
                     </div>
                   </div>
@@ -398,7 +398,7 @@ export function PolicyModal({
                     <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                       <img
                         src="/images/bangle-size-guide.jpg"
-                        alt="GleamNest Official Bangle Size Guide & Hand Measurement Steps"
+                        alt="Alnaya Official Bangle Size Guide & Hand Measurement Steps"
                         className="w-full h-auto max-h-[360px] object-contain mx-auto"
                       />
                       <button
@@ -475,7 +475,7 @@ export function PolicyModal({
               <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                 <img
                   src="/images/return-refund-policy.jpg"
-                  alt="GleamNest Official Return, Refund and Damage Replacement Policy"
+                  alt="Alnaya Official Return, Refund and Damage Replacement Policy"
                   className="w-full h-auto max-h-[380px] object-contain mx-auto"
                 />
                 <button
@@ -495,7 +495,7 @@ export function PolicyModal({
                     <span>No Cancellations, Returns or Refunds</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Once an order has been confirmed and placed with GleamNest, cancellations, returns, or refunds are strictly NOT accepted under any conditions. Please review your selected jewelry pieces, sizing, and shipping address carefully prior to confirming your order.
+                    Once an order has been confirmed and placed with Alnaya, cancellations, returns, or refunds are strictly NOT accepted under any conditions. Please review your selected jewelry pieces, sizing, and shipping address carefully prior to confirming your order.
                   </p>
                 </div>
 
@@ -564,7 +564,7 @@ export function PolicyModal({
                   <div className="flex items-center gap-2">
                     <a
                       href={`https://wa.me/${storeConfig.brand.contact.whatsappNumber}?text=${encodeURIComponent(
-                        "Hello GleamNest! I would like to report transit damage on my order. Here is my Order ID and unboxing video."
+                        "Hello Alnaya! I would like to report transit damage on my order. Here is my Order ID and unboxing video."
                       )}`}
                       target="_blank"
                       rel="noreferrer"
@@ -709,7 +709,7 @@ export function PolicyModal({
                     <div>
                       <strong className="text-foreground">Waterproof & Shower Safe:</strong>
                       <p className="text-muted-foreground mt-0.5 leading-relaxed">
-                        You can wear your GleamNest pieces freely in the shower, gym, pool, ocean, or while washing hands. They will not rust, fade, or tarnish.
+                        You can wear your Alnaya pieces freely in the shower, gym, pool, ocean, or while washing hands. They will not rust, fade, or tarnish.
                       </p>
                     </div>
                   </div>
@@ -739,7 +739,7 @@ export function PolicyModal({
                     <div>
                       <strong className="text-foreground">Proper Storage:</strong>
                       <p className="text-muted-foreground mt-0.5 leading-relaxed">
-                        When not in use, store each piece separately in your complimentary GleamNest zip pouch to prevent friction against hard surfaces.
+                        When not in use, store each piece separately in your complimentary Alnaya zip pouch to prevent friction against hard surfaces.
                       </p>
                     </div>
                   </div>

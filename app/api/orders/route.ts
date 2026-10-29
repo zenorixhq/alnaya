@@ -52,7 +52,7 @@ export async function GET(req: Request) {
           id: `cust-${o.id}`,
           name: o.customerName || "Valued Customer",
           fullName: o.customerName || "Valued Customer",
-          email: o.customerEmail || "whatsapp@gleamnest.in",
+          email: o.customerEmail || "whatsapp@alnaya.in",
           phone: o.customerPhone || "",
           shippingAddress: {
             line1: o.shippingAddress || "Direct Delivery",

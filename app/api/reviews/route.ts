@@ -169,13 +169,13 @@ export async function POST(req: Request) {
       const newInstaVideo = {
         id: `insta-${Date.now()}`,
         title: body.title || "Jewelry Styling Reel",
-        handle: body.handle || "@gleamnest.in",
+        handle: body.handle || "@alnaya.in",
         caption: body.caption || "Everyday luxury waterproof jewelry in 304 & 306 steel",
         videoUrl: videoUrl,
         embedUrl: embedUrl,
         poster: body.poster || "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=700",
         views: body.views || "15.2K",
-        instagramLink: instagramLink || "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5",
+        instagramLink: instagramLink || "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
       };
 
       if (!data.instagramVideos) data.instagramVideos = [];
@@ -200,13 +200,13 @@ export async function POST(req: Request) {
 
       const newVideo = {
         id: `vid-${Date.now()}`,
-        influencer: body.influencer || "GleamNest Client",
-        handle: body.handle || "@gleamnest.in",
+        influencer: body.influencer || "Alnaya Client",
+        handle: body.handle || "@alnaya.in",
         title: body.title || "Jewelry Styling Reel",
         poster: body.poster || "https://images.unsplash.com/photo-1611591475806-039775089201?auto=format&fit=crop&q=80&w=700",
         videoUrl: videoUrl,
         views: body.views || "1.2K views",
-        productTitle: body.productTitle || "GleamNest Jewelry",
+        productTitle: body.productTitle || "Alnaya Jewelry",
         productSlug: body.productSlug || "all",
         productPrice: Number(body.productPrice) || 150,
       };
@@ -276,7 +276,7 @@ export async function PUT(req: Request) {
         data.instagramVideos.push({
           id: targetId,
           title: body.title || "Jewelry Styling Reel",
-          handle: body.handle || "@gleamnest.in",
+          handle: body.handle || "@alnaya.in",
           caption: body.caption || "",
           videoUrl: body.videoUrl,
           poster: body.poster || "",

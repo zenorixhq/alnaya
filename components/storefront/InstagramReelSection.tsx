@@ -147,7 +147,7 @@ function AutoPlayingInstaCard({
             {vid.caption}
           </p>
           <span className="inline-block text-[10px] text-[#F3DFB0] font-mono tracking-wider">
-            {vid.handle || "@gleamnest.in"}
+            {vid.handle || "@alnaya.in"}
           </span>
         </div>
       </div>
@@ -159,7 +159,7 @@ export function InstagramReelSection() {
   const [videos, setVideos] = useState<InstagramVideoItem[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = localStorage.getItem("gleamnest_instagram_reels");
+        const cached = localStorage.getItem("alnaya_instagram_reels");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (
@@ -169,7 +169,7 @@ export function InstagramReelSection() {
           ) {
             return parsed;
           } else {
-            localStorage.removeItem("gleamnest_instagram_reels");
+            localStorage.removeItem("alnaya_instagram_reels");
           }
         }
       } catch (e) {}
@@ -190,7 +190,7 @@ export function InstagramReelSection() {
         if (Array.isArray(data.instagramVideos)) {
           setVideos(data.instagramVideos);
           try {
-            localStorage.setItem("gleamnest_instagram_reels", JSON.stringify(data.instagramVideos));
+            localStorage.setItem("alnaya_instagram_reels", JSON.stringify(data.instagramVideos));
           } catch (e) {}
         }
       })
@@ -241,12 +241,12 @@ export function InstagramReelSection() {
           </div>
 
           <a
-            href="https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
+            href="https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 font-editorial text-3xl sm:text-5xl md:text-6xl font-normal tracking-tight text-[#1C1917] hover:text-[#C5A059] transition-colors"
           >
-            <span>@gleamnest.in</span>
+            <span>@alnaya.in</span>
             <Instagram className="w-6 h-6 sm:w-8 sm:h-8 text-[#C5A059]" />
           </a>
           <p className="text-xs sm:text-sm text-stone-600 font-light max-w-md mx-auto">
@@ -299,13 +299,13 @@ export function InstagramReelSection() {
         {/* Bottom CTA to Instagram Profile */}
         <div className="text-center pt-2">
           <a
-            href="https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
+            href="https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[#1C1917] text-[#1C1917] hover:bg-[#1C1917] hover:text-white font-semibold text-xs tracking-wider uppercase transition-all shadow-sm"
           >
             <Instagram className="w-4 h-4" />
-            <span>Follow @gleamnest.in on Instagram</span>
+            <span>Follow @alnaya.in on Instagram</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
@@ -329,7 +329,7 @@ export function InstagramReelSection() {
                 </div>
                 <div>
                   <h4 className="text-xs font-bold truncate max-w-[200px]">{activeVideo.title}</h4>
-                  <p className="text-[10px] text-stone-400">{activeVideo.handle || "@gleamnest.in"}</p>
+                  <p className="text-[10px] text-stone-400">{activeVideo.handle || "@alnaya.in"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

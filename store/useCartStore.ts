@@ -147,8 +147,8 @@ export const useCartStore = create<CartStore>()(
 
         // Check if coupon is strictly restricted to first purchase
         if (found.firstPurchaseOnly && typeof window !== "undefined") {
-          const hasPurchased = localStorage.getItem("gleamnest_has_purchased") === "true";
-          const placedOrders = localStorage.getItem("gleamnest_placed_orders");
+          const hasPurchased = localStorage.getItem("alnaya_has_purchased") === "true";
+          const placedOrders = localStorage.getItem("alnaya_placed_orders");
           if (hasPurchased || (placedOrders && JSON.parse(placedOrders || "[]").length > 0)) {
             return {
               success: false,

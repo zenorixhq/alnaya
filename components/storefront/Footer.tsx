@@ -42,7 +42,7 @@ export function Footer() {
             {/* Social & WhatsApp Buttons */}
             <div className="flex items-center gap-3 pt-1">
               <a
-                href={storeConfig.brand.socials.instagram || "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"}
+                href={storeConfig.brand.socials.instagram || "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203"}
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-[#C5A059] hover:border-[#C5A059]/60 hover:bg-[#C5A059]/10 transition-all"

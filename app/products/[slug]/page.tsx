@@ -191,7 +191,7 @@ export default function ProductDetailPage({
 
     let greetingMessage = "";
     if (isOutOfStock) {
-      greetingMessage = `Hello GleamNest! I am inquiring about *${product.title}* in *${effectiveSize || "this size"}*, which is currently out of stock on your website. Could you please notify me when it's back in stock or if custom piece sizing is available? Thank you! 💖`;
+      greetingMessage = `Hello Alnaya! I am inquiring about *${product.title}* in *${effectiveSize || "this size"}*, which is currently out of stock on your website. Could you please notify me when it's back in stock or if custom piece sizing is available? Thank you! 💖`;
     } else {
       greetingMessage = isQatar
         ? "I want to order this piece from your website! Please confirm availability and share payment/delivery details for Qatar (Free Delivery). Thank you! 💖"
@@ -199,7 +199,7 @@ export default function ProductDetailPage({
     }
 
     const message = `━━━━━━━━━━━━━━━━━━━━━
-✨ *G L E A M N E S T* ✨
+✨ *A L N A Y A* ✨
 _${isOutOfStock ? "Size Restock & Custom Inquiry" : "Instant Order Inquiry"}_
 ━━━━━━━━━━━━━━━━━━━━━
 
@@ -208,7 +208,7 @@ _${isOutOfStock ? "Size Restock & Custom Inquiry" : "Instant Order Inquiry"}_
 ${selectedVariantSummary ? `${selectedVariantSummary}\n` : ""}• *Quantity:* ${quantity}
 ${isOutOfStock ? `• *Status:* ⚠️ *Size Currently Out of Stock*\n` : `• *Item Total:* *${itemTotalFormatted}*\n`}• *Destination:* *${isQatar ? "Qatar (Complimentary Delivery)" : "India"}*
 
-💬 *Hello GleamNest Team!*
+💬 *Hello Alnaya Team!*
 ${greetingMessage}
 ━━━━━━━━━━━━━━━━━━━━━`;
 
@@ -453,7 +453,7 @@ ${greetingMessage}
                     <Sparkles className="w-3 h-3 text-primary flex-shrink-0" />
                     <span>
                       {sizeInfo.type === "ring"
-                        ? "GleamNest cm sizing (5cm = Size 5, 6cm = Size 7). Need help? Open our interactive Size Guide."
+                        ? "Alnaya cm sizing (5cm = Size 5, 6cm = Size 7). Need help? Open our interactive Size Guide."
                         : "Standard Indian Bangle sizing (2-2 to 2-10). Check inner diameter in Size Guide."}
                     </span>
                   </p>

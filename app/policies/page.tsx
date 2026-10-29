@@ -65,7 +65,7 @@ function PoliciesContent() {
         <div className="space-y-3 border-b border-border pb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Official GleamNest Standards</span>
+            <span>Official Alnaya Standards</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-foreground">
             Customer Care, Sizing & Store Policies
@@ -124,7 +124,7 @@ function PoliciesContent() {
               </p>
               <a
                 href={`https://wa.me/${storeConfig.brand.contact.whatsappNumber}?text=${encodeURIComponent(
-                  "Hello GleamNest! I have a question about sizing and store policies."
+                  "Hello Alnaya! I have a question about sizing and store policies."
                 )}`}
                 target="_blank"
                 rel="noreferrer"
@@ -149,7 +149,7 @@ function PoliciesContent() {
                       Ring & Bangle Size Guide
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Official GleamNest size charts and easy measurement instructions.
+                      Official Alnaya size charts and easy measurement instructions.
                     </p>
                   </div>
 
@@ -268,7 +268,7 @@ function PoliciesContent() {
                       <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 text-xs text-foreground flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
                         <span>
-                          <strong>Adjustable Comfort Bands:</strong> Most GleamNest statement and band rings feature an open-ended adjustable comfort band that fits sizes 5 through 9 seamlessly without needing tools.
+                          <strong>Adjustable Comfort Bands:</strong> Most Alnaya statement and band rings feature an open-ended adjustable comfort band that fits sizes 5 through 9 seamlessly without needing tools.
                         </span>
                       </div>
                     </div>
@@ -381,7 +381,7 @@ function PoliciesContent() {
                       <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                         <img
                           src="/images/bangle-size-guide.jpg"
-                          alt="GleamNest Bangle Size Guide and Measurement Diagram"
+                          alt="Alnaya Bangle Size Guide and Measurement Diagram"
                           className="w-full h-auto max-h-[460px] object-contain mx-auto"
                         />
                         <button
@@ -453,7 +453,7 @@ function PoliciesContent() {
                 <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                   <img
                     src="/images/return-refund-policy.jpg"
-                    alt="GleamNest Return, Refund & Replacement Policy"
+                    alt="Alnaya Return, Refund & Replacement Policy"
                     className="w-full h-auto max-h-[460px] object-contain mx-auto"
                   />
                   <button
@@ -541,7 +541,7 @@ function PoliciesContent() {
                     </div>
                     <a
                       href={`https://wa.me/${storeConfig.brand.contact.whatsappNumber}?text=${encodeURIComponent(
-                        "Hello GleamNest! I would like to report damage on my order. Here is my unboxing video and Order ID."
+                        "Hello Alnaya! I would like to report damage on my order. Here is my unboxing video and Order ID."
                       )}`}
                       target="_blank"
                       rel="noreferrer"
@@ -666,7 +666,7 @@ function PoliciesContent() {
                       <div>
                         <strong className="text-foreground">Waterproof & Shower Friendly:</strong>
                         <p className="text-muted-foreground mt-0.5 leading-relaxed">
-                          Feel free to wear your GleamNest jewelry in the shower, swimming pool, gym workouts, or during daily chores. Our 304 and 306 grade pieces will not rust or discolor your skin.
+                          Feel free to wear your Alnaya jewelry in the shower, swimming pool, gym workouts, or during daily chores. Our 304 and 306 grade pieces will not rust or discolor your skin.
                         </p>
                       </div>
                     </div>
@@ -696,7 +696,7 @@ function PoliciesContent() {
                       <div>
                         <strong className="text-foreground">Protective Storage:</strong>
                         <p className="text-muted-foreground mt-0.5 leading-relaxed">
-                          Store each piece in your complimentary GleamNest zip pouch to prevent friction and surface scratches when not in use.
+                          Store each piece in your complimentary Alnaya zip pouch to prevent friction and surface scratches when not in use.
                         </p>
                       </div>
                     </div>

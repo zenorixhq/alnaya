@@ -97,7 +97,7 @@ export const storeConfig: StoreConfig = {
       hours: "Mon – Sat: 9:30 AM – 8:00 PM IST",
     },
     socials: {
-      instagram: "https://www.instagram.com/alnaya.in/",
+      instagram: "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203",
       whatsapp: "https://wa.me/919037075227",
     },
   },

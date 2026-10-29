@@ -49,7 +49,7 @@ const defaultPanels: HousePanel[] = [
 ];
 
 export function FollowTheHouseSection() {
-  const instagramUrl = "https://www.instagram.com/alnaya.in/";
+  const instagramUrl = "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203";
 
   return (
     <section className="w-full bg-[#FAF7F2] pt-14 sm:pt-20 md:pt-24 text-[#1C1917] overflow-hidden">

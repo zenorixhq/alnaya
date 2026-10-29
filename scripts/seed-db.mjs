@@ -2,13 +2,13 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const gleamNestProducts = [
+const alnayaProducts = [
   {
     id: "prod-clover-necklace",
     slug: "four-leaf-clover-pearl-necklace",
     title: "18K Gold Four-Leaf Clover Pearl Necklace",
     shortDescription: "Signature anti-tarnish four-leaf clover pendant with natural iridescent mother of pearl.",
-    description: "GleamNest's most beloved piece. Crafted from surgical-grade 316L stainless steel with thick 18K PVD gold plating that never fades. Completely waterproof, sweat-proof, and perfume-safe.",
+    description: "Alnaya's most beloved piece. Crafted from surgical-grade 316L stainless steel with thick 18K PVD gold plating that never fades. Completely waterproof, sweat-proof, and perfume-safe.",
     price: 999.0,
     salePrice: 799.0,
     category: "necklaces",
@@ -120,12 +120,12 @@ const gleamNestProducts = [
 ];
 
 async function seed() {
-  console.log("Seeding GleamNest jewelry collection into prisma/dev.db...");
+  console.log("Seeding Alnaya jewelry collection into prisma/dev.db...");
 
   await prisma.product.deleteMany({});
   await prisma.order.deleteMany({});
 
-  for (const p of gleamNestProducts) {
+  for (const p of alnayaProducts) {
     await prisma.product.create({
       data: {
         id: p.id,
@@ -173,7 +173,7 @@ async function seed() {
 
   const pCount = await prisma.product.count();
   const oCount = await prisma.order.count();
-  console.log(`✅ Database ready: ${pCount} GleamNest jewelry items & ${oCount} sample orders seeded!`);
+  console.log(`✅ Database ready: ${pCount} Alnaya jewelry items & ${oCount} sample orders seeded!`);
 }
 
 seed()
