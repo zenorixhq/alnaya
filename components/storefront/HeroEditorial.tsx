@@ -7,28 +7,22 @@ import { storeConfig } from "@/config/store.config";
 
 export function HeroEditorial() {
   return (
-    <section className="relative w-full min-h-screen bg-[#070A10] text-white overflow-hidden select-none flex flex-col justify-between pt-20 sm:pt-24 md:pt-28">
-      {/* 1. Optimized Visual Background Showcase (Scaled down, positioned upward, full necklace visible) */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none flex items-center justify-start">
-        {/* Left-Aligned High-Res Visual Frame */}
-        <div className="relative w-full lg:w-[62%] h-full flex items-center lg:items-start justify-center lg:justify-start pt-2 lg:pt-6 pl-0 lg:pl-8">
-          <img
-            src="/images/hero-royal-necklace.jpg"
-            alt="Royal Multi-Gemstone Teardrop Necklace on Velvet"
-            loading="eager"
-            decoding="sync"
-            className="max-h-[72vh] sm:max-h-[80vh] lg:max-h-[86vh] w-auto max-w-full object-contain object-top lg:object-left-top transform -translate-y-2 sm:-translate-y-4 lg:-translate-y-6 scale-[0.92] sm:scale-[0.88] lg:scale-[0.84] drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
-            style={{ imageRendering: "-webkit-optimize-contrast" }}
-          />
+    <section className="relative w-full min-h-[90svh] sm:min-h-screen h-[100svh] max-h-[1020px] bg-[#070A10] text-white overflow-hidden select-none flex flex-col justify-between pt-20 sm:pt-24 md:pt-28">
+      {/* 1. Full-Bleed Background Filling Entire Hero Section Canvas */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+        <img
+          src="/images/hero-royal-necklace.jpg"
+          alt="Royal Multi-Gemstone Teardrop Necklace on Velvet"
+          loading="eager"
+          decoding="sync"
+          className="w-full h-full object-cover object-[18%_36%] sm:object-[22%_38%] lg:object-[25%_42%]"
+          style={{ imageRendering: "-webkit-optimize-contrast" }}
+        />
 
-          {/* Smooth Velvet Feathering into Background */}
-          <div className="absolute inset-y-0 right-0 w-32 sm:w-48 bg-gradient-to-r from-transparent to-[#070A10] pointer-events-none hidden lg:block" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#070A10] via-[#070A10]/60 to-transparent pointer-events-none" />
-        </div>
-
-        {/* Global Lighting Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#070A10]/35 to-[#070A10]/95 pointer-events-none hidden lg:block" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070A10] via-black/40 to-black/30 pointer-events-none lg:hidden" />
+        {/* Dynamic Vignette: Left necklace crystal clear & vibrant, right velvet deepened for typography contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-black/25 to-black/85 md:to-black/90 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#070A10]/70 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#070A10]/90 to-transparent pointer-events-none" />
       </div>
 
       {/* 2. Main Editorial Typography & Action Container (Placed on the right side) */}
@@ -50,7 +44,7 @@ export function HeroEditorial() {
             <span className="font-editorial italic font-light text-white/95">Eternal.</span>
           </h1>
 
-          {/* Subtitle Description - Zero mention of 304, 306, anti-tarnish, or PVD */}
+          {/* Subtitle Description */}
           <p className="text-sm sm:text-base md:text-[17px] text-white/85 font-light leading-relaxed max-w-lg drop-shadow-md font-sans">
             Handcrafted teardrop gemstones set in radiant 18K gold finish. Designed by master artisans for everyday royalty and timeless luxury.
           </p>
@@ -86,15 +80,15 @@ export function HeroEditorial() {
         </div>
       </div>
 
-      {/* 3. Reference-Matched Organic Curved Wave Divider at the bottom */}
+      {/* 3. Subtle Sleek Curved Wave Divider at the bottom (Height streamlined so necklace is never blocked) */}
       <div className="relative z-10 w-full overflow-hidden leading-none pointer-events-none -mb-[1px]">
         <svg
-          viewBox="0 0 1440 110"
+          viewBox="0 0 1440 60"
           fill="none"
           preserveAspectRatio="none"
-          className="w-full h-12 sm:h-20 md:h-24 lg:h-28 text-[#FAF7F2] fill-current"
+          className="w-full h-8 sm:h-12 md:h-14 text-[#FAF7F2] fill-current"
         >
-          <path d="M0,70 C280,105 520,110 760,65 C1000,20 1240,25 1440,65 L1440,110 L0,110 Z" />
+          <path d="M0,35 C280,55 520,60 760,35 C1000,10 1240,15 1440,35 L1440,60 L0,60 Z" />
         </svg>
       </div>
     </section>
