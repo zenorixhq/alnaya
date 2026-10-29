@@ -16,13 +16,14 @@ export function HeroEditorial() {
           muted
           playsInline
           poster="/images/hero-necklace.png"
-          className="w-full h-full object-cover object-center scale-[1.01]"
+          className="w-full h-full object-cover object-left md:object-center scale-[1.01]"
         >
+          <source src="/videos/hero-jewelry.webm" type="video/webm" />
           <source src="/videos/hero-jewelry.mp4" type="video/mp4" />
         </video>
 
-        {/* Dynamic Luxury Vignette: Clear on left for emerald pendant, enriched on right for white typography contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-black/25 to-black/75 pointer-events-none" />
+        {/* Dynamic Luxury Vignette: Clear on left for the necklace, enriched on right for white typography contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-black/35 to-black/85 pointer-events-none" />
         <div className="absolute inset-0 bg-black/15 pointer-events-none" />
       </div>
 
@@ -47,35 +48,35 @@ export function HeroEditorial() {
 
           {/* Subtitle Description */}
           <p className="text-sm sm:text-base md:text-[17px] text-white/85 font-light leading-relaxed max-w-lg drop-shadow-sm font-sans">
-            Hand-set emerald stones and 18K radiant gold finish, handcrafted by our artisans for everyday luxury and timeless statement.
+            Handcrafted teardrop gemstones and 18K radiant gold finish, handcrafted by our artisans for everyday luxury and timeless royal elegance.
           </p>
 
-          {/* Signature Featured Piece Spotlight (Using the uploaded emerald necklace) */}
+          {/* Signature Featured Piece Spotlight (Using the uploaded teardrop necklace) */}
           <div className="pt-1">
             <Link
-              href="/products/imperial-emerald-cuban-pendant"
+              href="/products"
               className="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/20 hover:border-amber-400/60 text-xs text-white/90 transition-all duration-300 group shadow-lg"
             >
               <img
-                src="/images/emerald-necklace-product.jpg"
-                alt="Imperial Emerald Cuban Pendant"
+                src="/images/royal-teardrop-necklace.jpg"
+                alt="Royal Multi-Gemstone Teardrop Necklace"
                 className="w-6 h-6 rounded-full object-cover border border-amber-400/70 group-hover:scale-110 transition-transform"
               />
               <span className="font-medium truncate max-w-[220px] sm:max-w-none">
-                Featured: Imperial Emerald Cuban Pendant • ₹1,899
+                Featured: Royal Multi-Gemstone Teardrop Necklace • ₹1,999
               </span>
               <ArrowRight className="w-3 h-3 text-amber-300 group-hover:translate-x-1 transition-transform shrink-0" />
             </Link>
           </div>
 
-          {/* Pill Action Button (Dark emerald jewel tone) */}
+          {/* Pill Action Button */}
           <div className="pt-2 sm:pt-3">
             <Link
               href="/products"
-              className="inline-flex items-center gap-3 px-8 sm:px-9 py-3.5 sm:py-4 rounded-full bg-[#0D3831] hover:bg-[#124B42] text-white text-xs sm:text-sm font-medium tracking-wide border border-emerald-400/30 shadow-[0_10px_30px_rgba(13,56,49,0.5)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
+              className="inline-flex items-center gap-3 px-8 sm:px-9 py-3.5 sm:py-4 rounded-full bg-[#0E1E38] hover:bg-[#142A4E] text-white text-xs sm:text-sm font-medium tracking-wide border border-blue-400/30 shadow-[0_10px_30px_rgba(14,30,56,0.6)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
             >
               <span>Discover the Collection</span>
-              <ArrowRight className="w-4 h-4 text-emerald-300 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 text-blue-200 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
