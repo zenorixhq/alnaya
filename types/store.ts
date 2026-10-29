@@ -47,6 +47,7 @@ export interface Product {
   variantAttributes?: {
     name: string; // e.g., "Size", "Color"
     options: string[]; // e.g., ["S", "M", "L"]
+    sizeStock?: Record<string, number>; // Maps specific size option to stock count (e.g. { "Size 10 (15.9 mm)": 1 })
   }[];
   specifications?: { [key: string]: string };
   reviews?: Review[];
@@ -70,6 +71,7 @@ export interface CartItem {
   priceQatar?: number; // Qatar price (QAR)
   image: string;
   quantity: number;
+  stockCount?: number;
   selectedVariant?: {
     id: string;
     name: string;

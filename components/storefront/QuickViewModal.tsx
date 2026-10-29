@@ -27,6 +27,33 @@ export function QuickViewModal() {
 
   if (!product) return null;
 
+  const effectiveSize = selectedSize || sizeInfo?.defaultSize || "";
+
+  const hasSpecificSizeStock = Boolean(
+    sizeInfo &&
+    !sizeInfo.isAdjustableOnly &&
+    sizeInfo.sizeStock &&
+    effectiveSize &&
+    effectiveSize in sizeInfo.sizeStock
+  );
+
+  const selectedSizeInventory = hasSpecificSizeStock
+    ? Math.max(0, sizeInfo!.sizeStock![effectiveSize])
+    : undefined;
+
+  const isCurrentSizeOutOfStock = selectedSizeInventory !== undefined && selectedSizeInventory <= 0;
+
+  const overallStock = product.inStock !== false ? (product.stockCount !== undefined ? product.stockCount : 10) : 0;
+  const isOverallOutOfStock = overallStock <= 0;
+
+  const isOutOfStock = isOverallOutOfStock || isCurrentSizeOutOfStock;
+
+  const effectiveMaxStock = isOutOfStock
+    ? 0
+    : selectedSizeInventory !== undefined
+    ? selectedSizeInventory
+    : overallStock;
+
   const { regularPrice, salePrice, effectivePrice } = getProductPrices(
     product,
     selectedCurrency
@@ -43,9 +70,11 @@ export function QuickViewModal() {
   }
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
+
     const combinedOptions: { [key: string]: string } = { ...currentOptions };
-    if (sizeInfo && selectedSize) {
-      combinedOptions[sizeInfo.label] = selectedSize;
+    if (sizeInfo && effectiveSize) {
+      combinedOptions[sizeInfo.label] = effectiveSize;
     }
 
     const hasVariants = Object.keys(combinedOptions).length > 0;
@@ -103,9 +132,20 @@ export function QuickViewModal() {
           <div className="p-6 sm:p-8 flex flex-col justify-between">
             <div className="space-y-4">
               <div>
-                <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                  {product.category}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+                    {product.category}
+                  </span>
+                  {isOutOfStock ? (
+                    <span className="bg-destructive/10 text-destructive border border-destructive/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                      Out of Stock
+                    </span>
+                  ) : effectiveMaxStock <= 3 ? (
+                    <span className="bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      Only {effectiveMaxStock} Left
+                    </span>
+                  ) : null}
+                </div>
                 <h3 className="text-lg sm:text-xl font-bold text-foreground mt-1">
                   {product.title}
                 </h3>
@@ -144,29 +184,54 @@ export function QuickViewModal() {
                 {product.description}
               </p>
 
-              {/* Ring / Bangle Dedicated Size Dropdown */}
+              {/* Ring / Bangle Dedicated Sizing (Adjustable vs Specific Sizes) */}
               {sizeInfo && (
                 <div className="space-y-1.5 p-2.5 rounded-lg bg-muted/30 border border-border/80">
                   <div className="flex justify-between items-center text-xs">
                     <label htmlFor="quickview-size-select" className="font-semibold text-foreground">
-                      {sizeInfo.label}: <span className="font-bold text-primary">{selectedSize}</span>
+                      {sizeInfo.label}: <span className="font-bold text-primary">{selectedSize || sizeInfo.defaultSize}</span>
                     </label>
                   </div>
-                  <div className="relative">
-                    <select
-                      id="quickview-size-select"
-                      value={selectedSize}
-                      onChange={(e) => setSelectedSize(e.target.value)}
-                      className="w-full appearance-none px-3 py-2 text-xs font-semibold rounded-lg border border-border bg-background text-foreground focus:ring-1 focus:ring-primary outline-none transition-all pr-8 cursor-pointer shadow-sm hover:border-primary/50"
-                    >
-                      {sizeInfo.options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
+                  {sizeInfo.isAdjustableOnly ? (
+                    <p className="text-[11px] text-muted-foreground pt-0.5">
+                      ✨ {sizeInfo.type === "ring" ? "Adjustable comfort band fits all finger sizes." : "Adjustable open cuff fits all wrist sizes."}
+                    </p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <div className="relative">
+                        <select
+                          id="quickview-size-select"
+                          value={effectiveSize}
+                          onChange={(e) => {
+                            setSelectedSize(e.target.value);
+                            setQuantity(1);
+                          }}
+                          className="w-full appearance-none px-3 py-2 text-xs font-semibold rounded-lg border border-border bg-background text-foreground focus:ring-1 focus:ring-primary outline-none transition-all pr-8 cursor-pointer shadow-sm hover:border-primary/50"
+                        >
+                          {sizeInfo.options.map((opt) => {
+                            const optStock = sizeInfo.sizeStock?.[opt];
+                            const isOptOut = optStock !== undefined && optStock <= 0;
+                            return (
+                              <option key={opt} value={opt}>
+                                {opt} {isOptOut ? "— (Out of Stock)" : optStock !== undefined ? `(${optStock} in stock)` : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+
+                      {isCurrentSizeOutOfStock ? (
+                        <p className="text-[11px] text-amber-600 font-medium">
+                          ⚠️ {effectiveSize} is currently out of stock. Please select another size.
+                        </p>
+                      ) : selectedSizeInventory !== undefined && selectedSizeInventory <= 3 ? (
+                        <p className="text-[11px] text-amber-600 font-medium">
+                          ✨ Only {selectedSizeInventory} left in {effectiveSize}!
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -200,20 +265,33 @@ export function QuickViewModal() {
 
               {/* Quantity */}
               <div className="space-y-1.5 pt-2">
-                <span className="text-xs font-semibold text-foreground">Quantity</span>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-foreground">Quantity</span>
+                  {isCurrentSizeOutOfStock ? (
+                    <span className="text-amber-600 font-semibold text-[11px]">Size Out of Stock</span>
+                  ) : isOverallOutOfStock ? (
+                    <span className="text-destructive font-semibold text-[11px]">Out of Stock</span>
+                  ) : effectiveMaxStock <= 3 ? (
+                    <span className="text-amber-600 font-semibold text-[11px]">Only {effectiveMaxStock} left</span>
+                  ) : (
+                    <span className="text-emerald-600 font-semibold text-[11px]">In Stock ({effectiveMaxStock} units)</span>
+                  )}
+                </div>
                 <div className="flex items-center w-28 border border-border rounded-lg bg-muted/20">
                   <button
+                    disabled={isOutOfStock || quantity <= 1}
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 hover:bg-muted text-foreground transition-colors"
+                    className="p-2 hover:bg-muted text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
                   <span className="flex-1 text-center text-xs font-bold text-foreground">
-                    {quantity}
+                    {isOutOfStock ? 0 : quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 hover:bg-muted text-foreground transition-colors"
+                    disabled={isOutOfStock || quantity >= effectiveMaxStock}
+                    onClick={() => setQuantity(Math.min(effectiveMaxStock, quantity + 1))}
+                    className="p-2 hover:bg-muted text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -224,11 +302,22 @@ export function QuickViewModal() {
             {/* CTA Buttons */}
             <div className="pt-6 mt-6 border-t border-border space-y-2.5">
               <button
+                disabled={isOutOfStock}
                 onClick={handleAddToCart}
-                className="w-full py-3 px-4 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 flex items-center justify-center gap-2 shadow-md transition-all"
+                className={`w-full py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-md transition-all ${
+                  isOutOfStock
+                    ? "bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 cursor-not-allowed border border-border opacity-70"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                }`}
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Add to Bag</span>
+                <span>
+                  {isCurrentSizeOutOfStock
+                    ? `${effectiveSize} Out of Stock`
+                    : isOverallOutOfStock
+                    ? "Out of Stock / Sold Out"
+                    : "Add to Bag"}
+                </span>
               </button>
 
               <Link

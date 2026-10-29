@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { sampleOrders, products } from "@/data/mockData";
+import { sampleOrders } from "@/data/mockData";
 import { useCartStore } from "@/store/useCartStore";
+import { useProductStore } from "@/store/useProductStore";
 import { formatPrice } from "@/lib/utils";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import {
@@ -27,6 +28,20 @@ function AccountPageContent() {
   const wishlist = useCartStore((s) => s.wishlist);
   const selectedCurrency = useCartStore((s) => s.selectedCurrency);
   const addItem = useCartStore((s) => s.addItem);
+  const products = useProductStore((s) => s.products);
+  const fetchProducts = useProductStore((s) => s.fetchProducts);
+  const [hasLoadedProducts, setHasLoadedProducts] = useState(false);
+
+  useEffect(() => {
+    fetchProducts().finally(() => {
+      setHasLoadedProducts(true);
+    });
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
 
   const wishlistProducts = products.filter((p) => wishlist.includes(p.id));
 
@@ -118,7 +133,24 @@ function AccountPageContent() {
       {/* Tab 1: Orders */}
       {activeTab === "orders" && (
         <div className="space-y-6">
-          {sampleOrders.map((order) => (
+          {sampleOrders.length === 0 ? (
+            <div className="py-20 text-center rounded-2xl border border-dashed border-border p-8 space-y-4">
+              <div className="w-12 h-12 rounded-full bg-muted mx-auto flex items-center justify-center text-muted-foreground">
+                <Package className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">No orders placed yet</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                Explore our everyday waterproof luxury jewelry and place your first order today.
+              </p>
+              <Link
+                href="/products"
+                className="inline-block px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
+              >
+                Browse Catalog
+              </Link>
+            </div>
+          ) : (
+            sampleOrders.map((order) => (
             <div
               key={order.id}
               className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6"
@@ -175,7 +207,8 @@ function AccountPageContent() {
                 </div>
               )}
             </div>
-          ))}
+          ))
+          )}
         </div>
       )}
 
@@ -194,7 +227,14 @@ function AccountPageContent() {
             </div>
           )}
 
-          {wishlistProducts.length === 0 ? (
+          {!hasLoadedProducts && products.length === 0 ? (
+            <div className="py-20 text-center rounded-2xl border border-dashed border-border p-8 space-y-4">
+              <div className="w-12 h-12 rounded-full bg-muted mx-auto flex items-center justify-center text-muted-foreground animate-pulse">
+                <Heart className="w-6 h-6" />
+              </div>
+              <p className="text-xs text-muted-foreground">Loading your saved pieces...</p>
+            </div>
+          ) : wishlistProducts.length === 0 ? (
             <div className="py-20 text-center rounded-2xl border border-dashed border-border p-8 space-y-4">
               <div className="w-12 h-12 rounded-full bg-muted mx-auto flex items-center justify-center text-muted-foreground">
                 <Heart className="w-6 h-6" />
@@ -211,7 +251,7 @@ function AccountPageContent() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
               {wishlistProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}

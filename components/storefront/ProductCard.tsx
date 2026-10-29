@@ -17,7 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
   const toggleWishlist = useCartStore((s) => s.toggleWishlist);
-  const isInWishlist = useCartStore((s) => s.isInWishlist)(product.id);
+  const isInWishlist = useCartStore((s) => s.wishlist.includes(product.id));
   const openQuickView = useCartStore((s) => s.openQuickView);
 
   const { regularPrice, salePrice, effectivePrice, discountPercent } = getProductPrices(
@@ -25,9 +25,13 @@ export function ProductCard({ product }: ProductCardProps) {
     selectedCurrency
   );
 
+  const maxStock = product.inStock !== false ? (product.stockCount !== undefined ? product.stockCount : 10) : 0;
+  const isOutOfStock = maxStock <= 0;
+
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isOutOfStock) return;
     addItem(product, 1);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -62,26 +66,36 @@ export function ProductCard({ product }: ProductCardProps) {
             src={displayImage}
             alt={product.title}
             loading="lazy"
-            className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+            className={`w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500 ease-out ${
+              isOutOfStock ? "opacity-70 grayscale-[25%]" : ""
+            }`}
           />
         </Link>
 
         {/* Floating Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
-          {discountPercent > 0 && (
-            <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-              -{discountPercent}%
+          {isOutOfStock ? (
+            <span className="bg-stone-900/90 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm tracking-wider uppercase border border-stone-700/60 backdrop-blur-sm">
+              OUT OF STOCK
             </span>
-          )}
-          {product.isNewArrival && (
-            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-              NEW
-            </span>
-          )}
-          {product.isBestSeller && !product.isNewArrival && (
-            <span className="bg-accent text-accent-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-              BESTSELLER
-            </span>
+          ) : (
+            <>
+              {discountPercent > 0 && (
+                <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                  -{discountPercent}%
+                </span>
+              )}
+              {product.isNewArrival && (
+                <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                  NEW
+                </span>
+              )}
+              {product.isBestSeller && !product.isNewArrival && (
+                <span className="bg-accent text-accent-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                  BESTSELLER
+                </span>
+              )}
+            </>
           )}
         </div>
 
@@ -92,11 +106,11 @@ export function ProductCard({ product }: ProductCardProps) {
             aria-label="Save to Wishlist"
             className={`w-7 h-7 rounded-full flex items-center justify-center shadow-md backdrop-blur-md transition-all ${
               isInWishlist
-                ? "bg-destructive text-destructive-foreground"
-                : "bg-white/90 text-foreground hover:bg-white hover:text-destructive"
+                ? "bg-rose-600 text-white shadow-rose-200"
+                : "bg-white/90 text-foreground hover:bg-white hover:text-rose-600"
             }`}
           >
-            <Heart className={`w-3.5 h-3.5 ${isInWishlist ? "fill-current" : ""}`} />
+            <Heart className={`w-3.5 h-3.5 ${isInWishlist ? "fill-current text-white" : ""}`} />
           </button>
 
           <button
@@ -111,14 +125,19 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Quick Add To Cart Button (Desktop Hover) */}
         <div className="absolute inset-x-2 bottom-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 hidden sm:block">
           <button
+            disabled={isOutOfStock}
             onClick={handleQuickAdd}
-            className={`w-full py-1.5 px-2.5 text-[11px] font-bold rounded-lg shadow-md flex items-center justify-center gap-1.5 backdrop-blur-sm transition-all active:scale-95 ${
-              isAdded
-                ? "bg-emerald-600 text-white"
-                : "bg-foreground/95 hover:bg-foreground text-background"
+            className={`w-full py-1.5 px-2.5 text-[11px] font-bold rounded-lg shadow-md flex items-center justify-center gap-1.5 backdrop-blur-sm transition-all ${
+              isOutOfStock
+                ? "bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 cursor-not-allowed border border-border"
+                : isAdded
+                ? "bg-emerald-600 text-white active:scale-95"
+                : "bg-foreground/95 hover:bg-foreground text-background active:scale-95"
             }`}
           >
-            {isAdded ? (
+            {isOutOfStock ? (
+              <span>Out of Stock</span>
+            ) : isAdded ? (
               <>
                 <Check className="w-3 h-3" />
                 <span>Added to Bag!</span>
@@ -168,16 +187,25 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Mobile only add button with instant feedback */}
           <button
+            disabled={isOutOfStock}
             onClick={handleQuickAdd}
-            className={`sm:hidden min-w-[24px] min-h-[24px] p-1 rounded-md flex items-center justify-center transition-all active:scale-90 ${
-              isAdded
-                ? "bg-emerald-600 text-white"
-                : "bg-primary text-primary-foreground hover:bg-primary/90"
+            className={`sm:hidden min-w-[24px] min-h-[24px] px-1.5 py-1 rounded-md flex items-center justify-center transition-all ${
+              isOutOfStock
+                ? "bg-stone-200/90 dark:bg-stone-800 text-stone-500 dark:text-stone-400 text-[9px] font-bold cursor-not-allowed border border-border/80"
+                : isAdded
+                ? "bg-emerald-600 text-white active:scale-90"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-90"
             }`}
-            aria-label="Add to cart"
-            title="Add to shopping bag"
+            aria-label={isOutOfStock ? "Out of Stock" : "Add to cart"}
+            title={isOutOfStock ? "Out of Stock" : "Add to shopping bag"}
           >
-            {isAdded ? <Check className="w-3 h-3" /> : <ShoppingBag className="w-3 h-3" />}
+            {isOutOfStock ? (
+              <span>Sold Out</span>
+            ) : isAdded ? (
+              <Check className="w-3 h-3" />
+            ) : (
+              <ShoppingBag className="w-3 h-3" />
+            )}
           </button>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { sampleOrders, categories as defaultCategories } from "@/data/mockData";
 import { useProductStore } from "@/store/useProductStore";
 import { formatPrice } from "@/lib/utils";
 import { Order, OrderStatus, Product, Category } from "@/types/store";
+import { RING_SPECIFIC_SIZES, BANGLE_SPECIFIC_SIZES } from "@/lib/productSizes";
 import {
   TrendingUp,
   ShoppingBag,
@@ -54,7 +55,7 @@ export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_admin_orders");
+        const cached = sessionStorage.getItem("gleamnest_admin_orders");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -65,6 +66,8 @@ export default function AdminDashboardPage() {
   });
   const products = useProductStore((s) => s.products);
   const fetchProducts = useProductStore((s) => s.fetchProducts);
+  const hasLoaded = useProductStore((s) => s.hasLoaded);
+  const isLoading = useProductStore((s) => s.isLoading);
   const addProduct = useProductStore((s) => s.addProduct);
   const updateProduct = useProductStore((s) => s.updateProduct);
   const deleteProduct = useProductStore((s) => s.deleteProduct);
@@ -76,7 +79,7 @@ export default function AdminDashboardPage() {
   const [categoriesList, setCategoriesList] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_categories");
+        const cached = sessionStorage.getItem("gleamnest_categories");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -100,7 +103,7 @@ export default function AdminDashboardPage() {
   const [reviewsList, setReviewsList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_admin_reviews");
+        const cached = sessionStorage.getItem("gleamnest_admin_reviews");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -109,7 +112,7 @@ export default function AdminDashboardPage() {
   const [videosList, setVideosList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_admin_videos");
+        const cached = sessionStorage.getItem("gleamnest_admin_videos");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -118,7 +121,7 @@ export default function AdminDashboardPage() {
   const [feedbackScreenshotsList, setFeedbackScreenshotsList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_admin_screenshots");
+        const cached = sessionStorage.getItem("gleamnest_admin_screenshots");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -127,7 +130,7 @@ export default function AdminDashboardPage() {
   const [instagramVideosList, setInstagramVideosList] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_admin_instavideos");
+        const cached = sessionStorage.getItem("gleamnest_admin_instavideos");
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -160,7 +163,7 @@ export default function AdminDashboardPage() {
 
   const [instaVideoForm, setInstaVideoForm] = useState({
     title: "Jewelry Styling Reel",
-    handle: "@alnaya.in",
+    handle: "@gleamnest.in",
     caption: "",
     videoUrl: "",
     poster: "",
@@ -184,7 +187,24 @@ export default function AdminDashboardPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   // Form fields
-  const [formState, setFormState] = useState({
+  const [formState, setFormState] = useState<{
+    title: string;
+    category: string;
+    price: string;
+    salePrice: string;
+    priceQatar: string;
+    salePriceQatar: string;
+    stockCount: string;
+    shortDescription: string;
+    description: string;
+    imageUrl: string;
+    featured: boolean;
+    isBestSeller: boolean;
+    isNewArrival: boolean;
+    sizingType: "adjustable" | "sizes";
+    selectedSizes: string[];
+    sizeStock: Record<string, number>;
+  }>({
     title: "",
     category: "necklaces-and-chains",
     price: "",
@@ -198,6 +218,9 @@ export default function AdminDashboardPage() {
     featured: false,
     isBestSeller: false,
     isNewArrival: true,
+    sizingType: "adjustable",
+    selectedSizes: [...RING_SPECIFIC_SIZES],
+    sizeStock: {},
   });
 
   const fetchReviewsAndVideos = () => {
@@ -206,19 +229,19 @@ export default function AdminDashboardPage() {
       .then((data) => {
         if (Array.isArray(data.reviews)) {
           setReviewsList(data.reviews);
-          try { sessionStorage.setItem("alnaya_admin_reviews", JSON.stringify(data.reviews)); } catch (e) {}
+          try { sessionStorage.setItem("gleamnest_admin_reviews", JSON.stringify(data.reviews)); } catch (e) {}
         }
         if (Array.isArray(data.videoReels)) {
           setVideosList(data.videoReels);
-          try { sessionStorage.setItem("alnaya_admin_videos", JSON.stringify(data.videoReels)); } catch (e) {}
+          try { sessionStorage.setItem("gleamnest_admin_videos", JSON.stringify(data.videoReels)); } catch (e) {}
         }
         if (Array.isArray(data.feedbackScreenshots)) {
           setFeedbackScreenshotsList(data.feedbackScreenshots);
-          try { sessionStorage.setItem("alnaya_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
+          try { sessionStorage.setItem("gleamnest_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
         }
         if (Array.isArray(data.instagramVideos)) {
           setInstagramVideosList(data.instagramVideos);
-          try { sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(data.instagramVideos)); } catch (e) {}
+          try { sessionStorage.setItem("gleamnest_admin_instavideos", JSON.stringify(data.instagramVideos)); } catch (e) {}
         }
       })
       .catch((err) => console.error("Error fetching reviews:", err));
@@ -230,7 +253,7 @@ export default function AdminDashboardPage() {
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setCategoriesList(data);
-          try { sessionStorage.setItem("alnaya_categories", JSON.stringify(data)); } catch (e) {}
+          try { sessionStorage.setItem("gleamnest_categories", JSON.stringify(data)); } catch (e) {}
         }
       })
       .catch((err) => console.error("Error fetching categories:", err));
@@ -239,7 +262,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     // Check if merchant is already authenticated
     if (typeof window !== "undefined") {
-      const auth = localStorage.getItem("alnaya_admin_auth");
+      const auth = localStorage.getItem("gleamnest_admin_auth");
       if (auth === "true") {
         setIsAuthenticated(true);
       } else {
@@ -254,13 +277,13 @@ export default function AdminDashboardPage() {
     const cleanPassword = loginPassword.trim();
 
     // Accepted Merchant Credentials:
-    // Username: admin@alnaya.in or admin
-    // Password: alnaya@2026 or Alnaya@2026
+    // Username: admin@gleamnest.in or admin
+    // Password: gleamnest@2026 or GleamNest@2026
     if (
-      (cleanEmail === "admin@alnaya.in" || cleanEmail === "admin") &&
-      (cleanPassword === "alnaya@2026" || cleanPassword === "Alnaya@2026")
+      (cleanEmail === "admin@gleamnest.in" || cleanEmail === "admin") &&
+      (cleanPassword === "gleamnest@2026" || cleanPassword === "GleamNest@2026")
     ) {
-      localStorage.setItem("alnaya_admin_auth", "true");
+      localStorage.setItem("gleamnest_admin_auth", "true");
       setIsAuthenticated(true);
       setLoginError("");
     } else {
@@ -269,7 +292,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("alnaya_admin_auth");
+    localStorage.removeItem("gleamnest_admin_auth");
     setIsAuthenticated(false);
     setLoginPassword("");
   };
@@ -285,7 +308,7 @@ export default function AdminDashboardPage() {
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
             setOrders(data);
-            try { sessionStorage.setItem("alnaya_admin_orders", JSON.stringify(data)); } catch (e) {}
+            try { sessionStorage.setItem("gleamnest_admin_orders", JSON.stringify(data)); } catch (e) {}
           }
         })
         .catch((err) => console.error("Error fetching orders:", err));
@@ -1077,11 +1100,11 @@ export default function AdminDashboardPage() {
     setEditingInstaVideo(null);
     setInstaVideoForm({
       title: "",
-      handle: "@alnaya.in",
+      handle: "@gleamnest.in",
       caption: "",
       videoUrl: "",
       poster: "",
-      instagramLink: "https://www.instagram.com/alnaya.in/",
+      instagramLink: "https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5",
     });
     setIsInstaVideoModalOpen(true);
   };
@@ -1090,7 +1113,7 @@ export default function AdminDashboardPage() {
     setEditingInstaVideo(video);
     setInstaVideoForm({
       title: video.title || "",
-      handle: video.handle || "@alnaya.in",
+      handle: video.handle || "@gleamnest.in",
       caption: video.caption || "",
       videoUrl: video.videoUrl || "",
       poster: video.poster || "",
@@ -1187,7 +1210,7 @@ export default function AdminDashboardPage() {
       setEditingInstaVideo(null);
       setInstaVideoForm({
         title: "Jewelry Styling Reel",
-        handle: "@alnaya.in",
+        handle: "@gleamnest.in",
         caption: "",
         videoUrl: "",
         poster: "",
@@ -1362,6 +1385,12 @@ export default function AdminDashboardPage() {
 
   const openAddModal = () => {
     setEditingProduct(null);
+    const initialRingSizes = [...RING_SPECIFIC_SIZES];
+    const initialSizeStock: Record<string, number> = {};
+    initialRingSizes.forEach((s) => {
+      initialSizeStock[s] = 1;
+    });
+
     setFormState({
       title: "",
       category: "necklaces-and-chains",
@@ -1376,6 +1405,9 @@ export default function AdminDashboardPage() {
       featured: false,
       isBestSeller: false,
       isNewArrival: true,
+      sizingType: "adjustable",
+      selectedSizes: initialRingSizes,
+      sizeStock: initialSizeStock,
     });
     setIsModalOpen(true);
   };
@@ -1385,6 +1417,56 @@ export default function AdminDashboardPage() {
     const suggestedQar = product.priceQatar !== undefined && product.priceQatar !== null
       ? product.priceQatar.toString()
       : Math.max(10, Math.round(product.price / 20)).toString();
+
+    // Detect existing sizing configuration (adjustable vs specific sizes)
+    const explicitSizeAttr = product.variantAttributes?.find((a) => /size/i.test(a.name));
+    let detectedSizingType: "adjustable" | "sizes" = "adjustable";
+
+    const isRing = product.category === "rings";
+    const isBangle = product.category === "bangles-kada";
+    const standardSizes = isRing ? RING_SPECIFIC_SIZES : isBangle ? BANGLE_SPECIFIC_SIZES : [];
+
+    let selectedSizes: string[] = [];
+    let sizeStock: Record<string, number> = {};
+
+    if (explicitSizeAttr && explicitSizeAttr.options?.length > 0) {
+      const isAdj =
+        explicitSizeAttr.options.length === 1 &&
+        /adjustable|free size|cuff|openable/i.test(explicitSizeAttr.options[0]);
+      detectedSizingType = isAdj ? "adjustable" : "sizes";
+
+      const cleaned = explicitSizeAttr.options.filter(
+        (o) => !/adjustable|free size|cuff|openable/i.test(o)
+      );
+      selectedSizes = cleaned.length > 0 ? cleaned : [...standardSizes];
+
+      if (explicitSizeAttr.sizeStock) {
+        sizeStock = { ...explicitSizeAttr.sizeStock };
+      } else {
+        const fallbackCount = Math.max(0, product.stockCount ?? 1);
+        selectedSizes.forEach((s) => {
+          sizeStock[s] = fallbackCount;
+        });
+      }
+    } else {
+      const titleIndicatesAdjustable =
+        /\b(adjustable|free size|openable|cuff)\b/i.test(product.title) ||
+        /\b(adjustable|free size|openable|cuff)\b/i.test(product.description || "") ||
+        (product.tags && product.tags.some((t) => /\b(adjustable|free size)\b/i.test(t)));
+      detectedSizingType = titleIndicatesAdjustable ? "adjustable" : "sizes";
+      selectedSizes = [...standardSizes];
+      const fallbackCount = Math.max(0, product.stockCount ?? 1);
+      standardSizes.forEach((s) => {
+        sizeStock[s] = fallbackCount;
+      });
+    }
+
+    // Ensure all standard sizes have a non-undefined entry in sizeStock
+    standardSizes.forEach((s) => {
+      if (sizeStock[s] === undefined) {
+        sizeStock[s] = 0;
+      }
+    });
 
     setFormState({
       title: product.title,
@@ -1400,6 +1482,9 @@ export default function AdminDashboardPage() {
       featured: !!product.featured,
       isBestSeller: !!product.isBestSeller,
       isNewArrival: !!product.isNewArrival,
+      sizingType: detectedSizingType,
+      selectedSizes,
+      sizeStock,
     });
     setIsModalOpen(true);
   };
@@ -1440,11 +1525,70 @@ export default function AdminDashboardPage() {
     setIsSaving(true);
     try {
       const parsedPriceInr = parseFloat(formState.price);
-      const parsedSalePriceInr = formState.salePrice ? parseFloat(formState.salePrice) : null;
+      const parsedSalePriceInr = formState.salePrice ? parseFloat(formState.salePrice) : undefined;
       const parsedPriceQar = formState.priceQatar
         ? parseFloat(formState.priceQatar)
         : Math.max(10, Math.round(parsedPriceInr / 20));
-      const parsedSalePriceQar = formState.salePriceQatar ? parseFloat(formState.salePriceQatar) : null;
+      const parsedSalePriceQar = formState.salePriceQatar ? parseFloat(formState.salePriceQatar) : undefined;
+
+      // Construct sizing variants for rings or bangles
+      let variantAttributes = editingProduct?.variantAttributes
+        ? [...editingProduct.variantAttributes]
+        : [];
+
+      let finalStockCount = Math.max(0, parseInt(formState.stockCount) || 0);
+
+      if (formState.category === "rings") {
+        variantAttributes = variantAttributes.filter((a) => !/size/i.test(a.name));
+        if (formState.sizingType === "adjustable") {
+          variantAttributes.push({
+            name: "Ring Size",
+            options: ["Adjustable / Free Size"],
+            sizeStock: { "Adjustable / Free Size": finalStockCount },
+          });
+        } else {
+          const enabledSizes =
+            formState.selectedSizes.length > 0 ? formState.selectedSizes : [...RING_SPECIFIC_SIZES];
+          const activeSizeStock: Record<string, number> = {};
+          let totalStockSum = 0;
+          enabledSizes.forEach((s) => {
+            const count = Math.max(0, formState.sizeStock[s] ?? 0);
+            activeSizeStock[s] = count;
+            totalStockSum += count;
+          });
+          finalStockCount = totalStockSum;
+          variantAttributes.push({
+            name: "Ring Size",
+            options: enabledSizes,
+            sizeStock: activeSizeStock,
+          });
+        }
+      } else if (formState.category === "bangles-kada") {
+        variantAttributes = variantAttributes.filter((a) => !/size/i.test(a.name));
+        if (formState.sizingType === "adjustable") {
+          variantAttributes.push({
+            name: "Bangle Size",
+            options: ["Adjustable / Openable Cuff"],
+            sizeStock: { "Adjustable / Openable Cuff": finalStockCount },
+          });
+        } else {
+          const enabledSizes =
+            formState.selectedSizes.length > 0 ? formState.selectedSizes : [...BANGLE_SPECIFIC_SIZES];
+          const activeSizeStock: Record<string, number> = {};
+          let totalStockSum = 0;
+          enabledSizes.forEach((s) => {
+            const count = Math.max(0, formState.sizeStock[s] ?? 0);
+            activeSizeStock[s] = count;
+            totalStockSum += count;
+          });
+          finalStockCount = totalStockSum;
+          variantAttributes.push({
+            name: "Bangle Size",
+            options: enabledSizes,
+            sizeStock: activeSizeStock,
+          });
+        }
+      }
 
       if (editingProduct) {
         // Update existing product in DB and Store
@@ -1455,33 +1599,47 @@ export default function AdminDashboardPage() {
           salePrice: parsedSalePriceInr,
           priceQatar: parsedPriceQar,
           salePriceQatar: parsedSalePriceQar,
-          stockCount: parseInt(formState.stockCount) || 0,
+          stockCount: finalStockCount,
+          inStock: finalStockCount > 0,
           shortDescription: formState.shortDescription || formState.title,
           description: formState.description || formState.title,
-          imageUrl: formState.imageUrl,
           images: [formState.imageUrl],
           featured: formState.featured,
           isBestSeller: formState.isBestSeller,
           isNewArrival: formState.isNewArrival,
+          variantAttributes,
         });
       } else {
         // Create new product in DB and Store
+        const generatedSlug =
+          formState.title
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "") +
+          "-" +
+          Date.now().toString(36);
+
         await addProduct({
           title: formState.title,
+          slug: generatedSlug,
           category: formState.category,
           price: parsedPriceInr,
           salePrice: parsedSalePriceInr,
           priceQatar: parsedPriceQar,
           salePriceQatar: parsedSalePriceQar,
-          stockCount: parseInt(formState.stockCount) || 10,
+          stockCount: finalStockCount,
+          inStock: finalStockCount > 0,
           shortDescription: formState.shortDescription || formState.title,
           description: formState.description || formState.title,
-          imageUrl: formState.imageUrl,
           images: [formState.imageUrl],
           tags: [formState.category, "New"],
+          rating: 5,
+          reviewCount: 0,
           featured: formState.featured,
           isBestSeller: formState.isBestSeller,
           isNewArrival: formState.isNewArrival,
+          variantAttributes,
         });
       }
       setIsModalOpen(false);
@@ -1539,14 +1697,14 @@ export default function AdminDashboardPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Admin Username or Email</span>
-                <span className="text-[10px] text-muted-foreground font-mono">admin@alnaya.in</span>
+                <span className="text-[10px] text-muted-foreground font-mono">admin@gleamnest.in</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
                   required
                   autoFocus
-                  placeholder="admin@alnaya.in"
+                  placeholder="admin@gleamnest.in"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 pl-10 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -1558,7 +1716,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                 <span>Secret Password</span>
-                <span className="text-[10px] text-muted-foreground font-mono">alnaya@2026</span>
+                <span className="text-[10px] text-muted-foreground font-mono">gleamnest@2026</span>
               </label>
               <div className="relative">
                 <input
@@ -1657,7 +1815,7 @@ export default function AdminDashboardPage() {
             }`}
           >
             <Package className="w-4 h-4" />
-            <span>Product Catalog & Editing ({products.length})</span>
+            <span>Product Catalog & Editing {hasLoaded ? `(${products.length})` : "(...)"}</span>
           </button>
 
           <button
@@ -1738,8 +1896,17 @@ export default function AdminDashboardPage() {
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-bold text-foreground">
-                  Product Catalog ({filteredInventory.length})
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <span>Product Catalog</span>
+                  {hasLoaded ? (
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      {filteredInventory.length} Pieces
+                    </span>
+                  ) : (
+                    <span className="text-xs font-normal text-muted-foreground animate-pulse">
+                      Syncing catalog...
+                    </span>
+                  )}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Add, edit prices, update stock levels, or remove pieces from your live catalog.
@@ -1759,7 +1926,26 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {!hasLoaded && products.length === 0 ? (
+              <div className="py-20 text-center space-y-3 bg-muted/10 rounded-2xl border border-dashed border-border p-8">
+                <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
+                <p className="text-xs font-bold text-foreground">Syncing Live Product Catalog...</p>
+                <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
+                  Connecting to database and loading real-time catalog items.
+                </p>
+              </div>
+            ) : filteredInventory.length === 0 ? (
+              <div className="py-16 text-center space-y-2 bg-muted/10 rounded-2xl border border-dashed border-border p-8">
+                <Package className="w-8 h-8 text-muted-foreground mx-auto" />
+                <p className="text-xs font-bold text-foreground">No products found</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {searchQuery
+                    ? `No pieces match "${searchQuery}". Try a different search query.`
+                    : "Your live catalog is currently empty. Click 'Add New Product' to get started."}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border text-muted-foreground">
@@ -1857,6 +2043,7 @@ export default function AdminDashboardPage() {
                 </tbody>
               </table>
             </div>
+            )}
           </div>
         )}
 
@@ -2092,7 +2279,7 @@ export default function AdminDashboardPage() {
                       rel="noreferrer"
                       className="text-primary hover:underline font-mono text-[11px]"
                     >
-                      @alnaya.in ↗
+                      @gleamnest.in ↗
                     </a>
                   </p>
                   <p>
@@ -2103,7 +2290,7 @@ export default function AdminDashboardPage() {
                       rel="noreferrer"
                       className="text-primary hover:underline font-mono text-[11px]"
                     >
-                      Alnaya Official Page ↗
+                      GleamNest Official Page ↗
                     </a>
                   </p>
                   <p>
@@ -2128,8 +2315,8 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
                   <p>Portal URL: <strong className="text-foreground font-mono">/admin</strong></p>
-                  <p>Username / Email: <strong className="text-foreground font-mono">admin@alnaya.in</strong> (or <span className="font-mono">admin</span>)</p>
-                  <p>Default Password: <strong className="text-foreground font-mono">alnaya@2026</strong></p>
+                  <p>Username / Email: <strong className="text-foreground font-mono">admin@gleamnest.in</strong> (or <span className="font-mono">admin</span>)</p>
+                  <p>Default Password: <strong className="text-foreground font-mono">gleamnest@2026</strong></p>
                   <p>Session Security: <strong className="text-emerald-700">Encrypted Local Storage Authentication</strong></p>
                 </div>
               </div>
@@ -2346,7 +2533,7 @@ export default function AdminDashboardPage() {
 
                           <div>
                             <p className="text-xs font-bold line-clamp-1 text-white">{video.title}</p>
-                            <p className="text-[10px] text-white/80">{video.handle || "@alnaya.in"}</p>
+                            <p className="text-[10px] text-white/80">{video.handle || "@gleamnest.in"}</p>
                           </div>
                         </div>
                       </div>
@@ -2689,13 +2876,13 @@ export default function AdminDashboardPage() {
 
               <div className="flex items-center gap-2.5 flex-wrap">
                 <a
-                  href="https://www.instagram.com/alnaya.in/"
+                  href="https://www.instagram.com/gleamnest.in?igsh=c3I4M2h1YmprdXI5"
                   target="_blank"
                   rel="noreferrer"
                   className="px-3 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors"
                 >
                   <Instagram className="w-3.5 h-3.5 text-[#E1306C]" />
-                  <span>@alnaya.in ↗</span>
+                  <span>@gleamnest.in ↗</span>
                 </a>
                 <button
                   type="button"
@@ -2843,7 +3030,7 @@ export default function AdminDashboardPage() {
                         {/* Bottom Text Details */}
                         <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none space-y-0.5">
                           <p className="text-[10px] text-[#F3DFB0] font-mono tracking-wider">
-                            {video.handle || "@alnaya.in"}
+                            {video.handle || "@gleamnest.in"}
                           </p>
                           <h4 className="text-xs sm:text-sm font-bold leading-tight text-white drop-shadow line-clamp-1">
                             {video.title}
@@ -2863,7 +3050,7 @@ export default function AdminDashboardPage() {
                             {video.title}
                           </span>
                           <span className="text-[10px] text-muted-foreground font-mono block truncate">
-                            {video.handle || "@alnaya.in"}
+                            {video.handle || "@gleamnest.in"}
                           </span>
                         </div>
 
@@ -2970,16 +3157,301 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Inventory Units in Stock *</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-foreground">Inventory Units in Stock *</label>
+                    {(formState.category === "rings" || formState.category === "bangles-kada") &&
+                      formState.sizingType === "sizes" && (
+                        <span className="text-[10px] text-primary font-bold">
+                          Sum of size units
+                        </span>
+                      )}
+                  </div>
                   <input
                     type="number"
                     required
-                    value={formState.stockCount}
+                    readOnly={
+                      (formState.category === "rings" || formState.category === "bangles-kada") &&
+                      formState.sizingType === "sizes"
+                    }
+                    value={
+                      (formState.category === "rings" || formState.category === "bangles-kada") &&
+                      formState.sizingType === "sizes"
+                        ? (formState.category === "rings" ? RING_SPECIFIC_SIZES : BANGLE_SPECIFIC_SIZES)
+                            .filter((s) => formState.selectedSizes.includes(s))
+                            .reduce((sum, s) => sum + Math.max(0, formState.sizeStock[s] ?? 0), 0)
+                        : formState.stockCount
+                    }
                     onChange={(e) => setFormState({ ...formState, stockCount: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                    className={`w-full px-3 py-2 text-xs rounded-lg border outline-none ${
+                      (formState.category === "rings" || formState.category === "bangles-kada") &&
+                      formState.sizingType === "sizes"
+                        ? "bg-muted/40 border-border text-foreground font-bold cursor-not-allowed"
+                        : "bg-background border-border focus:ring-1 focus:ring-primary"
+                    }`}
                   />
                 </div>
               </div>
+
+              {/* Sizing Option Configuration for Rings & Bangles */}
+              {(formState.category === "rings" || formState.category === "bangles-kada") && (
+                <div className="p-3.5 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-primary" />
+                      <span>{formState.category === "rings" ? "Ring Sizing Setup" : "Bangle / Kada Sizing Setup"}</span>
+                    </label>
+                    <span className="text-[10px] text-muted-foreground font-medium">Customer Selection Mode</span>
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    Choose whether this piece is adjustable (one size fits all) or offered in specific Indian sizes:
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setFormState({ ...formState, sizingType: "adjustable" })}
+                      className={`p-3 text-left rounded-xl border transition-all ${
+                        formState.sizingType === "adjustable"
+                          ? "border-primary bg-background shadow-sm text-foreground ring-1 ring-primary"
+                          : "border-border bg-card/60 text-muted-foreground hover:bg-background hover:text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-foreground">✨ Adjustable / Free Size</span>
+                        {formState.sizingType === "adjustable" && (
+                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">Selected</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                        {formState.category === "rings"
+                          ? "One-size adjustable comfort band. No size dropdown shown to buyers."
+                          : "One-size open flex-cuff. No size dropdown shown to buyers."}
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormState({ ...formState, sizingType: "sizes" })}
+                      className={`p-3 text-left rounded-xl border transition-all ${
+                        formState.sizingType === "sizes"
+                          ? "border-primary bg-background shadow-sm text-foreground ring-1 ring-primary"
+                          : "border-border bg-card/60 text-muted-foreground hover:bg-background hover:text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-foreground">📏 Specific Sizes Only</span>
+                        {formState.sizingType === "sizes" && (
+                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">Selected</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                        {formState.category === "rings"
+                          ? "Manage inventory per ring size (Sizes 10–20). Set 0 for out of stock sizes."
+                          : "Manage inventory per bangle size (Sizes 2-2 to 2-10). Set 0 for out of stock sizes."}
+                      </p>
+                    </button>
+                  </div>
+
+                  {/* Specific Size Stock & Availability Management */}
+                  {formState.sizingType === "sizes" && (
+                    <div className="mt-3 p-3.5 rounded-xl border border-border bg-card shadow-xs space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/70 pb-2.5">
+                        <div>
+                          <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                            <Package className="w-3.5 h-3.5 text-primary" />
+                            <span>Individual Size Inventory & Stock</span>
+                          </h4>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            Set stock for each size. Any size with 0 units will be marked Out of Stock.
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-semibold text-muted-foreground">Total:</span>
+                          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            {(formState.category === "rings" ? RING_SPECIFIC_SIZES : BANGLE_SPECIFIC_SIZES)
+                              .filter((s) => formState.selectedSizes.includes(s))
+                              .reduce((sum, s) => sum + Math.max(0, formState.sizeStock[s] ?? 0), 0)}{" "}
+                            Units
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Quick Bulk Actions */}
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[11px]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const allSizes = formState.category === "rings" ? RING_SPECIFIC_SIZES : BANGLE_SPECIFIC_SIZES;
+                            setFormState((prev) => ({ ...prev, selectedSizes: [...allSizes] }));
+                          }}
+                          className="text-primary hover:underline font-semibold"
+                        >
+                          Select All
+                        </button>
+                        <span className="text-muted-foreground">•</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const allSizes = formState.category === "rings" ? RING_SPECIFIC_SIZES : BANGLE_SPECIFIC_SIZES;
+                            const updatedStock = { ...formState.sizeStock };
+                            allSizes.forEach((s) => {
+                              if ((updatedStock[s] ?? 0) <= 0) updatedStock[s] = 1;
+                            });
+                            setFormState((prev) => ({
+                              ...prev,
+                              selectedSizes: [...allSizes],
+                              sizeStock: updatedStock,
+                            }));
+                          }}
+                          className="text-primary hover:underline font-semibold"
+                        >
+                          Set In-Stock (1 unit each)
+                        </button>
+                        <span className="text-muted-foreground">•</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const allSizes = formState.category === "rings" ? RING_SPECIFIC_SIZES : BANGLE_SPECIFIC_SIZES;
+                            const updatedStock = { ...formState.sizeStock };
+                            allSizes.forEach((s) => {
+                              updatedStock[s] = 0;
+                            });
+                            setFormState((prev) => ({
+                              ...prev,
+                              sizeStock: updatedStock,
+                            }));
+                          }}
+                          className="text-amber-600 hover:underline font-semibold"
+                        >
+                          Mark All Out of Stock
+                        </button>
+                      </div>
+
+                      {/* Size List */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                        {(formState.category === "rings" ? RING_SPECIFIC_SIZES : BANGLE_SPECIFIC_SIZES).map((sizeName) => {
+                          const isEnabled = formState.selectedSizes.includes(sizeName);
+                          const count = formState.sizeStock[sizeName] ?? 0;
+                          const isSizeOut = count <= 0;
+
+                          return (
+                            <div
+                              key={sizeName}
+                              className={`p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2.5 ${
+                                !isEnabled
+                                  ? "border-border/40 bg-muted/20 opacity-60"
+                                  : isSizeOut
+                                  ? "border-amber-500/30 bg-amber-500/5 shadow-xs"
+                                  : "border-border bg-background shadow-xs"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  id={`size-toggle-${sizeName}`}
+                                  checked={isEnabled}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setFormState((prev) => {
+                                      const nextSelected = checked
+                                        ? [...prev.selectedSizes, sizeName]
+                                        : prev.selectedSizes.filter((s) => s !== sizeName);
+                                      return { ...prev, selectedSizes: nextSelected };
+                                    });
+                                  }}
+                                  className="w-4 h-4 rounded text-primary focus:ring-primary/40 cursor-pointer"
+                                />
+                                <label
+                                  htmlFor={`size-toggle-${sizeName}`}
+                                  className="cursor-pointer select-none min-w-0"
+                                >
+                                  <div className="text-xs font-bold text-foreground truncate">
+                                    {sizeName}
+                                  </div>
+                                  <div className="flex items-center gap-1 mt-0.5">
+                                    {!isEnabled ? (
+                                      <span className="text-[10px] text-muted-foreground font-medium">Offered: No</span>
+                                    ) : isSizeOut ? (
+                                      <span className="text-[10px] font-bold text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                                        Out of Stock
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                                        In Stock ({count})
+                                      </span>
+                                    )}
+                                  </div>
+                                </label>
+                              </div>
+
+                              {/* Unit Input and Quick Toggles */}
+                              {isEnabled && (
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-[9px] text-muted-foreground font-medium">Stock</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="999"
+                                      value={count}
+                                      onChange={(e) => {
+                                        const val = Math.max(0, parseInt(e.target.value) || 0);
+                                        setFormState((prev) => ({
+                                          ...prev,
+                                          sizeStock: {
+                                            ...prev.sizeStock,
+                                            [sizeName]: val,
+                                          },
+                                        }));
+                                      }}
+                                      className={`w-14 px-1.5 py-1 text-xs text-center font-bold rounded-lg border outline-none ${
+                                        isSizeOut
+                                          ? "border-amber-400 bg-amber-50 text-amber-900"
+                                          : "border-border bg-background text-foreground focus:border-primary"
+                                      }`}
+                                    />
+                                  </div>
+
+                                  {count > 0 ? (
+                                    <button
+                                      type="button"
+                                      title="Mark size as Out of Stock"
+                                      onClick={() => {
+                                        setFormState((prev) => ({
+                                          ...prev,
+                                          sizeStock: { ...prev.sizeStock, [sizeName]: 0 },
+                                        }));
+                                      }}
+                                      className="px-1.5 py-1 text-[10px] font-semibold text-muted-foreground hover:text-amber-600 rounded bg-muted/40 hover:bg-amber-50 transition-colors"
+                                    >
+                                      Set 0
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      title="Add 1 to stock"
+                                      onClick={() => {
+                                        setFormState((prev) => ({
+                                          ...prev,
+                                          sizeStock: { ...prev.sizeStock, [sizeName]: 1 },
+                                        }));
+                                      }}
+                                      className="px-1.5 py-1 text-[10px] font-bold text-primary rounded bg-primary/10 hover:bg-primary/20 transition-colors"
+                                    >
+                                      +1
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Dual Country Pricing (India & Qatar) */}
               <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-4">
@@ -3906,7 +4378,7 @@ export default function AdminDashboardPage() {
                   <label className="text-xs font-semibold text-foreground">Instagram Handle</label>
                   <input
                     type="text"
-                    placeholder="@alnaya.in"
+                    placeholder="@gleamnest.in"
                     value={instaVideoForm.handle}
                     onChange={(e) => setInstaVideoForm({ ...instaVideoForm, handle: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"

@@ -101,6 +101,140 @@ export const categories: Category[] = [
 
 export const products: Product[] = [
   {
+    "id": "alnaya-prod-001-minimal-chain",
+    "slug": "dainty-tulip-crystal-minimal-chain",
+    "title": "Dainty Tulip Crystal Minimal Chain",
+    "shortDescription": "Delicate 18K gold snake chain centered with a three-petal sparkling cubic zirconia floral tulip pendant.",
+    "description": "An exquisite everyday signature. Crafted on a sleek, anti-tarnish 18K gold-plated snake chain, this minimal pendant features three shimmering crystal marquise stones forming a delicate blooming tulip. 100% waterproof, sweatproof, and hypoallergenic.",
+    "price": 299,
+    "salePrice": 249,
+    "priceQatar": 25,
+    "salePriceQatar": 20,
+    "category": "minimal-chains",
+    "tags": [
+      "Minimal Chains",
+      "Necklaces",
+      "Pendant",
+      "Floral",
+      "Waterproof",
+      "New Arrival"
+    ],
+    "images": [
+      "/images/products/dainty-tulip-crystal-minimal-chain.jpg"
+    ],
+    "rating": 4.9,
+    "reviewCount": 38,
+    "inStock": true,
+    "stockCount": 20,
+    "featured": true,
+    "isNewArrival": true,
+    "isBestSeller": true
+  },
+  {
+    "id": "alnaya-prod-002-hanging-chain",
+    "slug": "celestial-jewel-drop-hanging-chain",
+    "title": "Celestial Jewel Drop Hanging Chain",
+    "shortDescription": "Regal multi-gemstone hanging chain accented with emerald, ruby, sapphire, and aquamarine crystal teardrops.",
+    "description": "A celebration of opulent color and vintage royalty. This hanging chain is adorned with station beaded links and dangling filigree-capped jewel teardrops in vibrant emerald green, royal ruby, and deep sapphire crystal. Designed with durable anti-tarnish 18K gold finish.",
+    "price": 349,
+    "salePrice": 299,
+    "priceQatar": 28,
+    "salePriceQatar": 24,
+    "category": "hanging-chains",
+    "tags": [
+      "Hanging Chains",
+      "Necklaces",
+      "Gemstone",
+      "Multicolor",
+      "Royal",
+      "New Arrival"
+    ],
+    "images": [
+      "/images/products/celestial-star-drop-hanging-chain.jpg"
+    ],
+    "rating": 5.0,
+    "reviewCount": 42,
+    "inStock": true,
+    "stockCount": 18,
+    "featured": true,
+    "isNewArrival": true,
+    "isBestSeller": true
+  },
+  {
+    "id": "alnaya-prod-003-ring",
+    "slug": "starfish-textured-open-adjustable-ring",
+    "title": "Starfish Textured Open Adjustable Ring",
+    "shortDescription": "Artisanal textured bypass ring adorned with twin sculpted starfish motifs in warm 18K gold.",
+    "description": "Capture ocean serenity with this statement starfish ring. Featuring two textured, stippled starfish in a comfortable bypass wrap design that effortlessly adjusts to any finger size without losing shape. Waterproof, tarnish-resistant, and hypoallergenic.",
+    "price": 220,
+    "salePrice": 180,
+    "priceQatar": 18,
+    "salePriceQatar": 15,
+    "category": "ring",
+    "tags": [
+      "Rings",
+      "Adjustable",
+      "Starfish",
+      "Ocean",
+      "Textured",
+      "New Arrival"
+    ],
+    "images": [
+      "/images/products/starfish-textured-adjustable-ring.jpg"
+    ],
+    "rating": 4.8,
+    "reviewCount": 29,
+    "inStock": true,
+    "stockCount": 25,
+    "featured": true,
+    "isNewArrival": true,
+    "isBestSeller": true,
+    "variantAttributes": [
+      {
+        "name": "Size",
+        "options": ["Adjustable (Fits All Sizes)"],
+        "sizeStock": { "Adjustable (Fits All Sizes)": 25 }
+      }
+    ]
+  },
+  {
+    "id": "alnaya-prod-004-bracelet",
+    "slug": "radiant-concentric-circles-ripple-cuff-bracelet",
+    "title": "Radiant Concentric Circles Ripple Cuff Bracelet",
+    "shortDescription": "Sculptural hammered gold open cuff bracelet featuring interlocking organic ripple and pebble rings.",
+    "description": "A wearable work of modern art. This statement cuff bracelet features interlocking organic concentric circles with an intricate hammered molten texture that reflects light from every angle. Flexible open cuff structure fits most wrist sizes with ease. 100% waterproof and anti-tarnish.",
+    "price": 399,
+    "salePrice": 349,
+    "priceQatar": 32,
+    "salePriceQatar": 28,
+    "category": "bracelet",
+    "tags": [
+      "Bracelet",
+      "Bracelets",
+      "Cuff",
+      "Hammered",
+      "Statement",
+      "New Arrival"
+    ],
+    "images": [
+      "/images/products/radiant-concentric-circles-cuff-bracelet.jpg"
+    ],
+    "rating": 4.9,
+    "reviewCount": 31,
+    "inStock": true,
+    "stockCount": 16,
+    "featured": true,
+    "isNewArrival": true,
+    "isBestSeller": true,
+    "variantAttributes": [
+      {
+        "name": "Size",
+        "options": ["Standard Adjustable Open Cuff"],
+        "sizeStock": { "Standard Adjustable Open Cuff": 16 }
+      }
+    ]
+  },
+  {
   "id": "alnaya-prod-000",
   "slug": "imperial-emerald-cuban-pendant",
   "title": "Imperial Emerald & Gold Cuban Pendant",
