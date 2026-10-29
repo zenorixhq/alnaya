@@ -68,7 +68,7 @@ export const storeConfig: StoreConfig = {
   meta: {
     name: "Alnaya",
     tagline: "Everyday & Ethnic Luxury Jewellery",
-    description: "Exquisite Handcrafted Jhumkas, Dainty Pendants & Anti-Tarnish Daily Wear Jewellery. 1000+ Happy Customers with Worldwide Shipping.",
+    description: "Exquisite Handcrafted Jhumkas, Dainty Pendants & Everyday Luxury Jewellery. 1000+ Happy Customers with Worldwide Shipping.",
     url: "https://alnaya.in",
     favicon: "/alnaya-logo.png",
   },
@@ -141,7 +141,7 @@ export const storeConfig: StoreConfig = {
     enableQuickView: true,
     enableStockBadges: true,
     enableAnnouncementBar: true,
-    announcementText: "✨ Handcrafted Jhumkas & Anti-Tarnish Jewellery • 1000+ Happy Customers • Pan-India Express Delivery • Free Shipping above ₹799 • Pay Securely via UPI / Cards",
+    announcementText: "✨ Handcrafted Jhumkas & Fine Jewellery • 1000+ Happy Customers • Pan-India Express Delivery • Free Shipping above ₹799 • Pay Securely via UPI / Cards",
     enableWhatsAppFloat: true,
     enableCurrencySwitcher: false,
   },

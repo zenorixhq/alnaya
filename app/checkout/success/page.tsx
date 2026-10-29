@@ -114,7 +114,7 @@ function SuccessContent() {
             <span>What happens next?</span>
           </h4>
           <ol className="list-decimal pl-4 space-y-2">
-            <li>Our team carefully inspects and gift-packs your jewelry in premium anti-tarnish pouches.</li>
+            <li>Our team carefully inspects and gift-packs your jewelry in premium luxury pouches.</li>
             <li>Your parcel will be handed over to our express courier partner (BlueDart / DTDC / Speed Post).</li>
             <li>Tracking details and estimated arrival will be sent to your WhatsApp contact ({phone || "your mobile number"}).</li>
           </ol>

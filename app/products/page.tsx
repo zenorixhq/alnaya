@@ -234,7 +234,7 @@ function ProductCatalogContent() {
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold mb-1">
             <Sparkles className="w-3 h-3" />
-            <span>Anti-Tarnish • 304 & 306 Steel • Waterproof</span>
+            <span>Waterproof • Hypoallergenic • Everyday Luxury</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-foreground">
             {selectedCategory === "all"

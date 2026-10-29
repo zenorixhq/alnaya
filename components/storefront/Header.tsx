@@ -57,6 +57,8 @@ export function Header() {
 
   const isHomePage = pathname === "/" || pathname === "";
   const isTransparent = mounted && isHomePage && !isScrolled;
+  // Dark navigation styling applies ONLY on the homepage (transparent over dark hero, or dark charcoal #1C1917 on scroll)
+  const isDarkNav = isHomePage;
 
   const primaryNavLinks = [
     { label: "Shop All", href: "/products" },
@@ -99,9 +101,9 @@ export function Header() {
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className={`p-2 -ml-2 rounded-md ${
-                  isTransparent || isScrolled
+                  isDarkNav
                     ? "text-white hover:bg-white/10"
-                    : "text-foreground hover:bg-[#F0E6D2]"
+                    : "text-[#1C1917] hover:bg-[#F0E6D2]"
                 }`}
                 aria-label="Open menu"
               >
@@ -114,7 +116,7 @@ export function Header() {
               <BrandLogo
                 variant="full"
                 showTagline={false}
-                theme={isTransparent || isScrolled ? "dark" : "light"}
+                theme={isDarkNav ? "dark" : "light"}
               />
             </div>
 
@@ -127,17 +129,17 @@ export function Header() {
                     key={link.href}
                     href={link.href}
                     className={`text-xs xl:text-sm font-medium tracking-wide transition-colors whitespace-nowrap flex items-center gap-1 ${
-                      isTransparent || isScrolled
+                      isDarkNav
                         ? isActive
                           ? "text-amber-300 font-semibold"
                           : link.highlight
                           ? "text-amber-300 font-semibold hover:text-white"
                           : "text-white/90 hover:text-white"
                         : isActive
-                        ? "text-primary font-semibold"
+                        ? "text-[#8F7234] font-bold"
                         : link.highlight
-                        ? "text-[#C5A059] font-bold hover:text-primary"
-                        : "text-foreground/80 hover:text-primary"
+                        ? "text-[#8F7234] font-bold hover:text-[#1C1917]"
+                        : "text-[#1C1917] hover:text-[#8F7234]"
                     }`}
                   >
                     {link.highlight && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
@@ -151,15 +153,15 @@ export function Header() {
                 <button
                   type="button"
                   className={`flex items-center gap-1 text-xs xl:text-sm font-medium transition-colors py-2 cursor-pointer whitespace-nowrap ${
-                    isTransparent || isScrolled
+                    isDarkNav
                       ? "text-white/90 hover:text-white"
-                      : "text-foreground/80 hover:text-primary"
+                      : "text-[#1C1917] hover:text-[#8F7234]"
                   }`}
                 >
                   <span>Categories</span>
                   <ChevronDown
                     className={`w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-200 ${
-                      isTransparent || isScrolled ? "text-white/70" : "text-muted-foreground"
+                      isDarkNav ? "text-white/70" : "text-[#786E5E]"
                     }`}
                   />
                 </button>
@@ -194,9 +196,9 @@ export function Header() {
               <button
                 onClick={() => setSearchOpen(true)}
                 className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
-                  isTransparent || isScrolled
+                  isDarkNav
                     ? "hover:bg-white/10 text-white"
-                    : "hover:bg-muted text-foreground"
+                    : "hover:bg-[#EADBBE]/50 text-[#1C1917]"
                 }`}
                 aria-label="Search products"
               >
@@ -207,9 +209,9 @@ export function Header() {
               <Link
                 href="/account"
                 className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
-                  isTransparent || isScrolled
+                  isDarkNav
                     ? "hover:bg-white/10 text-white"
-                    : "hover:bg-muted text-foreground"
+                    : "hover:bg-[#EADBBE]/50 text-[#1C1917]"
                 }`}
                 aria-label="Account"
               >
@@ -221,9 +223,9 @@ export function Header() {
                 <Link
                   href="/account?tab=wishlist"
                   className={`w-9 h-9 rounded-full transition-colors relative flex items-center justify-center ${
-                    isTransparent || isScrolled
+                    isDarkNav
                       ? "hover:bg-white/10 text-white"
-                      : "hover:bg-muted text-foreground"
+                      : "hover:bg-[#EADBBE]/50 text-[#1C1917]"
                   }`}
                   aria-label="Wishlist"
                 >
@@ -240,9 +242,9 @@ export function Header() {
               <button
                 onClick={openCart}
                 className={`w-9 h-9 rounded-full transition-colors relative flex items-center justify-center ${
-                  isTransparent || isScrolled
+                  isDarkNav
                     ? "hover:bg-white/10 text-white"
-                    : "hover:bg-muted text-foreground"
+                    : "hover:bg-[#EADBBE]/50 text-[#1C1917]"
                 }`}
                 aria-label="Shopping Cart"
               >

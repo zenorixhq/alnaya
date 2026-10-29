@@ -3617,7 +3617,7 @@ export default function AdminDashboardPage() {
                 <label className="text-xs font-semibold text-foreground">Short Summary</label>
                 <input
                   type="text"
-                  placeholder="e.g. 304 & 306 Grade Steel • Waterproof • Hypoallergenic"
+                  placeholder="e.g. Waterproof • Hypoallergenic • Everyday Luxury"
                   value={formState.shortDescription}
                   onChange={(e) => setFormState({ ...formState, shortDescription: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
@@ -3628,7 +3628,7 @@ export default function AdminDashboardPage() {
                 <label className="text-xs font-semibold text-foreground">Full Description & Story</label>
                 <textarea
                   rows={3}
-                  placeholder="Crafted with premium 304 & 306 grade stainless steel with high-grade PVD plating. 100% waterproof, sweatproof, and hypoallergenic."
+                  placeholder="Crafted with premium stainless steel in radiant gold finish. 100% waterproof, sweatproof, and hypoallergenic."
                   value={formState.description}
                   onChange={(e) => setFormState({ ...formState, description: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
@@ -4170,7 +4170,7 @@ export default function AdminDashboardPage() {
                 <label className="text-xs font-semibold text-foreground">Customer Message / Note</label>
                 <textarea
                   rows={3}
-                  placeholder="e.g. Arrived in 2 days via DTDC. The 304 steel mirror finish is so luxurious!"
+                  placeholder="e.g. Arrived in 2 days via DTDC. The mirror finish is so luxurious!"
                   value={screenshotForm.caption}
                   onChange={(e) => setScreenshotForm({ ...screenshotForm, caption: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none resize-none"
@@ -4401,7 +4401,7 @@ export default function AdminDashboardPage() {
                 <label className="text-xs font-semibold text-foreground">Caption / Description</label>
                 <textarea
                   rows={2}
-                  placeholder="Waterproof & anti-tarnish everyday luxury crafted in 304 & 306 steel ✨"
+                  placeholder="Waterproof everyday luxury crafted with radiant finish ✨"
                   value={instaVideoForm.caption}
                   onChange={(e) => setInstaVideoForm({ ...instaVideoForm, caption: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none resize-none"

@@ -82,7 +82,7 @@ export default function CheckoutPage() {
       <div className="max-w-3xl mx-auto px-4 py-24 text-center space-y-4">
         <h2 className="text-2xl font-serif-luxury font-bold text-foreground">Your jewelry bag is empty</h2>
         <p className="text-xs text-muted-foreground">
-          Discover our handcrafted jhumkas, minimal chains & anti-tarnish daily wear collection.
+          Discover our handcrafted jhumkas, minimal chains & everyday luxury collection.
         </p>
         <Link
           href="/products"

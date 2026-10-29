@@ -615,8 +615,8 @@ ${greetingMessage}
                 className="p-2.5 rounded-xl bg-card border border-border/80 hover:border-primary/50 transition-all text-center space-y-1 group"
               >
                 <ShieldCheck className="w-4 h-4 mx-auto text-primary group-hover:scale-110 transition-transform" />
-                <p className="font-bold text-foreground">Anti-Tarnish</p>
-                <p className="text-[10px]">304 & 306 Steel</p>
+                <p className="font-bold text-foreground">Hallmark Quality</p>
+                <p className="text-[10px]">Premium Craft</p>
               </button>
               <button
                 type="button"
@@ -730,7 +730,7 @@ ${greetingMessage}
             <div>
               <h2 className="text-lg sm:text-2xl font-bold text-foreground">You May Also Appreciate</h2>
               <p className="text-xs text-muted-foreground hidden sm:block">
-                Matching waterproof & anti-tarnish everyday jewelry pieces.
+                Matching waterproof everyday luxury jewelry pieces.
               </p>
             </div>
             <Link

@@ -7,20 +7,28 @@ import { storeConfig } from "@/config/store.config";
 
 export function HeroEditorial() {
   return (
-    <section className="relative w-full min-h-screen h-[100svh] bg-[#070A10] text-white overflow-hidden select-none flex flex-col justify-between pt-20 sm:pt-24 md:pt-28">
-      {/* 1. Full-Bleed Image Background (Using uploaded royal necklace photo, placed to the left) */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <img
-          src="/images/hero-royal-necklace.jpg"
-          alt="Royal Multi-Gemstone Teardrop Necklace on Velvet"
-          loading="eager"
-          decoding="sync"
-          className="w-full h-full object-cover object-[24%_center] sm:object-[26%_center] md:object-[28%_center]"
-        />
+    <section className="relative w-full min-h-screen bg-[#070A10] text-white overflow-hidden select-none flex flex-col justify-between pt-20 sm:pt-24 md:pt-28">
+      {/* 1. Optimized Visual Background Showcase (Scaled down, positioned upward, full necklace visible) */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none flex items-center justify-start">
+        {/* Left-Aligned High-Res Visual Frame */}
+        <div className="relative w-full lg:w-[62%] h-full flex items-center lg:items-start justify-center lg:justify-start pt-2 lg:pt-6 pl-0 lg:pl-8">
+          <img
+            src="/images/hero-royal-necklace.jpg"
+            alt="Royal Multi-Gemstone Teardrop Necklace on Velvet"
+            loading="eager"
+            decoding="sync"
+            className="max-h-[72vh] sm:max-h-[80vh] lg:max-h-[86vh] w-auto max-w-full object-contain object-top lg:object-left-top transform -translate-y-2 sm:-translate-y-4 lg:-translate-y-6 scale-[0.92] sm:scale-[0.88] lg:scale-[0.84] drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
+            style={{ imageRendering: "-webkit-optimize-contrast" }}
+          />
 
-        {/* Dynamic Luxury Vignette: Keeps left necklace crystal clear, enriches right for typography contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-black/35 to-black/85 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070A10]/90 via-transparent to-black/20 pointer-events-none" />
+          {/* Smooth Velvet Feathering into Background */}
+          <div className="absolute inset-y-0 right-0 w-32 sm:w-48 bg-gradient-to-r from-transparent to-[#070A10] pointer-events-none hidden lg:block" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#070A10] via-[#070A10]/60 to-transparent pointer-events-none" />
+        </div>
+
+        {/* Global Lighting Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#070A10]/35 to-[#070A10]/95 pointer-events-none hidden lg:block" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070A10] via-black/40 to-black/30 pointer-events-none lg:hidden" />
       </div>
 
       {/* 2. Main Editorial Typography & Action Container (Placed on the right side) */}
@@ -42,12 +50,12 @@ export function HeroEditorial() {
             <span className="font-editorial italic font-light text-white/95">Eternal.</span>
           </h1>
 
-          {/* Subtitle Description */}
+          {/* Subtitle Description - Zero mention of 304, 306, anti-tarnish, or PVD */}
           <p className="text-sm sm:text-base md:text-[17px] text-white/85 font-light leading-relaxed max-w-lg drop-shadow-md font-sans">
-            Handcrafted teardrop gemstones set in anti-tarnish 18K radiant gold finish. Designed by master artisans for everyday royalty and timeless luxury.
+            Handcrafted teardrop gemstones set in radiant 18K gold finish. Designed by master artisans for everyday royalty and timeless luxury.
           </p>
 
-          {/* Signature Featured Piece Spotlight (Direct link to the celestial hanging chain) */}
+          {/* Signature Featured Piece Spotlight */}
           <div className="pt-1">
             <Link
               href="/products/celestial-jewel-drop-hanging-chain"
@@ -86,7 +94,6 @@ export function HeroEditorial() {
           preserveAspectRatio="none"
           className="w-full h-12 sm:h-20 md:h-24 lg:h-28 text-[#FAF7F2] fill-current"
         >
-          {/* Smooth couture wave curve blending into the rest of the page */}
           <path d="M0,70 C280,105 520,110 760,65 C1000,20 1240,25 1440,65 L1440,110 L0,110 Z" />
         </svg>
       </div>

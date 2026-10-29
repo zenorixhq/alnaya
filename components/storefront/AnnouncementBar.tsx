@@ -20,7 +20,7 @@ export function AnnouncementBar() {
   }
 
   const tickerItems = [
-    "100% Anti-Tarnish & Waterproof",
+    "100% Waterproof & Skin-Friendly",
     "Handcrafted Ethnic & Daily Luxury",
     `Free Pan-India Delivery Above ₹${storeConfig.commerce.freeShippingThreshold}`,
     "Hypoallergenic & Shower Safe",
