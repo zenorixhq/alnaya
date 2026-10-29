@@ -289,7 +289,9 @@ export function HeroEditorial() {
           <img
             src="/images/hero-royal-necklace.jpg"
             alt="Royal Multi-Gemstone Teardrop Necklace on Velvet"
-            className="w-full h-full object-cover object-[28%_center] sm:object-[27%_center] md:object-[26%_center] scale-105 animate-hero-breathe"
+            loading="eager"
+            decoding="sync"
+            className="w-full h-full object-cover object-[25%_center] sm:object-[26%_center] md:object-[26%_center] scale-105 animate-hero-breathe"
           />
 
           {/* Shimmering Sunlight Caustic Light Sweep Overlay (Originating from top-left) */}
