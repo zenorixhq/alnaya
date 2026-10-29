@@ -23,25 +23,85 @@ function getInitialData() {
   };
 }
 
-function cleanContentString(raw: string): string {
-  return raw
+const DEFAULT_FOLLOW_HOUSE_PANELS = [
+  "/images/follow-house/panel-1.jpg",
+  "/images/follow-house/panel-2.jpg",
+  "/images/follow-house/panel-3.jpg",
+  "/images/follow-house/panel-4.jpg",
+  "/images/follow-house/panel-5.jpg",
+];
+
+function cleanTextValue(val: any): any {
+  if (typeof val !== "string") return val;
+  // If it's a base64 data URL or blob, NEVER run text replacements on it!
+  if (val.startsWith("data:") || val.startsWith("blob:")) return val;
+
+  // If it's a URL or image path, only replace gleamnest in domain/handle if needed
+  if (val.startsWith("http://") || val.startsWith("https://") || val.startsWith("/")) {
+    return val
+      .replace(/@?gleamnest\.in/gi, "@alnaya.in")
+      .replace(/gleamnest/gi, "alnaya");
+  }
+
+  // Text content cleaning
+  return val
     .replace(/@?gleamnest\.in/gi, "@alnaya.in")
     .replace(/gleamnest/gi, "alnaya")
     .replace(/304\s*(&|and)\s*306(\s*grade)?\s*steel/gi, "radiant finish")
+    .replace(/304\s*steel/gi, "hallmark stainless")
     .replace(/304\s*(&|and)\s*306/gi, "hallmark")
     .replace(/anti-?tarnish/gi, "waterproof")
     .replace(/pvd\s*coating/gi, "radiant finish")
-    .replace(/pvd/gi, "radiant finish");
+    .replace(/\bpvd\b/gi, "radiant finish");
+}
+
+function sanitizeObject(obj: any): any {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizeObject);
+  }
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === "poster" || key === "imageUrl" || key === "image") {
+      if (typeof value === "string") {
+        if (value.includes("radiant finish")) {
+          result[key] = "/images/follow-house/panel-1.jpg";
+        } else if (!value.startsWith("data:") && value.includes("gleamnest")) {
+          result[key] = value.replace(/gleamnest/gi, "alnaya");
+        } else {
+          result[key] = value;
+        }
+      } else {
+        result[key] = value;
+      }
+    } else if (typeof value === "string") {
+      result[key] = cleanTextValue(value);
+    } else if (typeof value === "object" && value !== null) {
+      result[key] = sanitizeObject(value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
 }
 
 function sanitizeData(parsed: any) {
   if (!parsed || typeof parsed !== "object") return getInitialData();
-  const cleanedStr = cleanContentString(JSON.stringify(parsed));
-  const cleaned = JSON.parse(cleanedStr);
+  const cleaned = sanitizeObject(parsed);
   if (!Array.isArray(cleaned.reviews)) cleaned.reviews = [];
   if (!Array.isArray(cleaned.videoReels)) cleaned.videoReels = [];
   if (!Array.isArray(cleaned.feedbackScreenshots)) cleaned.feedbackScreenshots = [];
   if (!Array.isArray(cleaned.instagramVideos)) cleaned.instagramVideos = [];
+
+  // Auto-heal any corrupted or oversized posters in instagramVideos
+  cleaned.instagramVideos = cleaned.instagramVideos.map((item: any, idx: number) => {
+    let poster = item.poster;
+    if (!poster || typeof poster !== "string" || poster.includes("radiant finish") || (poster.startsWith("data:") && poster.length > 50000)) {
+      poster = DEFAULT_FOLLOW_HOUSE_PANELS[idx % DEFAULT_FOLLOW_HOUSE_PANELS.length];
+    }
+    return { ...item, poster };
+  });
+
   return cleaned;
 }
 
@@ -62,19 +122,10 @@ async function readData() {
       where: { key: "client_reviews" },
     });
     if (row?.value) {
-      const originalVal = row.value;
-      const cleanedVal = cleanContentString(originalVal);
-      const parsed = JSON.parse(cleanedVal);
+      const parsed = JSON.parse(row.value);
       const sanitized = sanitizeData(parsed);
       if (!Array.isArray(sanitized.instagramVideos)) {
         sanitized.instagramVideos = fileData.instagramVideos || [];
-      }
-      // If the database contained any stale references, update it asynchronously to heal permanently
-      if (originalVal !== cleanedVal) {
-        prisma.siteContent.update({
-          where: { key: "client_reviews" },
-          data: { value: JSON.stringify(sanitized) },
-        }).catch((err) => console.warn("Failed to auto-heal DB row:", err));
       }
       return sanitized;
     }

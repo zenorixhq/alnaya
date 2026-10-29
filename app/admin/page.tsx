@@ -131,7 +131,14 @@ export default function AdminDashboardPage() {
     if (typeof window !== "undefined") {
       try {
         const cached = sessionStorage.getItem("alnaya_admin_instavideos");
-        if (cached && !cached.toLowerCase().includes("gleamnest")) return JSON.parse(cached);
+        if (
+          cached &&
+          !cached.toLowerCase().includes("gleamnest") &&
+          !cached.includes("radiant finish") &&
+          !cached.includes("data:image")
+        ) {
+          return JSON.parse(cached);
+        }
         sessionStorage.removeItem("alnaya_admin_instavideos");
       } catch (e) {}
     }
@@ -241,13 +248,20 @@ export default function AdminDashboardPage() {
           try { sessionStorage.setItem("alnaya_admin_screenshots", JSON.stringify(data.feedbackScreenshots)); } catch (e) {}
         }
         if (Array.isArray(data.instagramVideos)) {
-          const cleanInsta = data.instagramVideos.map((v: any) => ({
-            ...v,
-            handle: "@alnaya.in",
-            caption: (v.caption || "").replace(/gleamnest/gi, "alnaya").replace(/304\s*(&|and)\s*306/gi, "radiant finish"),
-            title: (v.title || "").replace(/gleamnest/gi, "alnaya"),
-            instagramLink: (v.instagramLink || "").replace(/gleamnest/gi, "alnaya"),
-          }));
+          const cleanInsta = data.instagramVideos.map((v: any, idx: number) => {
+            let poster = v.poster;
+            if (!poster || typeof poster !== "string" || poster.includes("radiant finish") || (poster.startsWith("data:") && poster.length > 50000)) {
+              poster = `/images/follow-house/panel-${(idx % 5) + 1}.jpg`;
+            }
+            return {
+              ...v,
+              poster,
+              handle: "@alnaya.in",
+              caption: (v.caption || "").replace(/gleamnest/gi, "alnaya").replace(/304\s*(&|and)\s*306/gi, "radiant finish"),
+              title: (v.title || "").replace(/gleamnest/gi, "alnaya"),
+              instagramLink: (v.instagramLink || "").replace(/gleamnest/gi, "alnaya"),
+            };
+          });
           setInstagramVideosList(cleanInsta);
           try { sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(cleanInsta)); } catch (e) {}
         }
@@ -1285,13 +1299,20 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || "Failed to delete reel");
       }
       if (Array.isArray(data.instagramVideos)) {
-        const cleanInsta = data.instagramVideos.map((v: any) => ({
-          ...v,
-          handle: "@alnaya.in",
-          caption: (v.caption || "").replace(/gleamnest/gi, "alnaya").replace(/304\s*(&|and)\s*306/gi, "radiant finish"),
-          title: (v.title || "").replace(/gleamnest/gi, "alnaya"),
-          instagramLink: (v.instagramLink || "").replace(/gleamnest/gi, "alnaya"),
-        }));
+        const cleanInsta = data.instagramVideos.map((v: any, idx: number) => {
+          let poster = v.poster;
+          if (!poster || typeof poster !== "string" || poster.includes("radiant finish") || (poster.startsWith("data:") && poster.length > 50000)) {
+            poster = `/images/follow-house/panel-${(idx % 5) + 1}.jpg`;
+          }
+          return {
+            ...v,
+            poster,
+            handle: "@alnaya.in",
+            caption: (v.caption || "").replace(/gleamnest/gi, "alnaya").replace(/304\s*(&|and)\s*306/gi, "radiant finish"),
+            title: (v.title || "").replace(/gleamnest/gi, "alnaya"),
+            instagramLink: (v.instagramLink || "").replace(/gleamnest/gi, "alnaya"),
+          };
+        });
         setInstagramVideosList(cleanInsta);
         try {
           sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(cleanInsta));
@@ -2574,15 +2595,24 @@ export default function AdminDashboardPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {instagramVideosList.map((video) => (
+                  {instagramVideosList.map((video, vIdx) => {
+                    const posterSrc =
+                      video.poster && !video.poster.includes("radiant finish") && !video.poster.startsWith("data:")
+                        ? video.poster
+                        : `/images/follow-house/panel-${(vIdx % 5) + 1}.jpg`;
+
+                    return (
                     <div
                       key={video.id}
                       className="rounded-xl border border-border overflow-hidden bg-muted/20 flex flex-col justify-between group shadow-sm hover:shadow-md transition-all"
                     >
                       <div className="relative aspect-[9/14] bg-stone-900 overflow-hidden">
                         <img
-                          src={video.poster || "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=700"}
+                          src={posterSrc}
                           alt={video.title}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = `/images/follow-house/panel-${(vIdx % 5) + 1}.jpg`;
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30 flex flex-col justify-between p-3 text-white">
@@ -2632,7 +2662,8 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
                 </div>
               )}
             </div>
@@ -2997,27 +3028,34 @@ export default function AdminDashboardPage() {
                     >
                       {/* Reel Video Preview Container */}
                       <div className="relative aspect-[9/15] w-full overflow-hidden bg-stone-900">
-                        {isDirectVideo ? (
-                          <video
-                            src={video.videoUrl}
-                            poster={video.poster}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            preload="metadata"
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <img
-                            src={
-                              video.poster ||
-                              "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=700"
-                            }
-                            alt={video.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        )}
+                        {(() => {
+                          const posterSrc =
+                            video.poster && !video.poster.includes("radiant finish") && !video.poster.startsWith("data:")
+                              ? video.poster
+                              : `/images/follow-house/panel-${(index % 5) + 1}.jpg`;
+
+                          return isDirectVideo ? (
+                            <video
+                              src={video.videoUrl}
+                              poster={posterSrc}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              preload="metadata"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <img
+                              src={posterSrc}
+                              alt={video.title}
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = `/images/follow-house/panel-${(index % 5) + 1}.jpg`;
+                              }}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          );
+                        })()}
 
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/35 pointer-events-none" />
 

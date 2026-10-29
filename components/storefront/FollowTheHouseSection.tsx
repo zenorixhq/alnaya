@@ -72,21 +72,29 @@ export function FollowTheHouseSection() {
         .then((data) => {
           if (Array.isArray(data.instagramVideos)) {
             if (data.instagramVideos.length > 0) {
-              const mapped: HousePanel[] = data.instagramVideos.map((item: any, idx: number) => ({
-                id: item.id || idx + 1,
-                image:
-                  item.poster ||
-                  (defaultPanels[idx % defaultPanels.length] && defaultPanels[idx % defaultPanels.length].image) ||
-                  "/images/follow-house/panel-1.jpg",
-                videoUrl: item.videoUrl || "",
-                alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
-                caption: item.title || item.caption || "",
-                handle: item.handle ? item.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in",
-                instagramLink:
-                  item.instagramLink && !item.instagramLink.includes("gleamnest")
-                    ? item.instagramLink
-                    : instagramUrl,
-              }));
+              const mapped: HousePanel[] = data.instagramVideos.map((item: any, idx: number) => {
+                const isCorrupted =
+                  !item.poster ||
+                  typeof item.poster !== "string" ||
+                  item.poster.includes("radiant finish") ||
+                  (item.poster.startsWith("data:") && item.poster.length > 50000);
+                const cleanImage = !isCorrupted
+                  ? item.poster
+                  : (defaultPanels[idx % defaultPanels.length]?.image || `/images/follow-house/panel-${(idx % 5) + 1}.jpg`);
+
+                return {
+                  id: item.id || idx + 1,
+                  image: cleanImage,
+                  videoUrl: item.videoUrl || "",
+                  alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
+                  caption: item.title || item.caption || "",
+                  handle: item.handle ? item.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in",
+                  instagramLink:
+                    item.instagramLink && !item.instagramLink.includes("gleamnest")
+                      ? item.instagramLink
+                      : instagramUrl,
+                };
+              });
               setPanels(mapped);
             } else {
               setPanels([]);
@@ -205,6 +213,12 @@ export function FollowTheHouseSection() {
                 <img
                   src={panel.image}
                   alt={panel.alt}
+                  onError={(e) => {
+                    const fallback = defaultPanels[idx % defaultPanels.length]?.image || `/images/follow-house/panel-${(idx % 5) + 1}.jpg`;
+                    if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                      (e.currentTarget as HTMLImageElement).src = fallback;
+                    }
+                  }}
                   className="w-full h-full object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"
                 />
@@ -316,6 +330,9 @@ export function FollowTheHouseSection() {
                 <img
                   src={activeVideoModal.image}
                   alt={activeVideoModal.alt}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/images/follow-house/panel-1.jpg";
+                  }}
                   className="w-full h-full object-cover"
                 />
               )}
