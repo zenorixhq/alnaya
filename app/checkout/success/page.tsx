@@ -28,7 +28,7 @@ function SuccessContent() {
 
   const [copied, setCopied] = useState(false);
   const isOnlinePayment = method === "razorpay" || !!paymentId;
-  const whatsappPhone = storeConfig.brand.contact.whatsappNumber || "919633956222";
+  const whatsappPhone = storeConfig.brand.contact.whatsappNumber || "919037075227";
 
   const handleCopy = async () => {
     try {

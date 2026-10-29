@@ -39,7 +39,7 @@ export function WhatsAppFloat() {
         href={waUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Chat with GleamNest on WhatsApp"
+        aria-label="Chat with Alnaya on WhatsApp"
         className="w-14 h-14 rounded-full bg-[#25D366] text-white shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 relative group"
       >
         <MessageCircle className="w-7 h-7 fill-current" />

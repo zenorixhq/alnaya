@@ -91,14 +91,14 @@ export const storeConfig: StoreConfig = {
     },
     contact: {
       email: "orders@alnaya.in",
-      phone: "+91 96339 56222",
-      whatsappNumber: "919633956222",
+      phone: "+91 90370 75227",
+      whatsappNumber: "919037075227",
       address: "India • Worldwide Express Shipping",
       hours: "Mon – Sat: 9:30 AM – 8:00 PM IST",
     },
     socials: {
       instagram: "https://www.instagram.com/alnaya.in/",
-      whatsapp: "https://wa.me/919633956222",
+      whatsapp: "https://wa.me/919037075227",
     },
   },
   commerce: {

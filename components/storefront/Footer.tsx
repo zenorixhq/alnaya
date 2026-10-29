@@ -179,7 +179,7 @@ export function Footer() {
             {subscribed ? (
               <div className="p-3 rounded-xl bg-[#C5A059]/10 border border-[#C5A059]/30 text-xs text-[#FAF7F2] font-medium flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#C5A059] flex-shrink-0" />
-                <span>Thank you! Your 5% first purchase voucher (GLEAM5) has been sent.</span>
+                <span>Thank you! Your 5% first purchase voucher (ALNAYA5) has been sent.</span>
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="relative flex items-center pt-1">
