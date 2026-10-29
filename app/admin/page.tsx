@@ -2063,18 +2063,10 @@ export default function AdminDashboardPage() {
                       <td className="py-3 font-semibold text-foreground">
                         <div className="flex flex-col text-xs leading-tight">
                           <span className="text-foreground">
-                            🇮🇳 {formatPrice(product.salePrice || product.price, "INR")}
+                            {formatPrice(product.salePrice || product.price, "INR")}
                             {product.salePrice && (
                               <span className="text-[10px] text-muted-foreground line-through ml-1">
                                 {formatPrice(product.price, "INR")}
-                              </span>
-                            )}
-                          </span>
-                          <span className="text-emerald-700 font-medium text-[11px] mt-0.5">
-                            🇶🇦 {formatPrice(product.salePriceQatar || product.priceQatar || Math.max(10, Math.round((product.salePrice || product.price) / 20)), "QAR")}
-                            {product.salePriceQatar && (
-                              <span className="text-[10px] text-muted-foreground line-through ml-1">
-                                {formatPrice(product.priceQatar || Math.max(10, Math.round(product.price / 20)), "QAR")}
                               </span>
                             )}
                           </span>
@@ -2330,19 +2322,13 @@ export default function AdminDashboardPage() {
               <div className="p-5 rounded-xl bg-muted/30 border border-border space-y-3">
                 <div className="flex items-center gap-2 text-foreground font-bold text-xs uppercase tracking-wider">
                   <Truck className="w-4 h-4 text-emerald-600" />
-                  <span>Dual Regional Pricing & Delivery</span>
+                  <span>Shipping & Delivery Policy</span>
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
                   <p>
-                    🇮🇳 India (INR ₹):{" "}
+                    Delivery:{" "}
                     <strong className="text-foreground">
                       Free Shipping on orders above ₹{storeConfig.commerce.freeShippingThreshold} (Flat ₹{storeConfig.commerce.flatShippingFee} below)
-                    </strong>
-                  </p>
-                  <p>
-                    🇶🇦 Qatar (QAR):{" "}
-                    <strong className="text-emerald-700 font-bold">
-                      100% Complimentary Express Delivery on all orders
                     </strong>
                   </p>
                   <p>Ordering Method: <strong className="text-foreground">Instant WhatsApp Order Direct Checkout</strong></p>
@@ -3556,91 +3542,43 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              {/* Dual Country Pricing (India & Qatar) */}
-              <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-4">
-                <div className="flex items-center justify-between border-b border-border/60 pb-2">
-                  <div>
-                    <h4 className="text-xs font-bold text-foreground">Product Pricing by Region</h4>
-                    <p className="text-[10px] text-muted-foreground">Set separate retail and sale prices for India and Qatar</p>
-                  </div>
+              {/* Product Pricing (₹ INR) */}
+              <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-3">
+                <div className="border-b border-border/60 pb-2">
+                  <h4 className="text-xs font-bold text-foreground">Product Pricing</h4>
+                  <p className="text-[10px] text-muted-foreground">Set the retail price and optional sale price in INR (₹)</p>
                 </div>
 
-                {/* India (₹ INR) */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-                    <span>🇮🇳</span>
-                    <span>India (₹ INR)</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-muted-foreground">Price (₹) *</label>
+                    <input
+                      type="number"
+                      step="1"
+                      required
+                      placeholder="899"
+                      value={formState.price}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormState((prev) => ({
+                          ...prev,
+                          price: val,
+                          priceQatar: prev.priceQatar ? prev.priceQatar : val ? Math.max(10, Math.round(parseFloat(val) / 20)).toString() : "",
+                        }));
+                      }}
+                      className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                    />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">Price (₹) *</label>
-                      <input
-                        type="number"
-                        step="1"
-                        required
-                        placeholder="899"
-                        value={formState.price}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setFormState((prev) => ({
-                            ...prev,
-                            price: val,
-                            // Auto-suggest Qatar price if empty
-                            priceQatar: prev.priceQatar ? prev.priceQatar : val ? Math.max(10, Math.round(parseFloat(val) / 20)).toString() : "",
-                          }));
-                        }}
-                        className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">Sale Price (₹ Optional)</label>
-                      <input
-                        type="number"
-                        step="1"
-                        placeholder="699"
-                        value={formState.salePrice}
-                        onChange={(e) => setFormState({ ...formState, salePrice: e.target.value })}
-                        className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Qatar (QAR) */}
-                <div className="space-y-2 pt-3 border-t border-border/40">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-                      <span>🇶🇦</span>
-                      <span>Qatar (QAR)</span>
-                    </div>
-                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Free Delivery in Qatar Included
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">Price (QAR) *</label>
-                      <input
-                        type="number"
-                        step="1"
-                        required
-                        placeholder="45"
-                        value={formState.priceQatar}
-                        onChange={(e) => setFormState({ ...formState, priceQatar: e.target.value })}
-                        className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-semibold text-emerald-800"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">Sale Price (QAR Optional)</label>
-                      <input
-                        type="number"
-                        step="1"
-                        placeholder="35"
-                        value={formState.salePriceQatar}
-                        onChange={(e) => setFormState({ ...formState, salePriceQatar: e.target.value })}
-                        className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
-                      />
-                    </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-muted-foreground">Sale Price (₹ Optional)</label>
+                    <input
+                      type="number"
+                      step="1"
+                      placeholder="699"
+                      value={formState.salePrice}
+                      onChange={(e) => setFormState({ ...formState, salePrice: e.target.value })}
+                      className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                    />
                   </div>
                 </div>
               </div>
