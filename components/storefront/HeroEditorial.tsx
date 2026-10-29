@@ -18,8 +18,8 @@ export function HeroEditorial() {
           poster="/images/hero-necklace.png"
           className="w-full h-full object-cover object-left md:object-center scale-[1.01]"
         >
-          <source src="/videos/hero-jewelry.webm" type="video/webm" />
           <source src="/videos/hero-jewelry.mp4" type="video/mp4" />
+          <source src="/videos/hero-jewelry.webm" type="video/webm" />
         </video>
 
         {/* Dynamic Luxury Vignette: Clear on left for the necklace, enriched on right for white typography contrast */}
