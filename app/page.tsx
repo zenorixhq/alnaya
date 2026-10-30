@@ -5,7 +5,6 @@ import { categories } from "@/data/mockData";
 import { HeroEditorial } from "@/components/storefront/HeroEditorial";
 import { AboutUsSection } from "@/components/storefront/AboutUsSection";
 import { BrandValueBadges } from "@/components/storefront/BrandValueBadges";
-import { ClientFeedbackScreenshots } from "@/components/storefront/ClientFeedbackScreenshots";
 import { CustomerReviewsWithVideos } from "@/components/storefront/CustomerReviewsWithVideos";
 import { FollowTheHouseSection } from "@/components/storefront/FollowTheHouseSection";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -77,10 +76,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Client Feedback & Screenshot Reviews (WhatsApp / DM Proof) */}
-      <ClientFeedbackScreenshots />
-
-      {/* 6. Follow The House (Instagram Editorial Mosaic) */}
+      {/* 5. Follow The House (Instagram Editorial Mosaic) */}
       <FollowTheHouseSection />
 
       {/* 7. Customer Testimonials & Influencer Video Reels ("IN THEIR WORDS") */}
