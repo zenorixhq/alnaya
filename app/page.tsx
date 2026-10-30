@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { categories } from "@/data/mockData";
+import { Category } from "@/types/store";
 import { HeroEditorial } from "@/components/storefront/HeroEditorial";
 import { AboutUsSection } from "@/components/storefront/AboutUsSection";
 import { BrandValueBadges } from "@/components/storefront/BrandValueBadges";
@@ -10,6 +12,18 @@ import { FollowTheHouseSection } from "@/components/storefront/FollowTheHouseSec
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function HomePage() {
+  const [categoryList, setCategoryList] = useState<Category[]>(categories);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategoryList(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
   return (
     <div className="w-full bg-[#FAF7F2] overflow-x-hidden">
       {/* 1. Hero Section (Enclosed within entire screen window, full scroll) */}
@@ -44,7 +58,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-5">
-            {categories.map((cat, idx) => (
+            {categoryList.map((cat, idx) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}

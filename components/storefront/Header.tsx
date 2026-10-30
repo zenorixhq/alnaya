@@ -62,24 +62,25 @@ export function Header() {
 
   const primaryNavLinks = [
     { label: "Shop All", href: "/products" },
-    { label: "Minimal Chains", href: "/products?category=minimal-chains" },
     { label: "Jhumkas", href: "/products?category=jhumkas" },
+    { label: "Minimal Chains", href: "/products?category=minimal-chains" },
     { label: "Traditional Sets", href: "/products?category=traditional-sets" },
     { label: "Offer Products", href: "/products?category=offer-products", highlight: true },
   ];
 
   const allCategoryLinks = [
+    { label: "Shop All", href: "/products" },
+    { label: "Jhumkas", href: "/products?category=jhumkas" },
     { label: "Minimal Chains", href: "/products?category=minimal-chains" },
-    { label: "Anklets", href: "/products?category=anklets" },
+    { label: "Traditional Sets", href: "/products?category=traditional-sets" },
+    { label: "Traditional Earrings", href: "/products?category=traditional-earrings" },
+    { label: "Stud & Hoops", href: "/products?category=stud-and-hoops" },
     { label: "Bangles", href: "/products?category=bangles" },
     { label: "Bracelet", href: "/products?category=bracelet" },
     { label: "Hanging Chains", href: "/products?category=hanging-chains" },
-    { label: "Jhumkas", href: "/products?category=jhumkas" },
+    { label: "Anklets", href: "/products?category=anklets" },
     { label: "Ring", href: "/products?category=ring" },
     { label: "Nosepin", href: "/products?category=nosepin" },
-    { label: "Stud & Hoops", href: "/products?category=stud-and-hoops" },
-    { label: "Traditional Earrings", href: "/products?category=traditional-earrings" },
-    { label: "Traditional Sets", href: "/products?category=traditional-sets" },
     { label: "Offer Products", href: "/products?category=offer-products" },
   ];
 
@@ -170,11 +171,15 @@ export function Header() {
                   <div className="w-64 bg-[#FFFDF9] border border-[#EADBBE] rounded-2xl shadow-2xl p-3 grid grid-cols-1 gap-1">
                     {allCategoryLinks.map((item) => (
                       <Link
-                        key={item.href}
+                        key={item.href + item.label}
                         href={item.href}
-                        className="block px-3 py-2 text-xs font-medium text-stone-800 hover:text-primary hover:bg-[#FAF7F2] rounded-lg transition-colors"
+                        className={`block px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                          item.label === "Shop All"
+                            ? "font-bold text-[#7E22CE] bg-purple-50/80 hover:bg-purple-100"
+                            : "font-medium text-stone-800 hover:text-primary hover:bg-[#FAF7F2]"
+                        }`}
                       >
-                        {item.label}
+                        {item.label === "Shop All" ? "✦ " + item.label : item.label}
                       </Link>
                     ))}
                     <div className="pt-2 border-t border-[#EADBBE]/50 mt-1">
@@ -279,15 +284,34 @@ export function Header() {
             </div>
 
             <nav className="flex-1 py-4 space-y-1 overflow-y-auto no-scrollbar">
+              {/* Prominent Shop All Button */}
+              <div className="mb-4">
+                <Link
+                  href="/products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-[#7E22CE] text-white font-semibold text-sm shadow-md hover:bg-[#6B21A8] transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-200" />
+                    <span>Shop All Jewelry</span>
+                  </span>
+                  <span className="text-xs uppercase tracking-wider text-purple-200 font-mono">All →</span>
+                </Link>
+              </div>
+
               <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-2 pb-1">
-                Categories
+                Explore Collections
               </p>
               {allCategoryLinks.map((link) => (
                 <Link
-                  key={link.href}
+                  key={link.href + link.label}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block text-sm font-medium text-foreground hover:text-primary transition-colors py-1.5 px-2 rounded-lg hover:bg-muted/40"
+                  className={`block text-sm font-medium transition-colors py-2 px-3 rounded-lg ${
+                    link.label === "Shop All"
+                      ? "text-[#7E22CE] font-bold bg-purple-50 hover:bg-purple-100"
+                      : "text-foreground hover:text-[#7E22CE] hover:bg-muted/40"
+                  }`}
                 >
                   {link.label}
                 </Link>

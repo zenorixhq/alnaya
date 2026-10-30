@@ -37,7 +37,7 @@ const categoryIconMap: Record<string, string> = {
   earring: "/images/category-cards/earrings.png",
   earrings: "/images/category-cards/earrings.png",
   "stud-and-hoops": "/images/category-cards/earrings.png",
-  jhumkas: "/images/category-cards/earrings.png",
+  jhumkas: "/images/category-cards/jhumkas.png",
   "traditional-earrings": "/images/category-cards/earrings.png",
   anklet: "/images/category-cards/bracelet.png",
   anklets: "/images/category-cards/bracelet.png",
@@ -284,7 +284,7 @@ function ProductCatalogContent() {
             >
               <img
                 src="/images/category-cards/all.png"
-                alt="All Pieces"
+                alt="Shop All Pieces"
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
               />
             </div>
@@ -295,7 +295,7 @@ function ProductCatalogContent() {
                   : "font-medium text-stone-700 group-hover:text-stone-900"
               }`}
             >
-              All
+              Shop All
             </span>
             <span className="text-[10px] text-stone-400 font-mono -mt-0.5">
               ({products.length})
@@ -306,15 +306,23 @@ function ProductCatalogContent() {
           {categoryList.map((cat) => {
             const count = products.filter((p) => {
               if (cat.slug === "new-arrivals") return p.isNewArrival || p.category === "new-arrivals";
+              if (cat.slug === "minimal-chains") return p.category === "minimal-chains" || p.tags.some(t => /minimal/i.test(t)) || /chain|pendant/i.test(p.title);
+              if (cat.slug === "hanging-chains") return p.category === "hanging-chains" || p.tags.some(t => /hanging/i.test(t)) || /hanging|lariat|drop/i.test(p.title);
               if (cat.slug === "necklaces-and-chains" || cat.slug === "necklaces") return p.category === "necklaces-and-chains" || p.category === "necklaces" || /necklace|chain|pendant/i.test(p.title);
-              if (cat.slug === "bangles-kada") return p.category === "bangles-kada" || p.category === "bangles" || /bangle|kada|cuff/i.test(p.title);
-              if (cat.slug === "bracelets") return (p.category === "bracelets" && !/bangle|kada|cuff/i.test(p.title)) || /bracelet/i.test(p.title);
+              if (cat.slug === "jhumkas") return p.category === "jhumkas" || /jhumka|jhumki|temple/i.test(p.title);
+              if (cat.slug === "stud-and-hoops") return p.category === "stud-and-hoops" || /stud|hoop|huggie/i.test(p.title);
+              if (cat.slug === "traditional-earrings") return p.category === "traditional-earrings" || /chandbali|traditional|earring/i.test(p.title);
+              if (cat.slug === "traditional-sets") return p.category === "traditional-sets" || /set|bridal|necklace set/i.test(p.title);
+              if (cat.slug === "bangles-kada" || cat.slug === "bangles") return p.category === "bangles-kada" || p.category === "bangles" || /bangle|kada|cuff|chooda/i.test(p.title);
+              if (cat.slug === "bracelets" || cat.slug === "bracelet") return p.category === "bracelets" || p.category === "bracelet" || /bracelet/i.test(p.title);
+              if (cat.slug === "rings" || cat.slug === "ring") return p.category === "rings" || p.category === "ring" || /ring|band/i.test(p.title);
+              if (cat.slug === "anklets") return p.category === "anklets" || /anklet|payal/i.test(p.title);
+              if (cat.slug === "nosepin") return p.category === "nosepin" || /nosepin|nath|nose/i.test(p.title);
+              if (cat.slug === "offer-products") return p.category === "offer-products" || p.tags.some(t => /offer/i.test(t)) || !!p.salePrice || p.isBestSeller;
               if (cat.slug === "watches") return p.category === "watches" || /watch/i.test(p.title);
               if (cat.slug === "charms") return p.category === "charms" || /charm/i.test(p.title);
               if (cat.slug === "hip-chains") return p.category === "hip-chains" || /hip chain|waist/i.test(p.title);
               if (cat.slug === "kids-collection") return p.category === "kids-collection" || p.category === "kids" || /kid|child/i.test(p.title);
-              if (cat.slug === "anklets") return p.category === "anklets" || /anklet/i.test(p.title);
-              if (cat.slug === "rings") return p.category === "rings" || /ring/i.test(p.title);
               if (cat.slug === "earrings") return p.category === "earrings" || /earring|stud|hoop/i.test(p.title);
               return p.category === cat.slug;
             }).length;

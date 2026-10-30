@@ -3231,17 +3231,40 @@ export default function AdminDashboardPage() {
                     onChange={(e) => setFormState({ ...formState, category: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
                   >
-                    <option value="necklaces-and-chains">Necklaces and Chains</option>
-                    <option value="rings">Rings</option>
-                    <option value="earrings">Earrings</option>
-                    <option value="bracelets">Bracelets</option>
-                    <option value="bangles-kada">Bangles Kada</option>
-                    <option value="watches">Watches</option>
-                    <option value="charms">Charms</option>
-                    <option value="hip-chains">Hip Chains</option>
-                    <option value="anklets">Anklets</option>
-                    <option value="kids-collection">Kids Collection</option>
-                    <option value="new-arrivals">New Arrivals</option>
+                    <optgroup label="Alnaya Core Collections">
+                      <option value="jhumkas">Jhumkas</option>
+                      <option value="minimal-chains">Minimal Chains</option>
+                      <option value="hanging-chains">Hanging Chains</option>
+                      <option value="traditional-sets">Traditional Sets</option>
+                      <option value="stud-and-hoops">Stud & Hoops</option>
+                      <option value="traditional-earrings">Traditional Earrings</option>
+                      <option value="bangles">Bangles</option>
+                      <option value="bangles-kada">Bangles / Kada</option>
+                      <option value="bracelet">Bracelet</option>
+                      <option value="bracelets">Bracelets</option>
+                      <option value="ring">Ring</option>
+                      <option value="rings">Rings</option>
+                      <option value="anklets">Anklets</option>
+                      <option value="nosepin">Nosepin</option>
+                      <option value="offer-products">Offer Products</option>
+                    </optgroup>
+                    {categoriesList.filter(c => ![
+                      "jhumkas", "minimal-chains", "hanging-chains", "traditional-sets", 
+                      "stud-and-hoops", "traditional-earrings", "bangles", "bangles-kada", 
+                      "bracelet", "bracelets", "ring", "rings", "anklets", "nosepin", "offer-products"
+                    ].includes(c.slug)).length > 0 && (
+                      <optgroup label="Other Collections">
+                        {categoriesList
+                          .filter(c => ![
+                            "jhumkas", "minimal-chains", "hanging-chains", "traditional-sets", 
+                            "stud-and-hoops", "traditional-earrings", "bangles", "bangles-kada", 
+                            "bracelet", "bracelets", "ring", "rings", "anklets", "nosepin", "offer-products"
+                          ].includes(c.slug))
+                          .map((c) => (
+                            <option key={c.slug} value={c.slug}>{c.name}</option>
+                          ))}
+                      </optgroup>
+                    )}
                   </select>
                 </div>
 
