@@ -57,8 +57,8 @@ export function Header() {
 
   const isHomePage = pathname === "/" || pathname === "";
   const isTransparent = mounted && isHomePage && !isScrolled;
-  // Dark navigation styling applies ONLY on the homepage (transparent over dark hero, or dark charcoal #1C1917 on scroll)
-  const isDarkNav = isHomePage;
+  // Dark navigation styling applies only if hero is dark; with Aleena's warm cream editorial hero, light styling applies throughout
+  const isDarkNav = false;
 
   const primaryNavLinks = [
     { label: "Shop All", href: "/products" },
@@ -90,8 +90,8 @@ export function Header() {
         className={`w-full transition-all duration-300 ${
           isHomePage
             ? isScrolled
-              ? "fixed top-0 left-0 right-0 z-50 bg-[#1C1917]/95 backdrop-blur-md shadow-xl border-b border-white/10 text-white"
-              : "absolute top-0 left-0 right-0 z-40 bg-transparent text-white border-b border-white/10"
+              ? "fixed top-0 left-0 right-0 z-50 bg-[#FAF7F2]/95 backdrop-blur-md shadow-md border-b border-[#EADBBE] text-[#1C1917]"
+              : "absolute top-0 left-0 right-0 z-40 bg-[#FAF7F2]/70 backdrop-blur-xs text-[#1C1917] border-b border-[#EADBBE]/50"
             : "sticky top-0 z-50 bg-[#FAF7F2] text-foreground border-b border-[#EADBBE]/80 shadow-2xs"
         }`}
       >
