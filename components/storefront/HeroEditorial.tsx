@@ -124,25 +124,71 @@ export function HeroEditorial() {
       </div>
 
       {/* ========================================================================= */}
-      {/* MOBILE HERO: Image only at top, then title, subtitle, story & buttons after */}
+      {/* MOBILE HERO: Vertical portrait with Heading & Subheading on the left */}
       {/* ========================================================================= */}
       <div className="lg:hidden flex flex-col w-full pt-16">
         
-        {/* 1. Mobile Image Only (Unframed raw photo, perfectly proportioned) */}
-        <div className="w-full relative aspect-[16/10] sm:aspect-[16/9] max-h-[38vh] overflow-hidden select-none">
-          <img
-            src="/images/founder-aleena-saree-hero.jpg"
-            alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-            className="w-full h-full object-cover object-[80%_center]"
-            loading="eager"
-            decoding="sync"
-          />
-          {/* Subtle bottom transition feather into content */}
-          <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#FAF7F2] to-transparent pointer-events-none" />
+        {/* 1. Mobile Portrait Image with Heading & Subheading on Left Side */}
+        <div className="w-full relative aspect-[9/11] sm:aspect-[9/10] overflow-hidden select-none bg-[#FAF7F2]">
+          <picture>
+            <source srcSet="/images/founder-aleena-mobile.webp" type="image/webp" />
+            <img
+              src="/images/founder-aleena-mobile.jpg"
+              alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
+              className="w-full h-full object-cover object-top"
+              loading="eager"
+              decoding="sync"
+              style={{ imageRendering: "-webkit-optimize-contrast" }}
+            />
+          </picture>
+
+          {/* Left subtle ambient gradient for perfect text contrast on warm sunlight wall */}
+          <div className="absolute inset-y-0 left-0 w-[60%] bg-gradient-to-r from-[#FAF7F2]/40 via-[#FAF7F2]/10 to-transparent pointer-events-none" />
+
+          {/* Bottom subtle transition feather into the manifesto section */}
+          <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#FAF7F2] via-[#FAF7F2]/60 to-transparent pointer-events-none" />
+
+          {/* Heading & Subheading Positioned on the Left Side of the Image */}
+          <div className="absolute top-4 sm:top-6 left-4 sm:left-6 w-[52%] sm:w-[50%] z-10 space-y-1.5 sm:space-y-2 pointer-events-none">
+            {/* Brand Eyebrow */}
+            <div className="flex items-center gap-1.5">
+              <span className="font-editorial text-[10px] sm:text-xs font-semibold tracking-[0.24em] uppercase text-[#1C1917]">
+                {storeConfig?.meta?.name || "ALNAYA"}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-[#9A7B4F]" />
+              <span className="text-[8px] sm:text-[9px] font-medium tracking-[0.16em] uppercase text-[#786E5E]">
+                JEWELLERY
+              </span>
+            </div>
+
+            {/* Handwritten Script Kicker */}
+            <div>
+              <span className="font-script text-xl sm:text-2xl text-[#9A7B4F] select-none block leading-none">
+                From my heart
+              </span>
+            </div>
+
+            {/* Headline Display */}
+            <h1 className="font-editorial text-2xl sm:text-3xl font-normal tracking-tight text-[#1C1917] leading-[1.08]">
+              <span>Hi, I&apos;m </span>
+              <span className="font-medium text-[#1C1917]">Aleena</span>
+            </h1>
+
+            {/* Subheading / Role with Gold Divider Line */}
+            <div className="space-y-1 pt-0.5">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#786E5E]">
+                  FOUNDER &amp; CREATIVE SOUL
+                </span>
+                <Sparkles className="w-3 h-3 text-[#9A7B4F] shrink-0" />
+              </div>
+              <div className="w-10 h-[1.5px] bg-gradient-to-r from-[#9A7B4F] via-[#C5A059] to-transparent rounded-full" />
+            </div>
+          </div>
         </div>
 
-        {/* 2. Mobile Typography & Actions (Title, subtitle, story and buttons within mobile hero) */}
-        <div className="relative z-10 px-5 sm:px-8 py-5 sm:py-6 space-y-3 text-left">
+        {/* 2. Mobile Typography & Actions (Manifesto, signature, buttons & badges) */}
+        <div className="relative z-10 px-5 sm:px-8 pt-2 pb-6 space-y-3 text-left">
           
           {/* Subtle signature watermark in background on mobile */}
           <div className="absolute top-1/2 -translate-y-1/2 -left-4 w-72 sm:w-80 opacity-[0.06] select-none pointer-events-none -rotate-6 z-0">
@@ -154,41 +200,8 @@ export function HeroEditorial() {
           </div>
 
           <div className="relative z-10 space-y-2.5">
-            
-            {/* Brand Eyebrow */}
-            <div className="flex items-center gap-2">
-              <span className="font-editorial text-[11px] font-semibold tracking-[0.28em] uppercase text-[#1C1917]">
-                {storeConfig?.meta?.name || "ALNAYA"}
-              </span>
-              <span className="w-1 h-1 rounded-full bg-[#9A7B4F]" />
-              <span className="text-[9px] font-medium tracking-[0.2em] uppercase text-[#786E5E]">
-                TIMELESS JEWELLERY
-              </span>
-            </div>
-
-            {/* Script Kicker */}
-            <div>
-              <span className="font-script text-2xl text-[#9A7B4F] select-none block leading-none">
-                From my heart
-              </span>
-            </div>
-
-            {/* Title & Subtitle */}
-            <div className="space-y-1">
-              <h1 className="font-editorial text-3xl font-normal tracking-tight text-[#1C1917] leading-tight">
-                <span>Hi, I&apos;m </span>
-                <span className="font-medium text-[#1C1917]">Aleena</span>
-              </h1>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#786E5E]">
-                  FOUNDER &amp; CREATIVE SOUL
-                </span>
-                <Sparkles className="w-3 h-3 text-[#9A7B4F]" />
-              </div>
-            </div>
-
             {/* Manifesto Message */}
-            <p className="text-xs text-[#4A4235] font-light leading-relaxed max-w-md font-sans">
+            <p className="text-xs sm:text-[13px] text-[#4A4235] font-light leading-relaxed max-w-md font-sans">
               I started ALNAYA with a simple belief — that jewellery is more than just an accessory, it&apos;s a part of your story. Every piece is thoughtfully designed to bring out your unique beauty, celebrate your moments, and stay with you for a lifetime.
             </p>
 
@@ -197,12 +210,12 @@ export function HeroEditorial() {
               <img
                 src="/images/aleena-signature-dark.png"
                 alt="Aleena Signature"
-                className="h-8 w-auto object-contain select-none opacity-90"
+                className="h-8 sm:h-9 w-auto object-contain select-none opacity-90"
               />
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-2">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1.5">
               <Link
                 href="/products"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs font-semibold tracking-wide shadow-md transition-all duration-300"
@@ -231,7 +244,6 @@ export function HeroEditorial() {
               <span>•</span>
               <span className="font-medium">Skin Safe</span>
             </div>
-
           </div>
         </div>
       </div>
