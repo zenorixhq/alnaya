@@ -40,6 +40,8 @@ export interface StoreConfig {
     supportedCurrencies: { code: string; symbol: string; name?: string; flag?: string; rate: number }[];
     freeShippingThreshold: number;
     flatShippingFee: number;
+    shippingFeeKerala: number;
+    shippingFeeOutsideKerala: number;
     taxRatePercent: number;
     taxInclusive: boolean;
     checkoutMode: "gateway" | "whatsapp"; // 'gateway' online checkout with Razorpay + WhatsApp assisted
@@ -107,7 +109,9 @@ export const storeConfig: StoreConfig = {
       { code: "INR", symbol: "₹", name: "India (₹)", flag: "🇮🇳", rate: 1.0 },
     ],
     freeShippingThreshold: 799,
-    flatShippingFee: 40,
+    flatShippingFee: 50,
+    shippingFeeKerala: 50,
+    shippingFeeOutsideKerala: 60,
     taxRatePercent: 0,
     taxInclusive: true,
     checkoutMode: "gateway",
@@ -141,7 +145,7 @@ export const storeConfig: StoreConfig = {
     enableQuickView: true,
     enableStockBadges: true,
     enableAnnouncementBar: true,
-    announcementText: "✨ Handcrafted Jhumkas & Fine Jewellery • 1000+ Happy Customers • Pan-India Express Delivery • Free Shipping above ₹799 • Pay Securely via UPI / Cards",
+    announcementText: "✨ Handcrafted Jhumkas & Fine Jewellery • Kerala Delivery ₹50 • Outside Kerala ₹60 • Free Shipping above ₹799 • Pay Securely via UPI / Cards",
     enableWhatsAppFloat: true,
     enableCurrencySwitcher: false,
   },

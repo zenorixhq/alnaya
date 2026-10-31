@@ -268,7 +268,7 @@ export function CartDrawer() {
                   </div>
                 )}
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Pan-India Delivery</span>
+                  <span>Shipping (Kerala ₹50 / Outside ₹60)</span>
                   <span>{shipping === 0 ? "FREE" : formatPrice(shipping)}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold text-foreground pt-2 border-t border-border">

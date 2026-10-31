@@ -810,14 +810,19 @@ export function PolicyModal({
                     </thead>
                     <tbody className="divide-y divide-border">
                       <tr className="hover:bg-muted/20">
-                        <td className="p-3 font-semibold text-foreground">Pan-India Orders Below ₹799</td>
-                        <td className="p-3 font-bold text-primary">Flat ₹40</td>
+                        <td className="p-3 font-semibold text-foreground">Within Kerala (All 14 Districts) Below ₹799</td>
+                        <td className="p-3 font-bold text-primary">₹50</td>
+                        <td className="p-3 text-muted-foreground">2 – 3 Business Days</td>
+                      </tr>
+                      <tr className="hover:bg-muted/20">
+                        <td className="p-3 font-semibold text-foreground">Outside Kerala (Rest of India) Below ₹799</td>
+                        <td className="p-3 font-bold text-primary">₹60</td>
                         <td className="p-3 text-muted-foreground">3 – 5 Business Days</td>
                       </tr>
                       <tr className="bg-primary/5 hover:bg-primary/10">
-                        <td className="p-3 font-bold text-primary">Pan-India Orders Above ₹799</td>
+                        <td className="p-3 font-bold text-primary">Orders Above ₹799</td>
                         <td className="p-3 font-bold text-emerald-600">FREE Delivery</td>
-                        <td className="p-3 font-semibold text-foreground">3 – 5 Business Days</td>
+                        <td className="p-3 font-semibold text-foreground">Priority Express</td>
                       </tr>
                       <tr className="hover:bg-muted/20">
                         <td className="p-3 font-semibold text-foreground">State of Qatar Orders</td>

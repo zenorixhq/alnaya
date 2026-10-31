@@ -32,12 +32,16 @@ interface CartStore {
   openQuickView: (product: Product) => void;
   closeQuickView: () => void;
 
+  // Shipping destination
+  shippingState: string;
+  setShippingState: (state: string) => void;
+
   // Computed helpers
   getSubtotal: () => number;
   getDiscountAmount: () => number;
-  getShippingFee: () => number;
+  getShippingFee: (stateParam?: string) => number;
   getTaxAmount: () => number;
-  getTotal: () => number;
+  getTotal: (stateParam?: string) => number;
   getItemCount: () => number;
 }
 
@@ -48,6 +52,8 @@ export const useCartStore = create<CartStore>()(
       wishlist: [],
       selectedCurrency: storeConfig.commerce.defaultCurrency,
       appliedCoupon: null,
+      shippingState: "Kerala",
+      setShippingState: (state: string) => set({ shippingState: state }),
       isCartOpen: false,
       quickViewProduct: null,
 
@@ -186,12 +192,17 @@ export const useCartStore = create<CartStore>()(
         return Math.min(coupon.amount, subtotal);
       },
 
-      getShippingFee: () => {
+      getShippingFee: (stateParam?: string) => {
         const subtotal = get().getSubtotal();
         if (subtotal === 0) return 0;
         const threshold = storeConfig.commerce.freeShippingThreshold;
         if (subtotal >= threshold) return 0;
-        return storeConfig.commerce.flatShippingFee;
+
+        const state = (stateParam || get().shippingState || "Kerala").trim().toLowerCase();
+        const isKerala = state === "kerala";
+        return isKerala
+          ? (storeConfig.commerce.shippingFeeKerala ?? 50)
+          : (storeConfig.commerce.shippingFeeOutsideKerala ?? 60);
       },
 
       getTaxAmount: () => {
@@ -202,10 +213,10 @@ export const useCartStore = create<CartStore>()(
         return taxableAmount * rate;
       },
 
-      getTotal: () => {
+      getTotal: (stateParam?: string) => {
         const subtotal = get().getSubtotal();
         const discount = get().getDiscountAmount();
-        const shipping = get().getShippingFee();
+        const shipping = get().getShippingFee(stateParam);
         const tax = get().getTaxAmount();
         return Math.max(0, subtotal - discount + shipping + tax);
       },

@@ -2328,7 +2328,7 @@ export default function AdminDashboardPage() {
                   <p>
                     Delivery:{" "}
                     <strong className="text-foreground">
-                      Free Shipping on orders above ₹{storeConfig.commerce.freeShippingThreshold} (Flat ₹{storeConfig.commerce.flatShippingFee} below)
+                      Free Shipping on orders above ₹{storeConfig.commerce.freeShippingThreshold} (Kerala ₹{storeConfig.commerce.shippingFeeKerala}, Outside Kerala ₹{storeConfig.commerce.shippingFeeOutsideKerala})
                     </strong>
                   </p>
                   <p>Ordering Method: <strong className="text-foreground">Instant WhatsApp Order Direct Checkout</strong></p>

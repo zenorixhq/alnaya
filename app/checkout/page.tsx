@@ -66,7 +66,7 @@ export default function CheckoutPage() {
 
   const subtotal = useCartStore((s) => s.getSubtotal)();
   const discount = useCartStore((s) => s.getDiscountAmount)();
-  const shipping = useCartStore((s) => s.getShippingFee)();
+  const shipping = useCartStore((s) => s.getShippingFee)(formData.state);
   const grandTotal = Math.max(0, subtotal - discount + shipping);
 
   if (!mounted) {
@@ -302,7 +302,7 @@ export default function CheckoutPage() {
                     </h3>
                   </div>
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                    🇮🇳 Pan-India Shipping
+                    🇮🇳 Kerala ₹50 • Outside Kerala ₹60
                   </span>
                 </div>
 
@@ -615,7 +615,8 @@ export default function CheckoutPage() {
 
                   <div className="flex justify-between text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Truck className="w-3.5 h-3.5" /> Pan-India Delivery
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>Shipping ({formData.state === "Kerala" ? "Kerala" : "Outside Kerala"})</span>
                     </span>
                     <span className="font-medium text-foreground">
                       {shipping === 0 ? (

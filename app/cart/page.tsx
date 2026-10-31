@@ -214,7 +214,7 @@ export default function CartPage() {
               </div>
             )}
             <div className="flex justify-between text-muted-foreground">
-              <span>Pan-India Shipping</span>
+              <span>Shipping (Kerala ₹50 / Outside ₹60)</span>
               <span>{shipping === 0 ? "FREE" : formatPrice(shipping)}</span>
             </div>
             <div className="flex justify-between text-base font-black text-foreground pt-3 border-t border-border">
