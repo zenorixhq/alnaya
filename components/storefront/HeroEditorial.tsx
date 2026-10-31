@@ -8,27 +8,27 @@ import { storeConfig } from "@/config/store.config";
 export function HeroEditorial() {
   return (
     <section className="relative w-full min-h-[90svh] sm:min-h-screen bg-[#FAF7F2] text-[#1C1917] overflow-hidden select-none flex flex-col justify-between pt-16 sm:pt-20 lg:pt-24">
-      {/* 1. Desktop Full-Bleed Unframed Hero Image (Photo only, zero frame) */}
+      {/* 1. Desktop Full-Bleed Unframed Hero Image (Photo only, zero frame, seamless #FAF7F2 blend) */}
       <div className="hidden lg:block absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
-          src="/images/founder-aleena-hero.jpg"
+          src="/images/founder-aleena-saree-hero.jpg"
           alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-          className="w-full h-full object-cover object-[78%_center] xl:object-[82%_center]"
+          className="w-full h-full object-cover object-[80%_center] xl:object-[84%_center]"
           loading="eager"
           decoding="sync"
           style={{ imageRendering: "-webkit-optimize-contrast" }}
         />
-        {/* Soft Left Ambient Feather: ensures typography on the left wall is 100% crisp while keeping Aleena's photo pristine */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/85 to-transparent w-full max-w-2xl xl:max-w-3xl pointer-events-none" />
+        {/* Soft Left Ambient Feather: blends smoothly into the #FAF7F2 canvas */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/80 to-transparent w-full max-w-2xl xl:max-w-3xl pointer-events-none" />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FAF7F2] to-transparent pointer-events-none" />
       </div>
 
-      {/* 2. Mobile Clean Unframed Image (Image only at top, zero border/frame) */}
+      {/* 2. Mobile Clean Unframed Image (New Saree Photo, zero frame) */}
       <div className="lg:hidden w-full relative aspect-[16/11] sm:aspect-[16/10] overflow-hidden select-none">
         <img
-          src="/images/founder-aleena-hero.jpg"
+          src="/images/founder-aleena-saree-hero.jpg"
           alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-          className="w-full h-full object-cover object-[72%_center]"
+          className="w-full h-full object-cover object-[80%_center]"
           loading="eager"
           decoding="sync"
         />
@@ -60,7 +60,7 @@ export function HeroEditorial() {
       {/* 4. Main Editorial Content Container */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 my-auto py-6 sm:py-10 lg:py-16">
         
-        {/* Subtle Signature Watermark in Background (Requested: subtle signature in background) */}
+        {/* Subtle Signature Watermark in Background (Watermark, requested by Aleena) */}
         <div className="absolute top-1/2 -translate-y-1/2 -left-4 sm:left-2 lg:left-6 font-script text-7xl sm:text-9xl md:text-[11rem] lg:text-[13rem] xl:text-[15rem] text-[#9A7B4F]/[0.08] select-none pointer-events-none -rotate-6 z-0 leading-none tracking-wide whitespace-nowrap">
           Aleena ♡
         </div>
