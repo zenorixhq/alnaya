@@ -228,48 +228,10 @@ function ProductCatalogContent() {
     inStockOnly;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6">
-      {/* 1. Header & Title Banner */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-border">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold mb-1">
-            <Sparkles className="w-3 h-3" />
-            <span>Waterproof • Hypoallergenic • Everyday Luxury</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-foreground">
-            {selectedCategory === "all"
-              ? "All Jewelry Collection"
-              : categoryList.find((c) => c.slug === selectedCategory)?.name || "Jewelry Collection"}
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Showing {displayedProducts.length} of {filteredProducts.length} pieces • 4 items per row
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search clover, hoops, bangles, rings..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-muted/40 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* 2. Visual Category Cards Bar (Matching user's reference) */}
-      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-3 sm:p-4 rounded-3xl border border-stone-200/70 shadow-sm">
-        <div className="flex items-start gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-1 scrollbar-none scroll-smooth -mx-1 px-1">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-8 sm:pb-10 space-y-4 sm:space-y-5">
+      {/* 1. Visual Category Cards Bar (Positioned high at top for immediate browsing) */}
+      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs">
+        <div className="flex items-start gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pb-1 scrollbar-none scroll-smooth -mx-1 px-1">
           {/* "All Pieces" Card */}
           <button
             onClick={() => setSelectedCategory("all")}
@@ -369,6 +331,44 @@ function ProductCatalogContent() {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* 2. Header & Title Banner + Search */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-3 border-b border-border">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold mb-1">
+            <Sparkles className="w-3 h-3" />
+            <span>Waterproof • Hypoallergenic • Everyday Luxury</span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-foreground">
+            {selectedCategory === "all"
+              ? "All Jewelry Collection"
+              : categoryList.find((c) => c.slug === selectedCategory)?.name || "Jewelry Collection"}
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Showing {displayedProducts.length} of {filteredProducts.length} pieces • 4 items per row
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative w-full md:w-80">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search clover, hoops, bangles, rings..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-muted/40 border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

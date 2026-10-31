@@ -29,15 +29,9 @@ export default function HomePage() {
       {/* 1. Hero Section (Enclosed within entire screen window, full scroll) */}
       <HeroEditorial />
 
-      {/* 2. About Us Section (Enclosed within entire screen window, full scroll) */}
-      <AboutUsSection />
-
-      {/* 3. Five Signature Brand Badges & WhatsApp Direct Contact Banner */}
-      <BrandValueBadges />
-
-      {/* 4. Curated Catalog / Shop by Category Grid (New Arrivals First) */}
-      <section className="w-full py-16 sm:py-24 border-t border-[#EADBBE]/60 bg-[#FAF7F2]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* 2. Curated Catalog / Shop by Category Grid (Positioned high up right below Hero) */}
+      <section className="w-full py-12 sm:py-20 border-b border-[#EADBBE]/60 bg-[#FAF7F2]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#7E22CE] uppercase tracking-widest">
@@ -89,6 +83,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 3. About Us Section */}
+      <AboutUsSection />
+
+      {/* 4. Five Signature Brand Badges & WhatsApp Direct Contact Banner */}
+      <BrandValueBadges />
 
       {/* 5. Follow The House (Instagram Editorial Mosaic) */}
       <FollowTheHouseSection />
