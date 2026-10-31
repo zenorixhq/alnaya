@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { storeConfig } from "@/config/store.config";
 
 export function HeroEditorial() {
@@ -67,9 +67,8 @@ export function HeroEditorial() {
 
             {/* Subheading / Role with Warm Gold Divider Line */}
             <div className="space-y-1.5 pt-0.5">
-              <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#786E5E] flex items-center gap-2">
-                <span>FOUNDER &amp; CREATIVE SOUL</span>
-                <Sparkles className="w-3.5 h-3.5 text-[#9A7B4F]" />
+              <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#786E5E]">
+                FOUNDER &amp; CREATIVE SOUL
               </div>
               <div className="w-14 h-[1.5px] bg-gradient-to-r from-[#9A7B4F] via-[#C5A059] to-transparent rounded-full" />
             </div>
@@ -89,22 +88,14 @@ export function HeroEditorial() {
             />
           </div>
 
-          {/* Interactive Action Buttons */}
+          {/* Interactive Action Button */}
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs lg:text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs lg:text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
             >
-              <span>✦ Shop All Jewelry</span>
+              <span>Discover Collection</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-[#FAF7F2] text-[#1C1917] hover:text-[#7E22CE] text-xs lg:text-sm font-semibold tracking-wide border border-[#EADBBE] shadow-2xs hover:shadow-sm transition-all duration-300 group"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#9A7B4F] group-hover:text-[#7E22CE] transition-colors" />
-              <span>Browse Collection</span>
             </Link>
           </div>
 
@@ -176,12 +167,9 @@ export function HeroEditorial() {
 
             {/* Subheading / Role with Gold Divider Line */}
             <div className="space-y-1 pt-0.5">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[8.5px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#786E5E]">
-                  FOUNDER &amp; CREATIVE SOUL
-                </span>
-                <Sparkles className="w-2.5 h-2.5 text-[#9A7B4F] shrink-0" />
-              </div>
+              <span className="text-[8.5px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#786E5E] block">
+                FOUNDER &amp; CREATIVE SOUL
+              </span>
               <div className="w-10 h-[1.5px] bg-gradient-to-r from-[#9A7B4F] via-[#C5A059] to-transparent rounded-full" />
             </div>
 
@@ -204,22 +192,14 @@ export function HeroEditorial() {
         {/* 2. Mobile Action Buttons & Trust Assurances (Below the image) */}
         <div className="relative z-10 px-4 sm:px-8 pt-3 pb-6 space-y-2.5 text-center sm:text-left">
           
-          {/* Action Buttons */}
+          {/* Action Button */}
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs font-semibold tracking-wide shadow-md transition-all duration-300"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs font-semibold tracking-wide shadow-md transition-all duration-300 group"
             >
-              <span>✦ Shop All Jewelry</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white hover:bg-[#FAF7F2] text-[#1C1917] text-xs font-semibold tracking-wide border border-[#EADBBE] shadow-2xs transition-all duration-300"
-            >
-              <Sparkles className="w-3 h-3 text-[#9A7B4F]" />
-              <span>Browse Collection</span>
+              <span>Discover Collection</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
