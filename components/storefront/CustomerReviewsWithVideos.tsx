@@ -1,7 +1,7 @@
 "use client";
 import { useReviewsData } from "@/hooks/useReviewsData";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import {
   Play,
@@ -15,9 +15,7 @@ import {
   MessageCircle,
   Maximize2,
   ShieldCheck,
-  Heart,
   Star,
-  Quote,
 } from "lucide-react";
 
 export interface ReviewQuote {
@@ -53,13 +51,11 @@ export interface VideoReel {
   productPrice?: number;
 }
 
-import initialReviewData from "@/data/clientReviews.json";
+type CarouselItem =
+  | { kind: "video"; id: string; data: VideoReel }
+  | { kind: "screenshot"; id: string; data: FeedbackScreenshot };
 
-const defaultReviewQuotes: ReviewQuote[] = (initialReviewData.reviews || []) as ReviewQuote[];
-const defaultVideoReels: VideoReel[] = (initialReviewData.videoReels || []) as VideoReel[];
-const defaultScreenshots: FeedbackScreenshot[] = (initialReviewData.feedbackScreenshots || []) as FeedbackScreenshot[];
-
-function AutoPlayingReelCard({
+function VideoCardPreview({
   reel,
   onClick,
 }: {
@@ -114,9 +110,9 @@ function AutoPlayingReelCard({
   return (
     <div
       onClick={onClick}
-      className="group relative aspect-[9/15] rounded-xl sm:rounded-2xl overflow-hidden bg-stone-900 shadow-md cursor-pointer border border-stone-300/80 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 ease-out"
+      className="group relative w-[70vw] xs:w-[58vw] sm:w-[42vw] md:w-[32vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-2xl overflow-hidden bg-stone-900 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
     >
-      {/* Autoplaying live video element */}
+      {/* Video / Poster Media */}
       {isDirectVideo ? (
         <video
           ref={videoRef}
@@ -134,43 +130,121 @@ function AutoPlayingReelCard({
           src={reel.poster}
           alt={reel.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          loading="lazy"
         />
       )}
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/35 flex flex-col justify-between p-3 text-white pointer-events-none">
-        {/* Top Sound Toggle (View count removed) */}
-        <div className="flex items-center justify-end text-[10px] pointer-events-auto">
-          {isDirectVideo && (
-            <button
-              type="button"
-              onClick={toggleSound}
-              className="w-6 h-6 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur flex items-center justify-center text-white transition-all shadow"
-              title={isMuted ? "Unmute sound" : "Mute sound"}
-            >
-              {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3 text-amber-400" />}
-            </button>
-          )}
-        </div>
+      {/* Top Floating Badges */}
+      <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10 pointer-events-none">
+        <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
+          <Sparkles className="w-3 h-3 text-purple-400" />
+          <span>Video Reel</span>
+        </span>
 
-        {/* Center Hover Action */}
-        <div className="self-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-11 h-11 rounded-full bg-white/90 text-stone-900 flex items-center justify-center shadow-lg group-hover:scale-110">
-          <Play className="w-4 h-4 fill-current ml-0.5 text-stone-900" />
-        </div>
+        {isDirectVideo && (
+          <button
+            type="button"
+            onClick={toggleSound}
+            className="w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur flex items-center justify-center text-white transition-all shadow pointer-events-auto"
+            title={isMuted ? "Unmute sound" : "Mute sound"}
+          >
+            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-400" />}
+          </button>
+        )}
+      </div>
 
-        {/* Bottom Details */}
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold text-white line-clamp-1 leading-snug drop-shadow-sm">
-            {reel.title}
-          </p>
-          <p className="text-[10px] text-white/80 font-medium drop-shadow-sm">
-            {reel.handle}
-          </p>
+      {/* Center Hover Action */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 w-12 h-12 rounded-full bg-white/95 text-stone-900 flex items-center justify-center shadow-xl">
+          <Play className="w-5 h-5 fill-current ml-0.5 text-stone-900" />
+        </div>
+      </div>
+
+      {/* Bottom Editorial Details Gradient */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3.5 pt-10 text-white space-y-1.5 pointer-events-none">
+        <p className="text-xs sm:text-sm font-semibold text-white line-clamp-1 leading-snug drop-shadow-sm">
+          {reel.title}
+        </p>
+        <p className="text-[11px] text-white/80 font-medium drop-shadow-sm">
+          {reel.handle}
+        </p>
+        <div className="flex items-center justify-between pt-0.5">
           {reel.productTitle && (
-            <span className="inline-block text-[9px] text-purple-300 font-semibold bg-white/10 px-1.5 py-0.5 rounded">
+            <span className="text-[9px] sm:text-[10px] text-purple-200 font-semibold bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/10 truncate max-w-[140px]">
               {reel.productTitle}
             </span>
           )}
+          <span className="text-[10px] text-purple-300 font-medium group-hover:text-white transition-colors">
+            Play Reel →
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScreenshotCardPreview({
+  item,
+  onClick,
+}: {
+  item: FeedbackScreenshot;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className="group relative w-[70vw] xs:w-[58vw] sm:w-[42vw] md:w-[32vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-2xl overflow-hidden bg-stone-950 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
+    >
+      {/* High Quality Screenshot Preview */}
+      <img
+        src={item.imageUrl}
+        alt={item.caption || "Customer feedback screenshot"}
+        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
+        loading="lazy"
+      />
+
+      {/* Top Floating Badge */}
+      <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10 pointer-events-none">
+        <span className="bg-[#114E45]/90 backdrop-blur-md text-white text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
+          <MessageCircle className="w-3 h-3 text-[#25D366] fill-[#25D366]" />
+          <span>Verified Review</span>
+        </span>
+        <span className="w-7 h-7 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center text-white text-[11px] shadow pointer-events-auto group-hover:scale-105 transition-transform">
+          <Maximize2 className="w-3.5 h-3.5" />
+        </span>
+      </div>
+
+      {/* Center Hover Action */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 w-12 h-12 rounded-full bg-white/95 text-stone-900 flex items-center justify-center shadow-xl">
+          <Maximize2 className="w-5 h-5 text-stone-800" />
+        </div>
+      </div>
+
+      {/* Bottom Editorial Details Gradient */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-3.5 pt-12 text-white space-y-1.5 pointer-events-none">
+        <div className="flex items-center gap-1.5">
+          <p className="text-xs sm:text-sm font-semibold text-white drop-shadow-sm truncate">
+            {item.customerName || "Verified Collector"}
+          </p>
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+        </div>
+
+        {item.caption && (
+          <p className="text-[11px] text-stone-200 italic line-clamp-2 leading-relaxed drop-shadow-sm font-light">
+            &ldquo;{item.caption}&rdquo;
+          </p>
+        )}
+
+        <div className="flex items-center justify-between pt-0.5">
+          {item.piece && (
+            <span className="text-[9px] sm:text-[10px] text-emerald-200 font-medium bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/10 truncate max-w-[140px]">
+              {item.piece}
+            </span>
+          )}
+          <span className="text-[10px] text-emerald-300 font-medium group-hover:text-white transition-colors">
+            View Details →
+          </span>
         </div>
       </div>
     </div>
@@ -182,7 +256,9 @@ export function CustomerReviewsWithVideos() {
   const [selectedVideo, setSelectedVideo] = useState<VideoReel | null>(null);
   const [selectedScreenshot, setSelectedScreenshot] = useState<FeedbackScreenshot | null>(null);
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<"all" | "videos" | "screenshots">("all");
+
+  const carouselRef = useRef<HTMLDivElement>(null);
   const [isLeftDisabled, setIsLeftDisabled] = useState(true);
   const [isRightDisabled, setIsRightDisabled] = useState(false);
 
@@ -190,9 +266,30 @@ export function CustomerReviewsWithVideos() {
   const [isQuotesLeftDisabled, setIsQuotesLeftDisabled] = useState(true);
   const [isQuotesRightDisabled, setIsQuotesRightDisabled] = useState(false);
 
-  // Update Left / Right Arrow states based on scroll position for Screenshots
+  // Interleave Video Reels & Feedback Screenshots into a single curated stream
+  const allItems = useMemo<CarouselItem[]>(() => {
+    const list: CarouselItem[] = [];
+    const maxLen = Math.max(videoReels.length, feedbackScreenshots.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (i < videoReels.length) {
+        list.push({ kind: "video", id: `video-${videoReels[i].id}`, data: videoReels[i] });
+      }
+      if (i < feedbackScreenshots.length) {
+        list.push({ kind: "screenshot", id: `screenshot-${feedbackScreenshots[i].id}`, data: feedbackScreenshots[i] });
+      }
+    }
+    return list;
+  }, [videoReels, feedbackScreenshots]);
+
+  const visibleItems = useMemo<CarouselItem[]>(() => {
+    if (activeTab === "videos") return allItems.filter((it) => it.kind === "video");
+    if (activeTab === "screenshots") return allItems.filter((it) => it.kind === "screenshot");
+    return allItems;
+  }, [allItems, activeTab]);
+
+  // Update carousel scroll buttons
   const updateScrollButtons = () => {
-    const el = scrollContainerRef.current;
+    const el = carouselRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
     setIsLeftDisabled(scrollLeft <= 6);
@@ -201,7 +298,7 @@ export function CustomerReviewsWithVideos() {
 
   useEffect(() => {
     updateScrollButtons();
-    const el = scrollContainerRef.current;
+    const el = carouselRef.current;
     if (!el) return;
 
     el.addEventListener("scroll", updateScrollButtons, { passive: true });
@@ -214,22 +311,21 @@ export function CustomerReviewsWithVideos() {
       window.removeEventListener("resize", updateScrollButtons);
       clearTimeout(timer);
     };
-  }, [feedbackScreenshots]);
+  }, [visibleItems]);
 
-  // Scroll screenshots 2 cards at a time (scrolls by container clientWidth)
   const scrollPrev = () => {
-    const el = scrollContainerRef.current;
+    const el = carouselRef.current;
     if (!el) return;
-    el.scrollBy({ left: -el.clientWidth, behavior: "smooth" });
+    el.scrollBy({ left: -Math.max(260, el.clientWidth * 0.75), behavior: "smooth" });
   };
 
   const scrollNext = () => {
-    const el = scrollContainerRef.current;
+    const el = carouselRef.current;
     if (!el) return;
-    el.scrollBy({ left: el.clientWidth, behavior: "smooth" });
+    el.scrollBy({ left: Math.max(260, el.clientWidth * 0.75), behavior: "smooth" });
   };
 
-  // Update Left / Right Arrow states based on scroll position for Quotes
+  // Quotes scroll logic
   const updateQuotesScrollButtons = () => {
     const el = quotesScrollRef.current;
     if (!el) return;
@@ -255,7 +351,6 @@ export function CustomerReviewsWithVideos() {
     };
   }, [reviewQuotes]);
 
-  // Scroll Quotes cards
   const scrollQuotesPrev = () => {
     const el = quotesScrollRef.current;
     if (!el) return;
@@ -293,159 +388,127 @@ export function CustomerReviewsWithVideos() {
   }, []);
 
   return (
-    <section className="w-full bg-[#FAF7F2] py-10 sm:py-12 md:py-14 border-t border-[#EADBBE]/80 text-[#1C1917]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
-        {/* Header: The love we get */}
-        <div className="text-center space-y-2">
-          <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-[#7E22CE] font-medium block">
+    <section className="w-full bg-[#FAF7F2] py-12 sm:py-16 md:py-20 border-t border-[#EADBBE]/80 text-[#1C1917] font-glacial">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
+        
+        {/* Editorial Section Header */}
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <span className="text-[11px] sm:text-xs uppercase tracking-[0.28em] text-[#7E22CE] font-bold block">
             IN THEIR WORDS
           </span>
-          <h2 className="font-editorial text-3xl sm:text-5xl font-normal tracking-tight text-[#1C1917]">
+          <h2 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-[#1C1917]">
             The love we get
           </h2>
+          <p className="text-xs sm:text-sm text-stone-600 font-light max-w-lg mx-auto">
+            Real wear tests, customer styling, and unedited WhatsApp chats from women cherishing their ALNAYA heirlooms.
+          </p>
         </div>
 
-        {/* Dual Showcase: Video Reels on Left + Verified Customer Feedback Screenshots on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-          {/* Left Side: Client Reels */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-stone-300/60">
-              <span className="text-xs uppercase tracking-widest font-semibold text-stone-700 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                <span>Client Reels</span>
-              </span>
-              <span className="text-[11px] text-stone-500">Real wear tests</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {videoReels.map((reel) => (
-                <AutoPlayingReelCard
-                  key={reel.id}
-                  reel={reel}
-                  onClick={() => setSelectedVideo(reel)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Right Side: Scrollable 2 Cards at a time Customer Feedback Screenshots */}
-          <div className="lg:col-span-7 flex flex-col justify-between space-y-4 sm:space-y-6">
-            {/* Header for Screenshots */}
-            <div className="flex items-center justify-between pb-2 border-b border-stone-300/60">
-              <span className="text-xs uppercase tracking-widest font-semibold text-stone-700 flex items-center gap-1.5">
-                <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
-                <span>Client Feedback</span>
-              </span>
-              <span className="text-[11px] text-stone-500">Real WhatsApp & DM chats</span>
-            </div>
-
-            {/* Scrollable Container (Shows only screenshot like uploaded image, details reveal on hover) */}
-            <div
-              ref={scrollContainerRef}
-              className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 no-scrollbar scroll-smooth snap-x snap-mandatory"
+        {/* Carousel Filter Pills & Scroll Controls Header */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-[#EADBBE]/70 pb-3">
+          {/* Filter Pills */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-none">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+                activeTab === "all"
+                  ? "bg-[#1C1917] text-white shadow-xs"
+                  : "bg-white text-stone-600 hover:text-stone-900 border border-stone-200/90"
+              }`}
             >
-              {feedbackScreenshots.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => setSelectedScreenshot(item)}
-                  className="group relative w-[calc(50%-6px)] sm:w-[calc(50%-8px)] min-w-[calc(50%-6px)] sm:min-w-[calc(50%-8px)] flex-shrink-0 snap-start aspect-[9/15] rounded-2xl sm:rounded-3xl overflow-hidden bg-stone-950 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out cursor-pointer border border-[#EADBBE]"
-                >
-                  {/* Clean Screenshot Image - Pure screenshot matching user reference */}
-                  <img
-                    src={item.imageUrl}
-                    alt="Customer feedback screenshot"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  />
+              All Moments ({allItems.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("videos")}
+              className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "videos"
+                  ? "bg-[#7E22CE] text-white shadow-xs"
+                  : "bg-white text-stone-600 hover:text-[#7E22CE] border border-stone-200/90"
+              }`}
+            >
+              <Play className="w-3 h-3 fill-current" />
+              <span>Video Reels ({videoReels.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("screenshots")}
+              className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "screenshots"
+                  ? "bg-[#114E45] text-white shadow-xs"
+                  : "bg-white text-stone-600 hover:text-[#114E45] border border-stone-200/90"
+              }`}
+            >
+              <MessageCircle className="w-3 h-3 text-[#25D366] fill-[#25D366]" />
+              <span>WhatsApp Reviews ({feedbackScreenshots.length})</span>
+            </button>
+          </div>
 
-                  {/* While hovering: Details Reveal smoothly */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-3 sm:p-4 flex flex-col justify-between text-white pointer-events-none">
-                    {/* Top: Anonymous Verified badge */}
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-full font-medium flex items-center gap-1 text-emerald-400 border border-emerald-500/30">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>Verified Chat</span>
-                      </span>
-                      <span className="w-6 h-6 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                        <Heart className="w-3 h-3 fill-rose-500 text-rose-500" />
-                      </span>
-                    </div>
-
-                    {/* Center: Tap to View Icon */}
-                    <div className="self-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/95 text-stone-900 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                      <Maximize2 className="w-4 h-4 text-stone-900" />
-                    </div>
-
-                    {/* Bottom: Piece & caption details revealed on hover */}
-                    <div className="space-y-1">
-                      {item.piece && (
-                        <span className="inline-block text-[9px] sm:text-[10px] text-purple-300 font-semibold bg-white/10 backdrop-blur-sm px-2 py-0.5 rounded">
-                          Piece: {item.piece}
-                        </span>
-                      )}
-                      {item.caption && (
-                        <p className="text-[11px] sm:text-xs text-white/95 italic font-light line-clamp-2 leading-relaxed drop-shadow-sm">
-                          &ldquo;{item.caption}&rdquo;
-                        </p>
-                      )}
-                      <p className="text-[9px] text-white/70">
-                        {item.date || "Verified WhatsApp Order"} • Click to enlarge
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Navigation Controls (Left disabled at first, enables after scrolling, right disabled at end) */}
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={scrollPrev}
-                  disabled={isLeftDisabled}
-                  className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
-                    isLeftDisabled
-                      ? "border-stone-200 text-stone-300 bg-stone-100 cursor-not-allowed opacity-35"
-                      : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-sm cursor-pointer"
-                  }`}
-                  aria-label="Previous screenshots"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={scrollNext}
-                  disabled={isRightDisabled}
-                  className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
-                    isRightDisabled
-                      ? "border-stone-200 text-stone-300 bg-stone-100 cursor-not-allowed opacity-35"
-                      : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-sm cursor-pointer"
-                  }`}
-                  aria-label="Next screenshots"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                <CheckCircle2 className="w-4 h-4 text-[#114E45]" />
-                <span className="hidden sm:inline">100% Genuine WhatsApp & DM Proof</span>
-                <span className="sm:hidden">Verified Proof</span>
-              </div>
-            </div>
+          {/* Left / Right Chevron Navigation Controls */}
+          <div className="hidden sm:flex items-center gap-2">
+            <button
+              type="button"
+              onClick={scrollPrev}
+              disabled={isLeftDisabled}
+              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
+                isLeftDisabled
+                  ? "border-stone-200 text-stone-300 bg-stone-100/50 cursor-not-allowed opacity-40"
+                  : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-xs cursor-pointer"
+              }`}
+              aria-label="Previous carousel cards"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={scrollNext}
+              disabled={isRightDisabled}
+              className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${
+                isRightDisabled
+                  ? "border-stone-200 text-stone-300 bg-stone-100/50 cursor-not-allowed opacity-40"
+                  : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-xs cursor-pointer"
+              }`}
+              aria-label="Next carousel cards"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Customer Review Quotes: Scrollable Cards (After the reels and screenshot proof) */}
-        {reviewQuotes.length > 0 && (
-          <div className="pt-8 sm:pt-10 border-t border-[#EADBBE]/80 space-y-4 sm:space-y-6">
-            <div className="flex items-center justify-between pb-2 border-b border-stone-300/60">
+        {/* ONE SINGLE SCROLLABLE CARD CAROUSEL FOR BOTH VIDEOS AND SCREENSHOTS */}
+        <div
+          ref={carouselRef}
+          className="flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-4 pt-1 px-1 no-scrollbar scroll-smooth snap-x snap-mandatory"
+        >
+          {visibleItems.map((item) => {
+            if (item.kind === "video") {
+              return (
+                <VideoCardPreview
+                  key={item.id}
+                  reel={item.data}
+                  onClick={() => setSelectedVideo(item.data)}
+                />
+              );
+            }
+            return (
+              <ScreenshotCardPreview
+                key={item.id}
+                item={item.data}
+                onClick={() => setSelectedScreenshot(item.data)}
+              />
+            );
+          })}
+        </div>
+
+        {/* Editorial Customer Review Quotes Ticker */}
+        {reviewQuotes && reviewQuotes.length > 0 && (
+          <div className="pt-6 sm:pt-10 border-t border-[#EADBBE]/70 space-y-4">
+            <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs uppercase tracking-widest font-semibold text-stone-700 flex items-center gap-1.5">
-                  <Quote className="w-3.5 h-3.5 text-[#7E22CE]" />
-                  <span>Customer Review Quotes</span>
-                </span>
-                <p className="text-[11px] text-stone-500">Verified client testimonials & reviews</p>
+                <h3 className="font-editorial text-xl sm:text-2xl text-[#1C1917]">
+                  What Our Collectors Say
+                </h3>
+                <p className="text-xs text-stone-500 font-light">
+                  Verified heirloom feedback from across India
+                </p>
               </div>
 
               {/* Navigation Controls */}
@@ -456,8 +519,8 @@ export function CustomerReviewsWithVideos() {
                   disabled={isQuotesLeftDisabled}
                   className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-all ${
                     isQuotesLeftDisabled
-                      ? "border-stone-200 text-stone-300 bg-stone-100 cursor-not-allowed opacity-35"
-                      : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-sm cursor-pointer"
+                      ? "border-stone-200 text-stone-300 bg-stone-100/50 cursor-not-allowed opacity-35"
+                      : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-xs cursor-pointer"
                   }`}
                   aria-label="Previous review quotes"
                 >
@@ -469,8 +532,8 @@ export function CustomerReviewsWithVideos() {
                   disabled={isQuotesRightDisabled}
                   className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-all ${
                     isQuotesRightDisabled
-                      ? "border-stone-200 text-stone-300 bg-stone-100 cursor-not-allowed opacity-35"
-                      : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-sm cursor-pointer"
+                      ? "border-stone-200 text-stone-300 bg-stone-100/50 cursor-not-allowed opacity-35"
+                      : "border-stone-300 hover:border-stone-900 text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-50 active:scale-95 shadow-xs cursor-pointer"
                   }`}
                   aria-label="Next review quotes"
                 >
@@ -487,7 +550,7 @@ export function CustomerReviewsWithVideos() {
               {reviewQuotes.map((item, idx) => (
                 <div
                   key={item.id || idx}
-                  className="w-[280px] xs:w-[320px] sm:w-[380px] min-w-[280px] xs:min-w-[320px] sm:min-w-[380px] flex-shrink-0 snap-start bg-[#FFFDF9] border border-[#EADBBE] rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md hover:border-purple-400/50 transition-all"
+                  className="w-[280px] xs:w-[320px] sm:w-[380px] min-w-[280px] xs:min-w-[320px] sm:min-w-[380px] flex-shrink-0 snap-start bg-[#FFFDF9] border border-[#EADBBE] rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-2xs hover:shadow-md hover:border-purple-400/50 transition-all"
                 >
                   <div className="space-y-3">
                     {/* Rating Stars & Quote Glyph */}
@@ -530,7 +593,7 @@ export function CustomerReviewsWithVideos() {
         )}
       </div>
 
-      {/* Screenshot Lightbox Modal (Clickable with Full Details revealed on click, Anonymous) */}
+      {/* Screenshot Lightbox Modal (Clickable with Full Details revealed on click) */}
       {selectedScreenshot && (
         <div
           className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
@@ -540,7 +603,7 @@ export function CustomerReviewsWithVideos() {
             className="relative max-w-lg w-full bg-[#FFFDF9] rounded-2xl overflow-hidden shadow-2xl border border-[#EADBBE] animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header: Anonymous Verified Feedback */}
+            {/* Modal Header */}
             <div className="px-4 sm:px-5 py-3.5 bg-[#FAF5EB] border-b border-[#EADBBE] flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-[#25D366]/20 text-[#25D366] flex items-center justify-center">
@@ -548,7 +611,7 @@ export function CustomerReviewsWithVideos() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-[#1C1917] flex items-center gap-1.5">
-                    <span>Verified Customer Review</span>
+                    <span>{selectedScreenshot.customerName || "Verified Customer"}</span>
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   </h4>
                   <p className="text-[11px] text-stone-500">
@@ -636,11 +699,13 @@ export function CustomerReviewsWithVideos() {
               />
             </div>
 
-            {/* Product Tag Bar */}
+            {/* Product Tag Bar & Details */}
             <div className="p-4 bg-stone-950 flex items-center justify-between text-white border-t border-stone-800">
               <div>
                 <p className="text-xs font-semibold">{selectedVideo.productTitle}</p>
-                <p className="text-[11px] text-purple-300 font-mono">₹{selectedVideo.productPrice}</p>
+                <p className="text-[11px] text-purple-300 font-mono">
+                  {selectedVideo.productPrice ? `₹${selectedVideo.productPrice}` : selectedVideo.handle}
+                </p>
               </div>
 
               {selectedVideo.productSlug && selectedVideo.productSlug !== "all" && (

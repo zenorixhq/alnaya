@@ -15,14 +15,19 @@ export function HeroEditorial() {
       {/* DESKTOP HERO: Strictly enclosed within the window (100svh) */}
       {/* ========================================================= */}
       <div className="hidden lg:block absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <img
-          src={images.heroDesktop || "/images/founder-aleena-saree-hero.jpg"}
-          alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-          className="w-full h-full object-cover object-[80%_center] xl:object-[84%_center]"
-          loading="eager"
-          decoding="sync"
-          style={{ imageRendering: "-webkit-optimize-contrast" }}
-        />
+        <picture>
+          <source srcSet="/images/founder-aleena-saree-hero-hd.webp" type="image/webp" />
+          <source srcSet="/images/founder-aleena-saree-hero-hd.png" type="image/png" />
+          <img
+            src={images.heroDesktop || "/images/founder-aleena-saree-hero-hd.png"}
+            alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
+            className="w-full h-full object-cover object-[80%_center] xl:object-[84%_center]"
+            loading="eager"
+            decoding="async"
+            // @ts-ignore
+            fetchPriority="high"
+          />
+        </picture>
         {/* Soft Left Ambient Feather: ensures typography has perfect contrast over sunlight */}
         <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/60 to-transparent w-full max-w-xl xl:max-w-2xl pointer-events-none" />
 
@@ -126,14 +131,19 @@ export function HeroEditorial() {
         
         {/* 1. Mobile Portrait Image with Full Editorial Story on Left Side */}
         <div className="w-full relative aspect-[9/13] sm:aspect-[9/12] overflow-hidden select-none bg-[#FAF7F2]">
-          <img
-            src={images.heroMobile || "/images/founder-aleena-mobile.jpg"}
-            alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-            className="w-full h-full object-cover object-top"
-            loading="eager"
-            decoding="sync"
-            style={{ imageRendering: "-webkit-optimize-contrast" }}
-          />
+          <picture>
+            <source srcSet="/images/founder-aleena-mobile-hd.webp" type="image/webp" />
+            <source srcSet="/images/founder-aleena-mobile-hd.png" type="image/png" />
+            <img
+              src={images.heroMobile || "/images/founder-aleena-mobile-hd.png"}
+              alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
+              className="w-full h-full object-cover object-top"
+              loading="eager"
+              decoding="async"
+              // @ts-ignore
+              fetchPriority="high"
+            />
+          </picture>
 
           {/* Left ambient feather gradient: ensures perfect contrast & legibility for all text */}
           <div className="absolute inset-y-0 left-0 w-[68%] bg-gradient-to-r from-[#FAF7F2]/85 via-[#FAF7F2]/50 to-transparent pointer-events-none" />

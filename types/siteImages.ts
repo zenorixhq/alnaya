@@ -19,8 +19,8 @@ export interface SiteImagesConfig {
 export const defaultSiteImages: SiteImagesConfig = {
   aboutImage1: "/images/about-model-necklace.jpg",
   aboutImage2: "/images/about-model-cuff.jpg",
-  heroDesktop: "/images/founder-aleena-saree-hero.jpg",
-  heroMobile: "/images/founder-aleena-mobile.jpg",
+  heroDesktop: "/images/founder-aleena-saree-hero-hd.png",
+  heroMobile: "/images/founder-aleena-mobile-hd.png",
   heroSignature: "/images/aleena-signature-dark.png",
   brandLogo: "/alnaya-logo.png",
   bangleSizeGuide: "/images/bangle-size-guide.jpg",
