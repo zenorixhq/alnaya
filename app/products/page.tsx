@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { categories as defaultCategories } from "@/data/mockData";
-import { Category } from "@/types/store";
+import { Category, Product } from "@/types/store";
 import { useProductStore } from "@/store/useProductStore";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import {
@@ -14,6 +14,9 @@ import {
   Search,
   Sparkles,
   ArrowDown,
+  ArrowUpDown,
+  Filter,
+  Check,
 } from "lucide-react";
 
 const ITEMS_PER_ROW = 4;
@@ -44,6 +47,63 @@ const categoryIconMap: Record<string, string> = {
   nosepin: "/images/category-cards/ring.png",
   "offer-products": "/images/category-cards/necklace.png",
 };
+
+// Robust Category Matcher for Collections
+function matchesCategory(p: Product, catSlug: string): boolean {
+  if (!catSlug || catSlug === "all") return true;
+  if (catSlug === "new-arrivals") return !!p.isNewArrival || p.category === "new-arrivals";
+  if (catSlug === "minimal-chains") {
+    return p.category === "minimal-chains" || p.tags.some((t) => /minimal/i.test(t)) || /chain|pendant/i.test(p.title);
+  }
+  if (catSlug === "hanging-chains") {
+    return p.category === "hanging-chains" || p.tags.some((t) => /hanging/i.test(t)) || /hanging|lariat|drop/i.test(p.title);
+  }
+  if (catSlug === "necklaces-and-chains" || catSlug === "necklaces") {
+    return p.category === "necklaces-and-chains" || p.category === "necklaces" || /necklace|chain|pendant/i.test(p.title);
+  }
+  if (catSlug === "jhumkas") {
+    return p.category === "jhumkas" || /jhumka|jhumki|temple/i.test(p.title);
+  }
+  if (catSlug === "stud-and-hoops") {
+    return p.category === "stud-and-hoops" || /stud|hoop|huggie/i.test(p.title);
+  }
+  if (catSlug === "traditional-earrings") {
+    return p.category === "traditional-earrings" || /chandbali|traditional|earring/i.test(p.title);
+  }
+  if (catSlug === "traditional-sets") {
+    return p.category === "traditional-sets" || /set|bridal|necklace set/i.test(p.title);
+  }
+  if (catSlug === "offer-products") {
+    return p.category === "offer-products" || p.tags.some((t) => /offer/i.test(t)) || !!p.salePrice || !!p.isBestSeller;
+  }
+  if (catSlug === "bangles-kada" || catSlug === "bangles") {
+    return p.category === "bangles-kada" || p.category === "bangles" || /bangle|kada|cuff|chooda/i.test(p.title);
+  }
+  if (catSlug === "bracelets" || catSlug === "bracelet") {
+    return p.category === "bracelets" || p.category === "bracelet" || /bracelet/i.test(p.title);
+  }
+  if (catSlug === "rings" || catSlug === "ring") {
+    return p.category === "rings" || p.category === "ring" || /ring|band/i.test(p.title);
+  }
+  if (catSlug === "anklets") {
+    return p.category === "anklets" || /anklet|payal/i.test(p.title);
+  }
+  if (catSlug === "nosepin") {
+    return p.category === "nosepin" || p.category === "charms" || /nosepin|nath|nose/i.test(p.title);
+  }
+  if (catSlug === "earrings" || catSlug === "earring") {
+    return p.category === "earrings" || p.category === "earring" || /earring|stud|hoop/i.test(p.title);
+  }
+  return p.category === catSlug;
+}
+
+const sortOptions = [
+  { id: "featured", label: "Featured First", hint: "Curated by Maison Alnaya" },
+  { id: "price-asc", label: "Price: Low to High", hint: "Affordable luxury first" },
+  { id: "price-desc", label: "Price: High to Low", hint: "High-value statement pieces" },
+  { id: "rating", label: "Customer Rating", hint: "Collector favorites & 5-stars" },
+  { id: "newest", label: "Newest Arrivals", hint: "Latest collection drops" },
+];
 
 function ProductCatalogContent() {
   const searchParams = useSearchParams();
@@ -82,18 +142,38 @@ function ProductCatalogContent() {
       .catch(() => {});
   }, [fetchProducts]);
 
+  // Primary filter & sort states
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchTerm, setSearchTerm] = useState<string>(initialSearch);
   const [priceRange, setPriceRange] = useState<string>("all");
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("featured");
   const [visibleCount, setVisibleCount] = useState<number>(BATCH_SIZE);
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState<boolean>(false);
+
+  // Bottom Sheet states for Mobile
+  const [isSortOpen, setIsSortOpen] = useState<boolean>(false);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+
+  // Draft filter states (for the Filter Bottom Sheet)
+  const [draftCategory, setDraftCategory] = useState<string>(initialCategory);
+  const [draftPriceRange, setDraftPriceRange] = useState<string>("all");
+  const [draftInStockOnly, setDraftInStockOnly] = useState<boolean>(false);
+  const [draftSearchTerm, setDraftSearchTerm] = useState<string>("");
+
+  // Synchronize draft filter states whenever the filter sheet opens
+  useEffect(() => {
+    if (isFilterOpen) {
+      setDraftCategory(selectedCategory);
+      setDraftPriceRange(priceRange);
+      setDraftInStockOnly(inStockOnly);
+      setDraftSearchTerm(searchTerm);
+    }
+  }, [isFilterOpen, selectedCategory, priceRange, inStockOnly, searchTerm]);
 
   // Sentinel ref for infinite scroll
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // Reset batch count when filters change
+  // Reset batch count when filters or sort change
   useEffect(() => {
     setVisibleCount(BATCH_SIZE);
   }, [selectedCategory, searchTerm, priceRange, inStockOnly, sortBy]);
@@ -105,52 +185,12 @@ function ProductCatalogContent() {
     }
   }, [searchParams]);
 
-  // Filter & Sort Logic
+  // Filter & Sort Logic for Main Grid
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
         // Category filter
-        if (selectedCategory !== "all") {
-          if (selectedCategory === "minimal-chains") {
-            const isMatch = p.category === "minimal-chains" || p.tags.some(t => /minimal/i.test(t)) || /chain|pendant/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "hanging-chains") {
-            const isMatch = p.category === "hanging-chains" || p.tags.some(t => /hanging/i.test(t)) || /hanging|lariat|drop/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "jhumkas") {
-            const isMatch = p.category === "jhumkas" || /jhumka|jhumki|temple/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "stud-and-hoops") {
-            const isMatch = p.category === "stud-and-hoops" || /stud|hoop|huggie/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "traditional-earrings") {
-            const isMatch = p.category === "traditional-earrings" || /chandbali|traditional|earring/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "traditional-sets") {
-            const isMatch = p.category === "traditional-sets" || /set|bridal|necklace set/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "offer-products") {
-            const isMatch = p.category === "offer-products" || p.tags.some(t => /offer/i.test(t)) || !!p.salePrice || p.isBestSeller;
-            if (!isMatch) return false;
-          } else if (selectedCategory === "anklets") {
-            const isMatch = p.category === "anklets" || /anklet|payal/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "bangles") {
-            const isMatch = p.category === "bangles" || p.category === "bangles-kada" || /bangle|kada|chooda/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "bracelet") {
-            const isMatch = p.category === "bracelet" || p.category === "bracelets" || /bracelet/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "ring") {
-            const isMatch = p.category === "ring" || p.category === "rings" || /ring|band/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (selectedCategory === "nosepin") {
-            const isMatch = p.category === "nosepin" || p.category === "charms" || /nosepin|nath|nose/i.test(p.title);
-            if (!isMatch) return false;
-          } else if (p.category !== selectedCategory) {
-            return false;
-          }
-        }
+        if (!matchesCategory(p, selectedCategory)) return false;
 
         // Search filter
         if (searchTerm.trim()) {
@@ -185,7 +225,32 @@ function ProductCatalogContent() {
       });
   }, [products, selectedCategory, searchTerm, priceRange, inStockOnly, sortBy]);
 
-  // Slice down to 3 rows (12 items) at a time
+  // Live count calculation for the Draft Filter Bottom Sheet
+  const draftFilteredCount = useMemo(() => {
+    return products.filter((p) => {
+      if (!matchesCategory(p, draftCategory)) return false;
+
+      if (draftSearchTerm.trim()) {
+        const query = draftSearchTerm.toLowerCase();
+        const matchTitle = p.title.toLowerCase().includes(query);
+        const matchDesc = p.description.toLowerCase().includes(query);
+        const matchCategory = p.category.toLowerCase().includes(query);
+        const matchTags = p.tags.some((t) => t.toLowerCase().includes(query));
+        if (!matchTitle && !matchDesc && !matchCategory && !matchTags) return false;
+      }
+
+      const currentPrice = p.salePrice || p.price;
+      if (draftPriceRange === "under200" && currentPrice >= 200) return false;
+      if (draftPriceRange === "200to350" && (currentPrice < 200 || currentPrice > 350)) return false;
+      if (draftPriceRange === "over350" && currentPrice <= 350) return false;
+
+      if (draftInStockOnly && (!p.inStock || p.stockCount === 0)) return false;
+
+      return true;
+    }).length;
+  }, [products, draftCategory, draftPriceRange, draftInStockOnly, draftSearchTerm]);
+
+  // Slice down to visible batch (12 items)
   const displayedProducts = useMemo(() => {
     return filteredProducts.slice(0, visibleCount);
   }, [filteredProducts, visibleCount]);
@@ -221,14 +286,31 @@ function ProductCatalogContent() {
     setVisibleCount(BATCH_SIZE);
   };
 
-  const hasActiveFilters =
-    selectedCategory !== "all" ||
-    searchTerm !== "" ||
-    priceRange !== "all" ||
-    inStockOnly;
+  const applyDraftFilters = () => {
+    setSelectedCategory(draftCategory);
+    setPriceRange(draftPriceRange);
+    setInStockOnly(draftInStockOnly);
+    setSearchTerm(draftSearchTerm);
+    setIsFilterOpen(false);
+  };
+
+  const resetDraftFilters = () => {
+    setDraftCategory("all");
+    setDraftPriceRange("all");
+    setDraftInStockOnly(false);
+    setDraftSearchTerm("");
+  };
+
+  const activeFilterCount =
+    (selectedCategory !== "all" ? 1 : 0) +
+    (priceRange !== "all" ? 1 : 0) +
+    (inStockOnly ? 1 : 0) +
+    (searchTerm.trim() ? 1 : 0);
+
+  const hasActiveFilters = activeFilterCount > 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-8 sm:pb-10 space-y-4 sm:space-y-5">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-24 sm:pb-12 space-y-4 sm:space-y-5 font-glacial">
       {/* 1. Visual Category Cards Bar (Positioned high at top for immediate browsing) */}
       <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs font-glacial">
         <div className="flex items-start gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pb-1 scrollbar-none scroll-smooth -mx-1 px-1">
@@ -266,28 +348,7 @@ function ProductCatalogContent() {
 
           {/* Category Cards */}
           {categoryList.map((cat) => {
-            const count = products.filter((p) => {
-              if (cat.slug === "new-arrivals") return p.isNewArrival || p.category === "new-arrivals";
-              if (cat.slug === "minimal-chains") return p.category === "minimal-chains" || p.tags.some(t => /minimal/i.test(t)) || /chain|pendant/i.test(p.title);
-              if (cat.slug === "hanging-chains") return p.category === "hanging-chains" || p.tags.some(t => /hanging/i.test(t)) || /hanging|lariat|drop/i.test(p.title);
-              if (cat.slug === "necklaces-and-chains" || cat.slug === "necklaces") return p.category === "necklaces-and-chains" || p.category === "necklaces" || /necklace|chain|pendant/i.test(p.title);
-              if (cat.slug === "jhumkas") return p.category === "jhumkas" || /jhumka|jhumki|temple/i.test(p.title);
-              if (cat.slug === "stud-and-hoops") return p.category === "stud-and-hoops" || /stud|hoop|huggie/i.test(p.title);
-              if (cat.slug === "traditional-earrings") return p.category === "traditional-earrings" || /chandbali|traditional|earring/i.test(p.title);
-              if (cat.slug === "traditional-sets") return p.category === "traditional-sets" || /set|bridal|necklace set/i.test(p.title);
-              if (cat.slug === "bangles-kada" || cat.slug === "bangles") return p.category === "bangles-kada" || p.category === "bangles" || /bangle|kada|cuff|chooda/i.test(p.title);
-              if (cat.slug === "bracelets" || cat.slug === "bracelet") return p.category === "bracelets" || p.category === "bracelet" || /bracelet/i.test(p.title);
-              if (cat.slug === "rings" || cat.slug === "ring") return p.category === "rings" || p.category === "ring" || /ring|band/i.test(p.title);
-              if (cat.slug === "anklets") return p.category === "anklets" || /anklet|payal/i.test(p.title);
-              if (cat.slug === "nosepin") return p.category === "nosepin" || /nosepin|nath|nose/i.test(p.title);
-              if (cat.slug === "offer-products") return p.category === "offer-products" || p.tags.some(t => /offer/i.test(t)) || !!p.salePrice || p.isBestSeller;
-              if (cat.slug === "watches") return p.category === "watches" || /watch/i.test(p.title);
-              if (cat.slug === "charms") return p.category === "charms" || /charm/i.test(p.title);
-              if (cat.slug === "hip-chains") return p.category === "hip-chains" || /hip chain|waist/i.test(p.title);
-              if (cat.slug === "kids-collection") return p.category === "kids-collection" || p.category === "kids" || /kid|child/i.test(p.title);
-              if (cat.slug === "earrings") return p.category === "earrings" || /earring|stud|hoop/i.test(p.title);
-              return p.category === cat.slug;
-            }).length;
+            const count = products.filter((p) => matchesCategory(p, cat.slug)).length;
 
             const iconSrc =
               categoryIconMap[cat.slug] ||
@@ -372,8 +433,8 @@ function ProductCatalogContent() {
         </div>
       </div>
 
-      {/* 3. Filter Controls & Sort Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-card border border-border">
+      {/* 3. Filter Controls & Sort Bar (Desktop & Tablet) */}
+      <div className="hidden md:flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-card border border-border shadow-2xs">
         {/* Left: Quick Dropdown Filters */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
           {/* Price Selector */}
@@ -423,18 +484,18 @@ function ProductCatalogContent() {
               onChange={(e) => setSortBy(e.target.value)}
               className="appearance-none bg-muted/50 border border-border rounded-lg pl-3 pr-7 py-1.5 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
-              <option value="featured">Featured First</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
-              <option value="newest">Newest Arrivals</option>
+              {sortOptions.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
             <ChevronDown className="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
           </div>
         </div>
       </div>
 
-      {/* 4. Product Grid: Exactly 4 Items per Row on Desktop */}
+      {/* 4. Product Grid */}
       {!hasLoaded && products.length === 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 py-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -455,7 +516,7 @@ function ProductCatalogContent() {
           <div>
             <h3 className="text-base font-bold text-foreground">No pieces match your filters</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-              Try choosing another category or clearing your active price filter.
+              Try choosing another category or clearing your active filters.
             </p>
           </div>
           <button
@@ -467,7 +528,7 @@ function ProductCatalogContent() {
         </div>
       ) : (
         <div className="space-y-10">
-          {/* 4 Items Listed in a Row Grid */}
+          {/* 4 Items Listed in a Row Grid (2 on Mobile) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
             {displayedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -510,6 +571,296 @@ function ProductCatalogContent() {
               ✨ You&apos;ve viewed all {filteredProducts.length} pieces in this collection!
             </div>
           )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 6. MOBILE STICKY BOTTOM BAR (Sort By & Filter - Exactly like GIVA reference) */}
+      {/* ========================================================================= */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-stone-200/95 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] md:hidden">
+        <div className="grid grid-cols-2 divide-x divide-stone-200 h-13 items-center">
+          {/* Left Button: Sort By */}
+          <button
+            onClick={() => setIsSortOpen(true)}
+            className="flex items-center justify-center gap-2 h-full text-stone-900 font-semibold text-xs tracking-wider uppercase active:bg-stone-50 transition-colors"
+          >
+            <ArrowUpDown className="w-4 h-4 text-stone-700" />
+            <span>Sort By</span>
+            {sortBy !== "featured" && (
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7E22CE]" />
+            )}
+          </button>
+
+          {/* Right Button: Filter */}
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="flex items-center justify-center gap-2 h-full text-stone-900 font-semibold text-xs tracking-wider uppercase active:bg-stone-50 transition-colors"
+          >
+            <Filter className="w-4 h-4 text-stone-700" />
+            <span>Filter</span>
+            {activeFilterCount > 0 && (
+              <span className="w-4.5 h-4.5 rounded-full bg-[#7E22CE] text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 7. SORT BY BOTTOM SHEET MODAL */}
+      {/* ========================================================================= */}
+      {isSortOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsSortOpen(false)}
+          />
+
+          {/* Slide-Up Sheet */}
+          <div className="relative z-10 bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[82vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
+            {/* Grab Handle */}
+            <div className="w-12 h-1 bg-stone-300 rounded-full mx-auto mt-3 mb-1 shrink-0" />
+
+            {/* Sheet Header */}
+            <div className="flex items-center justify-between px-6 py-3.5 border-b border-stone-100 shrink-0">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-4 h-4 text-[#7E22CE]" />
+                <h3 className="font-editorial text-lg font-bold text-stone-900 tracking-wide">
+                  Sort By
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsSortOpen(false)}
+                className="p-1.5 rounded-full text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+                aria-label="Close sort modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Sort Options List */}
+            <div className="divide-y divide-stone-100 p-2 overflow-y-auto">
+              {sortOptions.map((opt) => {
+                const isSelected = sortBy === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      setSortBy(opt.id);
+                      setIsSortOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-4 text-left rounded-xl transition-colors ${
+                      isSelected ? "bg-purple-50/70" : "hover:bg-stone-50"
+                    }`}
+                  >
+                    <div>
+                      <span
+                        className={`text-sm block ${
+                          isSelected ? "font-bold text-[#7E22CE]" : "font-medium text-stone-800"
+                        }`}
+                      >
+                        {opt.label}
+                      </span>
+                      <span className="text-[11px] text-stone-400 block mt-0.5">
+                        {opt.hint}
+                      </span>
+                    </div>
+
+                    {/* Radio Indicator */}
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected
+                          ? "border-[#7E22CE] bg-[#7E22CE]"
+                          : "border-stone-300 bg-white"
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 8. FILTER BOTTOM SHEET MODAL (Categories, Price, Availability, Search) */}
+      {/* ========================================================================= */}
+      {isFilterOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsFilterOpen(false)}
+          />
+
+          {/* Slide-Up Drawer */}
+          <div className="relative z-10 bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
+            {/* Grab Handle */}
+            <div className="w-12 h-1 bg-stone-300 rounded-full mx-auto mt-3 mb-1 shrink-0" />
+
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between px-6 py-3.5 border-b border-stone-100 shrink-0">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-[#7E22CE]" />
+                <h3 className="font-editorial text-lg font-bold text-stone-900 tracking-wide">
+                  Filter Pieces
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={resetDraftFilters}
+                  className="text-xs font-semibold text-[#7E22CE] hover:text-[#581C87] transition-colors"
+                >
+                  Clear All
+                </button>
+                <button
+                  onClick={() => setIsFilterOpen(false)}
+                  className="p-1.5 rounded-full text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+                  aria-label="Close filter modal"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Filter Body */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
+              {/* Filter Section: Category */}
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-900 block mb-2.5">
+                  Category
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {/* Shop All Chip */}
+                  <button
+                    onClick={() => setDraftCategory("all")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-medium border transition-all ${
+                      draftCategory === "all"
+                        ? "bg-[#7E22CE] text-white border-[#7E22CE] shadow-xs font-bold"
+                        : "bg-stone-50 text-stone-700 border-stone-200 hover:border-purple-300"
+                    }`}
+                  >
+                    <span>Shop All ({products.length})</span>
+                  </button>
+
+                  {/* Individual Categories */}
+                  {categoryList.map((cat) => {
+                    const count = products.filter((p) => matchesCategory(p, cat.slug)).length;
+                    const isSelected = draftCategory === cat.slug;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setDraftCategory(cat.slug)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-medium border transition-all ${
+                          isSelected
+                            ? "bg-[#7E22CE] text-white border-[#7E22CE] shadow-xs font-bold"
+                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-purple-300"
+                        }`}
+                      >
+                        <span>
+                          {cat.name.replace(/\s*Collection/gi, "").trim()} ({count})
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Filter Section: Price Range */}
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-900 block mb-2.5">
+                  Price Range
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: "all", label: "All Prices" },
+                    { id: "under200", label: "Under ₹200" },
+                    { id: "200to350", label: "₹200 to ₹350" },
+                    { id: "over350", label: "Over ₹350" },
+                  ].map((pOpt) => {
+                    const isSelected = draftPriceRange === pOpt.id;
+                    return (
+                      <button
+                        key={pOpt.id}
+                        onClick={() => setDraftPriceRange(pOpt.id)}
+                        className={`p-3 rounded-xl text-xs font-medium border text-center transition-all ${
+                          isSelected
+                            ? "bg-[#7E22CE] text-white border-[#7E22CE] shadow-xs font-bold"
+                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-purple-300"
+                        }`}
+                      >
+                        {pOpt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Filter Section: Availability */}
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-900 block mb-2.5">
+                  Availability
+                </span>
+                <label className="flex items-center justify-between p-3.5 rounded-xl border border-stone-200 bg-stone-50 cursor-pointer hover:bg-stone-100 transition-colors">
+                  <span className="text-xs font-medium text-stone-800">
+                    In Stock Only (Hide Sold Out)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={draftInStockOnly}
+                    onChange={(e) => setDraftInStockOnly(e.target.checked)}
+                    className="w-4 h-4 accent-[#7E22CE] rounded cursor-pointer"
+                  />
+                </label>
+              </div>
+
+              {/* Filter Section: Refine with Search Keyword */}
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-900 block mb-2.5">
+                  Keyword Search
+                </span>
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                  <input
+                    type="text"
+                    placeholder="Search e.g. clover, evil eye, drop..."
+                    value={draftSearchTerm}
+                    onChange={(e) => setDraftSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-8 py-2.5 text-xs rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:ring-1 focus:ring-[#7E22CE]"
+                  />
+                  {draftSearchTerm && (
+                    <button
+                      onClick={() => setDraftSearchTerm("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sticky Action Footer */}
+            <div className="p-4 bg-white border-t border-stone-200 flex items-center gap-3 shrink-0">
+              <button
+                onClick={resetDraftFilters}
+                className="w-1/3 py-3 px-4 rounded-xl border border-stone-300 text-stone-700 hover:bg-stone-50 font-semibold text-xs uppercase tracking-wider transition-colors text-center"
+              >
+                Reset
+              </button>
+              <button
+                onClick={applyDraftFilters}
+                className="w-2/3 py-3 px-4 rounded-xl bg-[#1C1917] hover:bg-[#7E22CE] text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all active:scale-[0.98] text-center"
+              >
+                Apply Filters ({draftFilteredCount})
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
