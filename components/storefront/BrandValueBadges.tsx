@@ -117,32 +117,32 @@ export function BrandValueBadges() {
         </div>
 
         {/* 2 Rows Layout: 3 first, 2 second (No horizontal scrolling on mobile!) */}
-        <div className="space-y-2.5 sm:space-y-5">
+        <div className="space-y-3 sm:space-y-5">
           {/* Row 1: 3 Badges */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 items-stretch">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6 items-stretch">
             {badges.slice(0, 3).map((badge) => (
               <div
                 key={badge.id}
                 className="group relative rounded-xl sm:rounded-2xl bg-[#FFFDF9] border border-[#EADBBE] hover:border-[#7E22CE]/60 p-2.5 sm:p-5 lg:p-6 text-center shadow-[0_2px_12px_rgba(28,25,23,0.03)] hover:shadow-[0_12px_28px_rgba(126,34,206,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-between"
               >
                 {/* Mini Tag Pill */}
-                <span className="text-[7.5px] sm:text-[9px] font-semibold tracking-wider uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-1.5 sm:px-2.5 py-0.5 rounded-full mb-1.5 sm:mb-3">
+                <span className="text-[8.5px] sm:text-[9.5px] font-bold tracking-wider uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-2 sm:px-2.5 py-0.5 rounded-full mb-1.5 sm:mb-3">
                   {badge.tag}
                 </span>
 
                 {/* Insignia Medallion */}
-                <div className="relative w-10 h-10 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-2 sm:p-3.5 mb-2 sm:mb-3.5 shadow-xs group-hover:scale-105 group-hover:border-[#7E22CE] transition-all duration-300 shrink-0">
-                  <div className="scale-75 sm:scale-100 flex items-center justify-center">
+                <div className="relative w-11 h-11 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-2 sm:p-3.5 mb-2 sm:mb-3.5 shadow-xs group-hover:scale-105 group-hover:border-[#7E22CE] transition-all duration-300 shrink-0">
+                  <div className="scale-85 sm:scale-100 flex items-center justify-center">
                     {badge.icon}
                   </div>
                 </div>
 
                 {/* Title & Benefit */}
-                <div className="space-y-0.5 sm:space-y-1 flex-1 flex flex-col justify-start">
-                  <h4 className="font-editorial text-xs sm:text-base lg:text-lg font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
+                <div className="space-y-1 flex-1 flex flex-col justify-start">
+                  <h4 className="font-editorial text-[13px] sm:text-base lg:text-lg font-bold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
                     {badge.title}
                   </h4>
-                  <p className="text-[9px] sm:text-xs text-[#5C5346] font-light leading-relaxed mt-0.5 line-clamp-2 sm:line-clamp-none">
+                  <p className="text-[11px] sm:text-xs text-[#3D352A] font-normal leading-snug mt-0.5 line-clamp-2 sm:line-clamp-none">
                     {badge.desc}
                   </p>
                 </div>
@@ -151,30 +151,30 @@ export function BrandValueBadges() {
           </div>
 
           {/* Row 2: 2 Badges (Centered) */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:gap-6 max-w-[72%] sm:max-w-xl lg:max-w-2xl mx-auto items-stretch">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:gap-6 max-w-[76%] sm:max-w-xl lg:max-w-2xl mx-auto items-stretch">
             {badges.slice(3, 5).map((badge) => (
               <div
                 key={badge.id}
                 className="group relative rounded-xl sm:rounded-2xl bg-[#FFFDF9] border border-[#EADBBE] hover:border-[#7E22CE]/60 p-2.5 sm:p-5 lg:p-6 text-center shadow-[0_2px_12px_rgba(28,25,23,0.03)] hover:shadow-[0_12px_28px_rgba(126,34,206,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-between"
               >
                 {/* Mini Tag Pill */}
-                <span className="text-[7.5px] sm:text-[9px] font-semibold tracking-wider uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-1.5 sm:px-2.5 py-0.5 rounded-full mb-1.5 sm:mb-3">
+                <span className="text-[8.5px] sm:text-[9.5px] font-bold tracking-wider uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-2 sm:px-2.5 py-0.5 rounded-full mb-1.5 sm:mb-3">
                   {badge.tag}
                 </span>
 
                 {/* Insignia Medallion */}
-                <div className="relative w-10 h-10 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-2 sm:p-3.5 mb-2 sm:mb-3.5 shadow-xs group-hover:scale-105 group-hover:border-[#7E22CE] transition-all duration-300 shrink-0">
-                  <div className="scale-75 sm:scale-100 flex items-center justify-center">
+                <div className="relative w-11 h-11 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-2 sm:p-3.5 mb-2 sm:mb-3.5 shadow-xs group-hover:scale-105 group-hover:border-[#7E22CE] transition-all duration-300 shrink-0">
+                  <div className="scale-85 sm:scale-100 flex items-center justify-center">
                     {badge.icon}
                   </div>
                 </div>
 
                 {/* Title & Benefit */}
-                <div className="space-y-0.5 sm:space-y-1 flex-1 flex flex-col justify-start">
-                  <h4 className="font-editorial text-xs sm:text-base lg:text-lg font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
+                <div className="space-y-1 flex-1 flex flex-col justify-start">
+                  <h4 className="font-editorial text-[13px] sm:text-base lg:text-lg font-bold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
                     {badge.title}
                   </h4>
-                  <p className="text-[9px] sm:text-xs text-[#5C5346] font-light leading-relaxed mt-0.5 line-clamp-2 sm:line-clamp-none">
+                  <p className="text-[11px] sm:text-xs text-[#3D352A] font-normal leading-snug mt-0.5 line-clamp-2 sm:line-clamp-none">
                     {badge.desc}
                   </p>
                 </div>

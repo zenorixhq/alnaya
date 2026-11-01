@@ -182,13 +182,13 @@ export function HeroEditorial() {
                 />
               </div>
 
-              <span className="relative z-10 text-[11px] sm:text-xs font-bold uppercase tracking-[0.24em] text-[#786E5E] block leading-none font-glacial">
+              <span className="relative z-10 text-xs sm:text-[13px] font-bold uppercase tracking-[0.24em] text-[#786E5E] block leading-none font-glacial">
                 FOUNDER &amp; CREATIVE SOUL
               </span>
             </div>
 
             {/* Subtext: Founder Personal Manifesto (Increased size for enhanced mobile readability) */}
-            <p className="text-[12px] sm:text-[13px] text-[#3D352A] font-light leading-[1.52] max-w-[225px] sm:max-w-xs font-glacial pt-1">
+            <p className="text-[13px] sm:text-[14px] text-[#2C241B] font-normal leading-[1.56] max-w-[240px] sm:max-w-xs font-glacial pt-1">
               I started ALNAYA with a simple belief that jewellery is more than just an accessory, it&apos;s a part of your story. Every piece is thoughtfully designed to bring out your unique beauty, celebrate your moments, and stay with you for a lifetime.
             </p>
 
