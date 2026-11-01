@@ -171,7 +171,7 @@ export function FollowTheHouseSection() {
         {/* The Scrollable Horizontal Strip Filling the Entire Page Width */}
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto snap-x snap-mandatory gap-1.5 sm:gap-2.5 px-1.5 sm:px-3 w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] select-none"
+          className="flex overflow-x-auto snap-x snap-mandatory gap-2 sm:gap-3 px-2 sm:px-4 w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] select-none scroll-smooth"
         >
           {panels.map((panel, idx) => {
             const hasPlayableVideo =
@@ -190,7 +190,7 @@ export function FollowTheHouseSection() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => handlePanelClick(e, panel)}
-                className="group relative flex-shrink-0 w-[calc((100vw-24px)/3)] sm:w-[calc((100vw-36px)/4)] md:w-[24vw] lg:w-[20vw] xl:w-[16.666vw] aspect-[3/5] snap-start overflow-hidden bg-stone-900 focus:outline-none cursor-pointer rounded-lg sm:rounded-xl"
+                className="group relative flex-shrink-0 w-[calc((100vw-24px)/2)] sm:w-[calc((100vw-48px)/3)] md:w-[26vw] lg:w-[20vw] xl:w-[16.666vw] aspect-[3/5] snap-start overflow-hidden bg-stone-900 focus:outline-none cursor-pointer rounded-xl sm:rounded-2xl"
                 title={`Follow @alnaya.in on Instagram - ${panel.caption || panel.alt}`}
               >
                 <img
@@ -208,8 +208,8 @@ export function FollowTheHouseSection() {
 
                 {/* Play Video Badge if Reel has video file */}
                 {hasPlayableVideo && (
-                  <div className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-md group-hover:scale-110 transition-transform">
-                    <Play className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 fill-white translate-x-0.5 text-white" />
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-md group-hover:scale-110 transition-transform">
+                    <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-white translate-x-0.5 text-white" />
                   </div>
                 )}
 
@@ -232,11 +232,11 @@ export function FollowTheHouseSection() {
 
                 {/* Editorial Caption Gradient Overlay */}
                 {panel.caption && (
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-1.5 sm:p-3 pt-6 sm:pt-8 transition-opacity duration-300 opacity-95 lg:opacity-0 lg:group-hover:opacity-100">
-                    <p className="text-white text-[10px] sm:text-xs md:text-sm font-medium tracking-wide line-clamp-1">
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2.5 sm:p-3.5 pt-7 sm:pt-9 transition-opacity duration-300 opacity-95 lg:opacity-0 lg:group-hover:opacity-100">
+                    <p className="text-white text-xs sm:text-sm font-medium tracking-wide line-clamp-1">
                       {panel.caption}
                     </p>
-                    <p className="text-purple-200 text-[8px] sm:text-[10px] md:text-xs font-light tracking-wider uppercase mt-0.5 truncate">
+                    <p className="text-purple-200 text-[10px] sm:text-xs font-light tracking-wider uppercase mt-0.5 truncate">
                       {hasPlayableVideo ? "Play Video Reel 🎬" : "View on Instagram →"}
                     </p>
                   </div>
