@@ -7,25 +7,25 @@ export function AboutUsSection() {
   return (
     <section
       id="about-us"
-      className="relative w-full py-16 sm:py-20 lg:py-24 bg-[#FAF7F2] text-[#1C1917] overflow-hidden border-b border-[#EADBBE]/70 select-none scroll-mt-20 font-glacial"
+      className="relative w-full py-8 sm:py-16 lg:py-20 bg-[#FAF7F2] text-[#1C1917] overflow-hidden border-b border-[#EADBBE]/70 select-none scroll-mt-20 font-glacial"
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center">
-          {/* 1. Left Editorial Text Column (Headline at top, story and SHOP NOW at bottom) */}
-          <div className="lg:col-span-5 flex flex-col justify-between self-stretch space-y-8 sm:space-y-12 lg:space-y-0 py-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-14 items-center">
+          {/* 1. Left Editorial Text Column (Compact on mobile, editorial on desktop) */}
+          <div className="lg:col-span-5 flex flex-col justify-between self-stretch space-y-4 sm:space-y-8 lg:space-y-0 py-1">
             {/* Top Display Headline */}
             <div>
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-[#7E22CE] block mb-2 sm:mb-3">
+              <span className="text-[9.5px] sm:text-xs font-semibold uppercase tracking-[0.26em] text-[#7E22CE] block mb-1.5 sm:mb-3">
                 ABOUT THE HOUSE
               </span>
-              <h2 className="font-editorial text-3xl sm:text-4xl md:text-5xl lg:text-[2.75rem] xl:text-[3.25rem] font-normal tracking-tight text-[#1C1917] leading-[1.12]">
+              <h2 className="font-editorial text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-normal tracking-tight text-[#1C1917] leading-[1.12]">
                 Elegant and Professional Jewellery Design
               </h2>
             </div>
 
-            {/* Bottom Paragraph & Underlined Shop Now Action */}
-            <div className="space-y-5 sm:space-y-6 pt-4 lg:pt-16 max-w-md">
-              <p className="text-xs sm:text-sm text-[#5C5346] font-light leading-relaxed">
+            {/* Paragraph & Underlined Shop Now Action */}
+            <div className="space-y-3 sm:space-y-5 pt-1 lg:pt-12 max-w-md">
+              <p className="text-[11.5px] sm:text-xs md:text-sm text-[#5C5346] font-light leading-relaxed">
                 Our shop offers thoughtfully crafted jewellery that blends timeless elegance with modern design. Each piece is created using premium materials and exceptional attention to detail.
               </p>
 
@@ -41,10 +41,10 @@ export function AboutUsSection() {
             </div>
           </div>
 
-          {/* 2. Right Dual Photography Spread (Showcasing authentic pieces) */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-center">
-            {/* Primary Image: Model wearing Celestial Star Drop Hanging Chain */}
-            <div className="sm:col-span-7 relative aspect-[3/4] sm:aspect-[4/5] md:aspect-[5/6] overflow-hidden rounded-md bg-stone-100 shadow-sm border border-[#EADBBE]/80 group">
+          {/* 2. Right Dual Photography Spread (2 images in ONE row on mobile, editorial spread on desktop) */}
+          <div className="lg:col-span-7 grid grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-4 md:gap-6 items-center">
+            {/* Image 1: Celestial Star Drop Hanging Chain */}
+            <div className="col-span-1 lg:col-span-7 relative aspect-[4/5] sm:aspect-[4/5] md:aspect-[5/6] overflow-hidden rounded-xl sm:rounded-2xl bg-stone-100 shadow-xs border border-[#EADBBE]/80 group">
               <img
                 src="/images/about-model-necklace.jpg"
                 alt="Alnaya Jewellery - Celestial Star Drop Hanging Chain"
@@ -53,8 +53,8 @@ export function AboutUsSection() {
               />
             </div>
 
-            {/* Secondary Image: Model wearing Radiant Concentric Circles Cuff Bracelet */}
-            <div className="sm:col-span-5 relative aspect-[3/4] sm:aspect-[4/5] md:aspect-[5/6] overflow-hidden rounded-md bg-stone-100 shadow-sm border border-[#EADBBE]/80 group">
+            {/* Image 2: Radiant Concentric Circles Cuff Bracelet */}
+            <div className="col-span-1 lg:col-span-5 relative aspect-[4/5] sm:aspect-[4/5] md:aspect-[5/6] overflow-hidden rounded-xl sm:rounded-2xl bg-stone-100 shadow-xs border border-[#EADBBE]/80 group">
               <img
                 src="/images/about-model-cuff.jpg"
                 alt="Alnaya Jewellery - Radiant Concentric Circles Cuff Bracelet"

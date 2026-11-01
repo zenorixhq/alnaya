@@ -25,18 +25,21 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
   return (
-    <div className="w-full bg-[#FAF7F2] overflow-x-hidden">
+    <div className="w-full bg-[#FAF7F2] overflow-x-hidden font-glacial">
       {/* 1. Hero Section (Enclosed within entire screen window, full scroll) */}
       <HeroEditorial />
 
-      {/* 2. Curated Catalog / Shop by Category Grid (Positioned high up right below Hero) */}
+      {/* 2. About Us Section (Positioned right after Hero as requested) */}
+      <AboutUsSection />
+
+      {/* 3. The Maison Archive / Shop by Category Grid */}
       <section className="w-full py-12 sm:py-20 border-b border-[#EADBBE]/60 bg-gradient-to-b from-white via-[#FAF7F2] to-[#FAF7F2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#7E22CE] uppercase tracking-widest">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#7E22CE] uppercase tracking-widest font-glacial">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Curated Collections</span>
+                <span>The Maison Archive</span>
               </div>
               <h2 className="font-editorial text-3xl sm:text-4xl font-normal text-[#1C1917] mt-1 tracking-wide">
                 Shop by Category
@@ -44,48 +47,50 @@ export default function HomePage() {
             </div>
             <Link
               href="/products"
-              className="text-xs sm:text-sm font-semibold text-[#7E22CE] hover:text-[#581C87] flex items-center gap-1 group transition-colors"
+              className="text-xs sm:text-sm font-semibold text-[#7E22CE] hover:text-[#581C87] flex items-center gap-1 group transition-colors font-glacial"
             >
               <span>View All Categories</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-5">
+          {/* Editorial Framed Arch Category Cards (New Distinct Design) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
             {categoryList.map((cat, idx) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                className="group relative aspect-[4/5] rounded-2xl overflow-hidden border border-[#EADBBE] shadow-sm bg-[#FFFDF9] hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(126,34,206,0.18)] transition-all duration-500 ease-out"
+                className="group relative bg-white border border-[#EADBBE]/90 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 shadow-xs hover:shadow-xl hover:border-[#7E22CE]/60 hover:-translate-y-1.5 transition-all duration-500 ease-out flex flex-col justify-between"
               >
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-3.5 sm:p-4 text-white transition-opacity duration-300">
+                {/* Arched Top Silhouette Image Frame */}
+                <div className="w-full aspect-[4/4.8] rounded-t-[1.8rem] sm:rounded-t-[2.2rem] rounded-b-xl overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                  />
                   {idx === 0 && (
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] text-purple-200 font-medium tracking-wider uppercase">
-                        🔥 Latest Drop
-                      </span>
-                      <span className="text-[9px] font-bold bg-[#7E22CE] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        New
-                      </span>
-                    </div>
+                    <span className="absolute top-2 right-2 text-[8px] sm:text-[9px] font-bold bg-[#7E22CE] text-white px-2 py-0.5 rounded-full shadow-xs uppercase tracking-wider font-glacial">
+                      NEW DROP
+                    </span>
                   )}
-                  <h3 className="font-editorial text-sm sm:text-base font-semibold tracking-wide text-white group-hover:text-purple-200 transition-colors leading-snug mt-0.5">
+                </div>
+
+                {/* Bottom Typography & Action */}
+                <div className="pt-2 sm:pt-2.5 pb-0.5 px-0.5 flex flex-col items-center text-center">
+                  <h3 className="font-editorial text-sm sm:text-base font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
                     {cat.name.replace(/\s*Collection/gi, "").trim()}
                   </h3>
+                  <div className="flex items-center gap-1 text-[9.5px] sm:text-[10.5px] font-semibold tracking-widest uppercase text-[#9A7B4F] group-hover:text-[#7E22CE] transition-colors font-glacial mt-1">
+                    <span>EXPLORE</span>
+                    <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         </div>
       </section>
-
-      {/* 3. About Us Section */}
-      <AboutUsSection />
 
       {/* 4. Five Signature Brand Badges & WhatsApp Direct Contact Banner */}
       <BrandValueBadges />

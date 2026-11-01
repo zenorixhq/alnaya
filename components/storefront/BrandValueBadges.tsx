@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
-import { MessageCircle, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { storeConfig } from "@/config/store.config";
 
 export function BrandValueBadges() {
-  const [activeMobileIdx, setActiveMobileIdx] = useState(0);
-  const mobileScrollRef = useRef<HTMLDivElement>(null);
-
   const badges = [
     {
       id: "waterproof",
@@ -102,29 +99,12 @@ export function BrandValueBadges() {
     },
   ];
 
-  // Sync mobile scroll position to active dot index
-  const handleMobileScroll = () => {
-    if (mobileScrollRef.current) {
-      const { scrollLeft, clientWidth } = mobileScrollRef.current;
-      const idx = Math.round(scrollLeft / (clientWidth * 0.75));
-      setActiveMobileIdx(Math.min(badges.length - 1, Math.max(0, idx)));
-    }
-  };
-
-  const scrollMobile = (direction: "left" | "right") => {
-    if (mobileScrollRef.current) {
-      const { clientWidth } = mobileScrollRef.current;
-      const delta = direction === "left" ? -clientWidth * 0.75 : clientWidth * 0.75;
-      mobileScrollRef.current.scrollBy({ left: delta, behavior: "smooth" });
-    }
-  };
-
   return (
-    <section id="brand-values" className="w-full py-12 sm:py-16 md:py-20 bg-[#FAF7F2] border-b border-[#EADBBE]/80 font-glacial">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+    <section id="brand-values" className="w-full py-10 sm:py-16 md:py-20 bg-[#FAF7F2] border-b border-[#EADBBE]/80 font-glacial">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
         
         {/* Section Editorial Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+        <div className="text-center max-w-2xl mx-auto space-y-1.5 sm:space-y-2">
           <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.3em] text-[#7E22CE] block">
             MAISON STANDARDS
           </span>
@@ -136,35 +116,33 @@ export function BrandValueBadges() {
           </p>
         </div>
 
-        {/* MOBILE ( < sm ): Elegant Horizontal Snap Carousel with Indicators */}
-        <div className="sm:hidden relative">
-          <div
-            ref={mobileScrollRef}
-            onScroll={handleMobileScroll}
-            className="flex gap-3.5 overflow-x-auto snap-x snap-mandatory pb-3 pt-1 px-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {badges.map((badge, idx) => (
+        {/* 2 Rows Layout: 3 first, 2 second (No horizontal scrolling on mobile!) */}
+        <div className="space-y-2.5 sm:space-y-5">
+          {/* Row 1: 3 Badges */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 items-stretch">
+            {badges.slice(0, 3).map((badge) => (
               <div
                 key={badge.id}
-                className="w-[78vw] max-w-[300px] flex-shrink-0 snap-center rounded-2xl bg-[#FFFDF9] border border-[#EADBBE] p-6 text-center shadow-[0_4px_20px_rgba(126,34,206,0.05)] flex flex-col items-center justify-between space-y-4"
+                className="group relative rounded-xl sm:rounded-2xl bg-[#FFFDF9] border border-[#EADBBE] hover:border-[#7E22CE]/60 p-2.5 sm:p-5 lg:p-6 text-center shadow-[0_2px_12px_rgba(28,25,23,0.03)] hover:shadow-[0_12px_28px_rgba(126,34,206,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-between"
               >
-                {/* Top Badge Tag */}
-                <span className="text-[9px] font-semibold tracking-widest uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-2.5 py-0.5 rounded-full">
+                {/* Mini Tag Pill */}
+                <span className="text-[7.5px] sm:text-[9px] font-semibold tracking-wider uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-1.5 sm:px-2.5 py-0.5 rounded-full mb-1.5 sm:mb-3">
                   {badge.tag}
                 </span>
 
                 {/* Insignia Medallion */}
-                <div className="relative w-18 h-18 rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-3.5 shadow-sm">
-                  <div className="absolute inset-[3px] rounded-xl border border-purple-300/40 pointer-events-none" />
-                  {badge.icon}
+                <div className="relative w-10 h-10 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-2 sm:p-3.5 mb-2 sm:mb-3.5 shadow-xs group-hover:scale-105 group-hover:border-[#7E22CE] transition-all duration-300 shrink-0">
+                  <div className="scale-75 sm:scale-100 flex items-center justify-center">
+                    {badge.icon}
+                  </div>
                 </div>
 
-                {/* Content */}
-                <div className="space-y-1.5">
-                  <h4 className="font-editorial text-base font-semibold tracking-wide text-[#1C1917]">
+                {/* Title & Benefit */}
+                <div className="space-y-0.5 sm:space-y-1 flex-1 flex flex-col justify-start">
+                  <h4 className="font-editorial text-xs sm:text-base lg:text-lg font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
                     {badge.title}
                   </h4>
-                  <p className="text-xs text-[#5C5346] font-light leading-relaxed">
+                  <p className="text-[9px] sm:text-xs text-[#5C5346] font-light leading-relaxed mt-0.5 line-clamp-2 sm:line-clamp-none">
                     {badge.desc}
                   </p>
                 </div>
@@ -172,60 +150,37 @@ export function BrandValueBadges() {
             ))}
           </div>
 
-          {/* Mobile Dot Navigation */}
-          <div className="flex items-center justify-center gap-1.5 pt-2">
-            {badges.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  if (mobileScrollRef.current) {
-                    const { clientWidth } = mobileScrollRef.current;
-                    mobileScrollRef.current.scrollTo({
-                      left: idx * (clientWidth * 0.75),
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`transition-all duration-300 rounded-full ${
-                  idx === activeMobileIdx
-                    ? "w-6 h-1.5 bg-[#7E22CE]"
-                    : "w-1.5 h-1.5 bg-purple-200 hover:bg-[#7E22CE]/60"
-                }`}
-              />
+          {/* Row 2: 2 Badges (Centered) */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:gap-6 max-w-[72%] sm:max-w-xl lg:max-w-2xl mx-auto items-stretch">
+            {badges.slice(3, 5).map((badge) => (
+              <div
+                key={badge.id}
+                className="group relative rounded-xl sm:rounded-2xl bg-[#FFFDF9] border border-[#EADBBE] hover:border-[#7E22CE]/60 p-2.5 sm:p-5 lg:p-6 text-center shadow-[0_2px_12px_rgba(28,25,23,0.03)] hover:shadow-[0_12px_28px_rgba(126,34,206,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-between"
+              >
+                {/* Mini Tag Pill */}
+                <span className="text-[7.5px] sm:text-[9px] font-semibold tracking-wider uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-1.5 sm:px-2.5 py-0.5 rounded-full mb-1.5 sm:mb-3">
+                  {badge.tag}
+                </span>
+
+                {/* Insignia Medallion */}
+                <div className="relative w-10 h-10 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-2 sm:p-3.5 mb-2 sm:mb-3.5 shadow-xs group-hover:scale-105 group-hover:border-[#7E22CE] transition-all duration-300 shrink-0">
+                  <div className="scale-75 sm:scale-100 flex items-center justify-center">
+                    {badge.icon}
+                  </div>
+                </div>
+
+                {/* Title & Benefit */}
+                <div className="space-y-0.5 sm:space-y-1 flex-1 flex flex-col justify-start">
+                  <h4 className="font-editorial text-xs sm:text-base lg:text-lg font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
+                    {badge.title}
+                  </h4>
+                  <p className="text-[9px] sm:text-xs text-[#5C5346] font-light leading-relaxed mt-0.5 line-clamp-2 sm:line-clamp-none">
+                    {badge.desc}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-
-        {/* DESKTOP & TABLET ( sm+ ): 5-Column Haute Joaillerie Showcase */}
-        <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 items-stretch">
-          {badges.map((badge) => (
-            <div
-              key={badge.id}
-              className="group relative rounded-2xl bg-[#FFFDF9] border border-[#EADBBE] hover:border-[#7E22CE]/60 p-6 lg:p-7 text-center shadow-[0_4px_16px_rgba(28,25,23,0.03)] hover:shadow-[0_16px_36px_rgba(126,34,206,0.12)] hover:-translate-y-1.5 transition-all duration-500 ease-out flex flex-col items-center justify-between cursor-default"
-            >
-              {/* Top Mini Pill */}
-              <span className="text-[9px] font-semibold tracking-widest uppercase text-[#7E22CE] bg-[#FAF5FF] border border-purple-200/60 px-2.5 py-0.5 rounded-full mb-4">
-                {badge.tag}
-              </span>
-
-              {/* Insignia Medallion */}
-              <div className="relative w-18 h-18 lg:w-20 lg:h-20 rounded-2xl border border-purple-200/80 bg-gradient-to-br from-[#FFFDF9] via-[#FAF5FF] to-[#F3E8FF] flex items-center justify-center p-3.5 mb-4 shadow-sm group-hover:scale-105 group-hover:border-[#7E22CE] group-hover:shadow-[0_8px_24px_rgba(126,34,206,0.2)] transition-all duration-500">
-                <div className="absolute inset-[3px] rounded-xl border border-purple-300/40 group-hover:border-purple-400/60 transition-colors pointer-events-none" />
-                {badge.icon}
-              </div>
-
-              {/* Title & Benefit */}
-              <div className="space-y-1.5 flex-1 flex flex-col justify-start">
-                <h4 className="font-editorial text-base lg:text-lg font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-snug">
-                  {badge.title}
-                </h4>
-                <p className="text-xs text-[#5C5346] font-light leading-relaxed mt-1">
-                  {badge.desc}
-                </p>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* WhatsApp Customer Care & Styling Assistance Banner */}
