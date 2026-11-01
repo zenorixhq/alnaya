@@ -87,7 +87,7 @@ export function Header() {
   return (
     <>
       <header
-        className={`w-full transition-all duration-300 ${
+        className={`w-full font-glacial transition-all duration-300 ${
           isHomePage
             ? isScrolled
               ? "fixed top-0 left-0 right-0 z-50 bg-[#FAF7F2]/95 backdrop-blur-md shadow-md border-b border-[#EADBBE] text-[#1C1917]"

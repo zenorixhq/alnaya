@@ -230,7 +230,7 @@ function ProductCatalogContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-8 sm:pb-10 space-y-4 sm:space-y-5">
       {/* 1. Visual Category Cards Bar (Positioned high at top for immediate browsing) */}
-      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs">
+      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs font-glacial">
         <div className="flex items-start gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pb-1 scrollbar-none scroll-smooth -mx-1 px-1">
           {/* "All Pieces" Card */}
           <button

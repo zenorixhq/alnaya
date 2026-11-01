@@ -58,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
       : "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800";
 
   return (
-    <div className="group relative flex flex-col bg-card rounded-xl border border-border/70 overflow-hidden hover:shadow-lg transition-all duration-500 ease-out hover:-translate-y-1 hover:border-primary/50">
+    <div className="group relative flex flex-col bg-card rounded-xl border border-border/70 overflow-hidden hover:shadow-lg transition-all duration-500 ease-out hover:-translate-y-1 hover:border-primary/50 font-glacial">
       {/* Product Image - Clean Framed Aspect Ratio (Fits Entire Jewelry Piece) */}
       <div className="relative aspect-square w-full overflow-hidden bg-[#FAF8F5] dark:bg-stone-900/40 p-2 sm:p-2.5 flex items-center justify-center">
         <Link href={`/products/${product.slug}`} className="block w-full h-full relative flex items-center justify-center">

@@ -7,7 +7,7 @@ export function AboutUsSection() {
   return (
     <section
       id="about-us"
-      className="relative w-full py-16 sm:py-20 lg:py-24 bg-[#FAF7F2] text-[#1C1917] overflow-hidden border-b border-[#EADBBE]/70 select-none scroll-mt-20"
+      className="relative w-full py-16 sm:py-20 lg:py-24 bg-[#FAF7F2] text-[#1C1917] overflow-hidden border-b border-[#EADBBE]/70 select-none scroll-mt-20 font-glacial"
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center">

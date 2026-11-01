@@ -73,7 +73,7 @@ export function HeroEditorial() {
 
             {/* Subheading / Role with Warm Gold Divider Line (Bigger, bolder presence) */}
             <div className="space-y-1.5 pt-1">
-              <div className="text-xs lg:text-sm xl:text-[15px] font-bold uppercase tracking-[0.26em] text-[#786E5E]">
+              <div className="text-xs lg:text-sm xl:text-[15px] font-bold uppercase tracking-[0.26em] text-[#786E5E] font-glacial">
                 FOUNDER &amp; CREATIVE SOUL
               </div>
               <div className="w-16 lg:w-20 h-[2px] bg-gradient-to-r from-[#9A7B4F] via-[#C5A059] to-transparent rounded-full" />
@@ -81,7 +81,7 @@ export function HeroEditorial() {
           </div>
 
           {/* Founder's Personal Manifesto */}
-          <p className="text-sm lg:text-[15px] xl:text-base text-[#4A4235] font-light leading-relaxed max-w-xl font-sans">
+          <p className="text-sm lg:text-[15px] xl:text-base text-[#4A4235] font-light leading-relaxed max-w-xl font-glacial">
             I started ALNAYA with a simple belief — that jewellery is more than just an accessory, it&apos;s a part of your story. Every piece is thoughtfully designed to bring out your unique beauty, celebrate your moments, and stay with you for a lifetime.
           </p>
 
@@ -95,10 +95,10 @@ export function HeroEditorial() {
           </div>
 
           {/* Interactive Action Button */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2 font-glacial">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs lg:text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs lg:text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group font-glacial"
             >
               <span>Discover Collection</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -106,7 +106,7 @@ export function HeroEditorial() {
           </div>
 
           {/* Quality Commitment Badges */}
-          <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] text-[#786E5E]">
+          <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] text-[#786E5E] font-glacial">
             <span className="inline-flex items-center gap-1.5 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               100% Waterproof
@@ -182,13 +182,13 @@ export function HeroEditorial() {
                 />
               </div>
 
-              <span className="relative z-10 text-[11px] sm:text-xs font-bold uppercase tracking-[0.24em] text-[#786E5E] block leading-none">
+              <span className="relative z-10 text-[11px] sm:text-xs font-bold uppercase tracking-[0.24em] text-[#786E5E] block leading-none font-glacial">
                 FOUNDER &amp; CREATIVE SOUL
               </span>
             </div>
 
             {/* Subtext: Founder Personal Manifesto (Increased size for enhanced mobile readability) */}
-            <p className="text-[12px] sm:text-[13px] text-[#3D352A] font-light leading-[1.52] max-w-[225px] sm:max-w-xs font-sans pt-1">
+            <p className="text-[12px] sm:text-[13px] text-[#3D352A] font-light leading-[1.52] max-w-[225px] sm:max-w-xs font-glacial pt-1">
               I started ALNAYA with a simple belief that jewellery is more than just an accessory, it&apos;s a part of your story. Every piece is thoughtfully designed to bring out your unique beauty, celebrate your moments, and stay with you for a lifetime.
             </p>
 
@@ -196,7 +196,7 @@ export function HeroEditorial() {
             <div className="pt-2 sm:pt-2.5">
               <Link
                 href="/products"
-                className="inline-flex items-center justify-center px-6 py-2.5 sm:px-7 sm:py-3 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-md transition-all duration-300 active:scale-[0.98]"
+                className="inline-flex items-center justify-center px-6 py-2.5 sm:px-7 sm:py-3 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-md transition-all duration-300 active:scale-[0.98] font-glacial"
               >
                 <span>Discover Collection</span>
               </Link>
@@ -205,7 +205,7 @@ export function HeroEditorial() {
         </div>
 
         {/* 2. Mobile Trust Assurances (Below the image) */}
-        <div className="w-full bg-[#FAF7F2] py-2.5 sm:py-3 px-4 border-t border-[#EADBBE]/40 flex flex-wrap items-center justify-center gap-2 text-[10px] text-[#786E5E]">
+        <div className="w-full bg-[#FAF7F2] py-2.5 sm:py-3 px-4 border-t border-[#EADBBE]/40 flex flex-wrap items-center justify-center gap-2 text-[10px] text-[#786E5E] font-glacial">
           <span className="inline-flex items-center gap-1 font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             100% Waterproof

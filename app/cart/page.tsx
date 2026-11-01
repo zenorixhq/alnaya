@@ -72,7 +72,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-8 font-glacial">
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-foreground">Shopping Bag</h1>
         <p className="text-xs text-muted-foreground mt-1">

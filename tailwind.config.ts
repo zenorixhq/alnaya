@@ -54,8 +54,9 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        sans: ["'Glacial Indifference'", "var(--font-sans)", "system-ui", "sans-serif"],
         heading: ["var(--font-heading)", "system-ui", "sans-serif"],
+        glacial: ["'Glacial Indifference'", "var(--font-sans)", "system-ui", "sans-serif"],
       },
     },
   },

@@ -120,7 +120,7 @@ export function BrandValueBadges() {
   };
 
   return (
-    <section id="brand-values" className="w-full py-12 sm:py-16 md:py-20 bg-[#FAF7F2] border-b border-[#EADBBE]/80">
+    <section id="brand-values" className="w-full py-12 sm:py-16 md:py-20 bg-[#FAF7F2] border-b border-[#EADBBE]/80 font-glacial">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
         
         {/* Section Editorial Header */}
