@@ -34,7 +34,7 @@ export default function HomePage() {
 
       {/* 3. The Maison Archive / Shop by Category Grid - Enclosed within a compact window container */}
       <section className="w-full py-6 sm:py-8 lg:py-10 bg-[#FAF7F2] border-b border-[#EADBBE]/60">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
           <div className="bg-white/85 backdrop-blur-xs border border-[#EADBBE] rounded-3xl p-4 sm:p-6 lg:p-7 shadow-xs space-y-4 sm:space-y-5">
             {/* Window Header */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-[#EADBBE]/50 pb-3">
@@ -62,10 +62,10 @@ export default function HomePage() {
                 <Link
                   key={cat.id}
                   href={`/products?category=${cat.slug}`}
-                  className="group relative bg-[#FFFDF9] border border-[#EADBBE]/80 rounded-2xl sm:rounded-2.5xl p-2 sm:p-2.5 shadow-2xs hover:shadow-md hover:border-[#7E22CE]/60 hover:-translate-y-0.5 transition-all duration-300 ease-out flex flex-col justify-between"
+                  className="group relative bg-[#FFFDF9] border border-[#EADBBE]/80 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 shadow-2xs hover:shadow-lg hover:border-[#7E22CE]/60 hover:-translate-y-1 transition-all duration-300 ease-out flex flex-col justify-between"
                 >
                   {/* Arched Top Silhouette Image Frame with compact viewport height */}
-                  <div className="w-full h-28 sm:h-32 md:h-36 lg:h-40 rounded-t-[1.4rem] sm:rounded-t-[1.8rem] rounded-b-lg overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
+                  <div className="w-full h-36 xs:h-40 sm:h-48 md:h-52 lg:h-56 rounded-t-[1.3rem] sm:rounded-t-[1.8rem] rounded-b-xl overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
                     <img
                       src={cat.image}
                       alt={cat.name}
@@ -80,7 +80,7 @@ export default function HomePage() {
 
                   {/* Bottom Typography & Action */}
                   <div className="pt-2 pb-0.5 px-0.5 flex flex-col items-center text-center">
-                    <h3 className="font-editorial text-xs sm:text-sm md:text-[15px] font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight truncate max-w-full">
+                    <h3 className="font-editorial text-sm sm:text-base md:text-[17px] font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight truncate max-w-full">
                       {cat.name.replace(/\s*Collection/gi, "").trim()}
                     </h3>
                     <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase text-[#9A7B4F] group-hover:text-[#7E22CE] transition-colors font-glacial mt-1">

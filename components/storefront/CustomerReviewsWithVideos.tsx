@@ -389,7 +389,7 @@ export function CustomerReviewsWithVideos() {
 
   return (
     <section className="w-full bg-[#FAF7F2] py-12 sm:py-16 md:py-20 border-t border-[#EADBBE]/80 text-[#1C1917] font-glacial">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-8 sm:space-y-10">
         
         {/* Editorial Section Header */}
         <div className="text-center space-y-2 max-w-2xl mx-auto">
