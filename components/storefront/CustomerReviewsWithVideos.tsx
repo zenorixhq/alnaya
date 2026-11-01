@@ -110,7 +110,7 @@ function VideoCardPreview({
   return (
     <div
       onClick={onClick}
-      className="group relative w-[70vw] xs:w-[58vw] sm:w-[42vw] md:w-[32vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-2xl overflow-hidden bg-stone-900 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
+      className="group relative w-[calc((100vw-42px)/2)] sm:w-[calc((100vw-56px)/3)] md:w-[30vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-xl sm:rounded-2xl overflow-hidden bg-stone-900 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
     >
       {/* Video / Poster Media */}
       {isDirectVideo ? (
@@ -136,7 +136,7 @@ function VideoCardPreview({
 
       {/* Top Floating Badges */}
       <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10 pointer-events-none">
-        <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
+        <span className="bg-black/60 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1 sm:gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
           <Sparkles className="w-3 h-3 text-purple-400" />
           <span>Video Reel</span>
         </span>
@@ -155,13 +155,13 @@ function VideoCardPreview({
 
       {/* Center Hover Action */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 w-12 h-12 rounded-full bg-white/95 text-stone-900 flex items-center justify-center shadow-xl">
-          <Play className="w-5 h-5 fill-current ml-0.5 text-stone-900" />
+        <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 text-stone-900 flex items-center justify-center shadow-xl">
+          <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5 text-stone-900" />
         </div>
       </div>
 
       {/* Bottom Editorial Details Gradient */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3.5 pt-10 text-white space-y-1.5 pointer-events-none">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2.5 sm:p-3.5 pt-7 sm:pt-10 text-white space-y-1 sm:space-y-1.5 pointer-events-none">
         <p className="text-xs sm:text-sm font-semibold text-white line-clamp-1 leading-snug drop-shadow-sm">
           {reel.title}
         </p>
@@ -193,7 +193,7 @@ function ScreenshotCardPreview({
   return (
     <div
       onClick={onClick}
-      className="group relative w-[70vw] xs:w-[58vw] sm:w-[42vw] md:w-[32vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-2xl overflow-hidden bg-stone-950 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
+      className="group relative w-[calc((100vw-42px)/2)] sm:w-[calc((100vw-56px)/3)] md:w-[30vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-xl sm:rounded-2xl overflow-hidden bg-stone-950 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
     >
       {/* High Quality Screenshot Preview */}
       <img
@@ -205,7 +205,7 @@ function ScreenshotCardPreview({
 
       {/* Top Floating Badge */}
       <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10 pointer-events-none">
-        <span className="bg-[#114E45]/90 backdrop-blur-md text-white text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
+        <span className="bg-[#114E45]/90 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1 sm:gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
           <MessageCircle className="w-3 h-3 text-[#25D366] fill-[#25D366]" />
           <span>Verified Review</span>
         </span>
@@ -217,12 +217,12 @@ function ScreenshotCardPreview({
       {/* Center Hover Action */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 w-12 h-12 rounded-full bg-white/95 text-stone-900 flex items-center justify-center shadow-xl">
-          <Maximize2 className="w-5 h-5 text-stone-800" />
+          <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 text-stone-800" />
         </div>
       </div>
 
       {/* Bottom Editorial Details Gradient */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-3.5 pt-12 text-white space-y-1.5 pointer-events-none">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-2.5 sm:p-3.5 pt-7 sm:pt-12 text-white space-y-1 sm:space-y-1.5 pointer-events-none">
         <div className="flex items-center gap-1.5">
           <p className="text-xs sm:text-sm font-semibold text-white drop-shadow-sm truncate">
             {item.customerName || "Verified Collector"}
@@ -316,13 +316,13 @@ export function CustomerReviewsWithVideos() {
   const scrollPrev = () => {
     const el = carouselRef.current;
     if (!el) return;
-    el.scrollBy({ left: -Math.max(260, el.clientWidth * 0.75), behavior: "smooth" });
+    el.scrollBy({ left: -Math.max(200, el.clientWidth * 0.9), behavior: "smooth" });
   };
 
   const scrollNext = () => {
     const el = carouselRef.current;
     if (!el) return;
-    el.scrollBy({ left: Math.max(260, el.clientWidth * 0.75), behavior: "smooth" });
+    el.scrollBy({ left: Math.max(200, el.clientWidth * 0.9), behavior: "smooth" });
   };
 
   // Quotes scroll logic
@@ -476,7 +476,7 @@ export function CustomerReviewsWithVideos() {
         {/* ONE SINGLE SCROLLABLE CARD CAROUSEL FOR BOTH VIDEOS AND SCREENSHOTS */}
         <div
           ref={carouselRef}
-          className="flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto pb-4 pt-1 px-1 no-scrollbar scroll-smooth snap-x snap-mandatory"
+          className="flex gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pb-4 pt-1 px-0.5 no-scrollbar scroll-smooth snap-x snap-mandatory"
         >
           {visibleItems.map((item) => {
             if (item.kind === "video") {
