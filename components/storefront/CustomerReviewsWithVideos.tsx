@@ -110,7 +110,7 @@ function VideoCardPreview({
   return (
     <div
       onClick={onClick}
-      className="group relative w-[calc((100vw-42px)/2)] sm:w-[calc((100vw-56px)/3)] md:w-[30vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-xl sm:rounded-2xl overflow-hidden bg-stone-900 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
+      className="group relative w-[calc((100vw-42px)/2)] sm:w-[calc((100vw-56px)/3)] md:w-[30vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-xl sm:rounded-2xl overflow-hidden bg-stone-900 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-[#7E22CE] transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
     >
       {/* Video / Poster Media */}
       {isDirectVideo ? (
@@ -205,9 +205,9 @@ function ScreenshotCardPreview({
 
       {/* Top Floating Badge */}
       <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10 pointer-events-none">
-        <span className="bg-[#114E45]/90 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1 sm:gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
-          <MessageCircle className="w-3 h-3 text-[#25D366] fill-[#25D366]" />
-          <span>Verified Review</span>
+        <span className="bg-black/60 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full flex items-center gap-1 sm:gap-1.5 border border-white/20 shadow-sm pointer-events-auto">
+          <MessageCircle className="w-3 h-3 text-purple-400 fill-purple-400" />
+          <span>Review</span>
         </span>
         <span className="w-7 h-7 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center text-white text-[11px] shadow pointer-events-auto group-hover:scale-105 transition-transform">
           <Maximize2 className="w-3.5 h-3.5" />
@@ -242,8 +242,8 @@ function ScreenshotCardPreview({
               {item.piece}
             </span>
           )}
-          <span className="text-[10px] text-emerald-300 font-medium group-hover:text-white transition-colors">
-            View Details →
+          <span className="text-[10px] text-purple-300 font-medium group-hover:text-white transition-colors">
+            View Review →
           </span>
         </div>
       </div>
@@ -433,12 +433,12 @@ export function CustomerReviewsWithVideos() {
               onClick={() => setActiveTab("screenshots")}
               className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                 activeTab === "screenshots"
-                  ? "bg-[#114E45] text-white shadow-xs"
-                  : "bg-white text-stone-600 hover:text-[#114E45] border border-stone-200/90"
+                  ? "bg-[#7E22CE] text-white shadow-xs"
+                  : "bg-white text-stone-600 hover:text-[#7E22CE] hover:border-[#7E22CE]/60 border border-stone-200/90"
               }`}
             >
-              <MessageCircle className="w-3 h-3 text-[#25D366] fill-[#25D366]" />
-              <span>WhatsApp Reviews ({feedbackScreenshots.length})</span>
+              <MessageCircle className="w-3 h-3 text-[#7E22CE] fill-[#7E22CE]" />
+              <span>Reviews ({feedbackScreenshots.length})</span>
             </button>
           </div>
 
@@ -606,7 +606,7 @@ export function CustomerReviewsWithVideos() {
             {/* Modal Header */}
             <div className="px-4 sm:px-5 py-3.5 bg-[#FAF5EB] border-b border-[#EADBBE] flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#25D366]/20 text-[#25D366] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-purple-100 text-[#7E22CE] flex items-center justify-center">
                   <MessageCircle className="w-4 h-4 fill-current" />
                 </div>
                 <div>
