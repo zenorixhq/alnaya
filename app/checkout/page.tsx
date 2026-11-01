@@ -216,6 +216,56 @@ export default function CheckoutPage() {
             });
 
             const verifyData = await verifyRes.json();
+            
+            // Persist order & customer details to client storage for instantaneous Account portal display
+            const orderRecord = {
+              id: verifyData.order?.id || `ord_${orderNumber}`,
+              orderNumber,
+              createdAt: new Date().toISOString(),
+              status: "processing",
+              paymentStatus: "paid",
+              paymentMethod: "razorpay",
+              paymentId: response.razorpay_payment_id,
+              customer: {
+                fullName: formData.fullName,
+                phone: formData.phone,
+                email: formData.email,
+                address: {
+                  street: formData.address,
+                  city: formData.city,
+                  state: formData.state,
+                  postalCode: formData.postalCode,
+                  country: "India",
+                },
+              },
+              items: items.map((it) => ({
+                id: it.id,
+                title: it.title,
+                image: it.image || "/images/about-model-necklace.jpg",
+                price: (it as any).salePrice || it.price,
+                quantity: it.quantity,
+                selectedVariant: (it as any).selectedVariant,
+              })),
+              subtotal,
+              discount,
+              shipping,
+              grandTotal,
+              trackingNumber: `DTDC-KL-${(parseInt(orderNumber.replace(/\D/g, "") || "100000", 10) * 7).toString().slice(0, 6)}`,
+            };
+
+            try {
+              localStorage.setItem("alnaya_customer_profile", JSON.stringify(formData));
+              localStorage.setItem("alnaya_customer_phone", formData.phone);
+              localStorage.setItem("alnaya_has_purchased", "true");
+
+              const prevOrdersStr = localStorage.getItem("alnaya_placed_orders");
+              const prevOrders = prevOrdersStr ? JSON.parse(prevOrdersStr) : [];
+              const updatedOrders = [orderRecord, ...prevOrders.filter((o: any) => o.orderNumber !== orderNumber)];
+              localStorage.setItem("alnaya_placed_orders", JSON.stringify(updatedOrders));
+            } catch (storageErr) {
+              console.warn("Could not save to localStorage:", storageErr);
+            }
+
             if (verifyData.success) {
               clearCart();
               router.push(

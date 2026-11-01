@@ -30,6 +30,39 @@ function SuccessContent() {
   const isOnlinePayment = method === "razorpay" || !!paymentId;
   const whatsappPhone = storeConfig.brand.contact.whatsappNumber || "919037075227";
 
+  useEffect(() => {
+    if (typeof window === "undefined" || !orderNumber) return;
+    try {
+      const prevOrdersStr = localStorage.getItem("alnaya_placed_orders");
+      const prevOrders = prevOrdersStr ? JSON.parse(prevOrdersStr) : [];
+      const exists = prevOrders.some((o: any) => o.orderNumber === orderNumber);
+      if (!exists) {
+        const numericTotal = parseFloat(cleanedTotal) || 0;
+        const newRecord = {
+          id: `ord_${orderNumber}`,
+          orderNumber,
+          createdAt: new Date().toISOString(),
+          status: "processing",
+          paymentStatus: isOnlinePayment ? "paid" : "pending",
+          paymentMethod: method,
+          razorpayPaymentId: paymentId,
+          customer: {
+            fullName: "Valued Collector",
+            phone: phone,
+          },
+          items: [],
+          grandTotal: numericTotal,
+          trackingNumber: `DTDC-KL-${(parseInt(orderNumber.replace(/\D/g, "") || "100000", 10) * 7).toString().slice(0, 6)}`,
+        };
+        localStorage.setItem("alnaya_placed_orders", JSON.stringify([newRecord, ...prevOrders]));
+      }
+      if (phone) {
+        localStorage.setItem("alnaya_customer_phone", phone);
+      }
+      localStorage.setItem("alnaya_has_purchased", "true");
+    } catch (e) {}
+  }, [orderNumber, paymentId, cleanedTotal, phone, method, isOnlinePayment]);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(orderNumber);
@@ -123,8 +156,16 @@ function SuccessContent() {
         {/* Action Buttons */}
         <div className="pt-2 flex flex-col sm:flex-row gap-3">
           <Link
+            href={`/account?order=${orderNumber}`}
+            className="flex-1 py-3 px-5 rounded-xl bg-[#7E22CE] hover:bg-[#6B21A8] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+          >
+            <PackageCheck className="w-4 h-4" />
+            <span>View in Account & Track</span>
+          </Link>
+
+          <Link
             href="/products"
-            className="flex-1 py-3 px-5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+            className="flex-1 py-3 px-5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
           >
             <span>Continue Shopping</span>
             <ArrowRight className="w-4 h-4" />
