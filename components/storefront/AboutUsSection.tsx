@@ -14,18 +14,18 @@ export function AboutUsSection() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-14 items-center">
-          {/* 1. Left Editorial Text Column (Large readable typography) */}
-          <div className="lg:col-span-5 flex flex-col justify-between self-stretch space-y-4 sm:space-y-6 py-1">
-            {/* Top Display Headline: Changed to 'About Us' and removed sub Heading */}
+          {/* 1. Left Editorial Text Column (Subtext positioned directly beneath headline) */}
+          <div className="lg:col-span-5 flex flex-col justify-start space-y-6 sm:space-y-7 py-1">
+            {/* Top Display Headline */}
             <div>
               <h2 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-[#1C1917] leading-[1.1]">
                 About Us
               </h2>
-              <div className="w-14 sm:w-20 h-[2.5px] bg-gradient-to-r from-[#9A7B4F] to-transparent rounded-full mt-2 sm:mt-3" />
+              <div className="w-14 sm:w-20 h-[2.5px] bg-gradient-to-r from-[#9A7B4F] to-transparent rounded-full mt-2.5 sm:mt-3" />
             </div>
 
-            {/* Paragraph & Underlined Shop Now Action with Enlarged, Highly Legible Text */}
-            <div className="space-y-4 sm:space-y-6 pt-1 max-w-md">
+            {/* Paragraph & Underlined Shop Now Action positioned directly in the designated area */}
+            <div className="space-y-6 max-w-md">
               <p className="text-sm sm:text-base md:text-lg text-[#2C241B] font-normal leading-relaxed">
                 Our shop offers thoughtfully crafted jewellery that blends timeless elegance with modern design. Each piece is created using premium materials and exceptional attention to detail.
               </p>

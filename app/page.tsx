@@ -33,15 +33,15 @@ export default function HomePage() {
       <AboutUsSection />
 
       {/* 3. The Maison Archive / Shop by Category Grid */}
-      <section className="w-full py-12 sm:py-20 border-b border-[#EADBBE]/60 bg-gradient-to-b from-white via-[#FAF7F2] to-[#FAF7F2]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+      <section className="w-full py-8 sm:py-12 lg:py-14 border-b border-[#EADBBE]/60 bg-gradient-to-b from-white via-[#FAF7F2] to-[#FAF7F2]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#7E22CE] uppercase tracking-widest font-glacial">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>The Maison Archive</span>
               </div>
-              <h2 className="font-editorial text-3xl sm:text-4xl font-normal text-[#1C1917] mt-1 tracking-wide">
+              <h2 className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-normal text-[#1C1917] mt-1 tracking-wide">
                 Shop by Category
               </h2>
             </div>
@@ -54,16 +54,16 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Editorial Framed Arch Category Cards (New Distinct Design) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
-            {categoryList.map((cat, idx) => (
+          {/* Editorial Framed Arch Category Cards: Exactly 6 cards in a 2*3 grid on desktop within the window */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5">
+            {categoryList.slice(0, 6).map((cat, idx) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                className="group relative bg-white border border-[#EADBBE]/90 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 shadow-xs hover:shadow-xl hover:border-[#7E22CE]/60 hover:-translate-y-1.5 transition-all duration-500 ease-out flex flex-col justify-between"
+                className="group relative bg-white border border-[#EADBBE]/90 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 shadow-xs hover:shadow-xl hover:border-[#7E22CE]/60 hover:-translate-y-1 transition-all duration-300 ease-out flex flex-col justify-between"
               >
-                {/* Arched Top Silhouette Image Frame */}
-                <div className="w-full aspect-[4/4.8] rounded-t-[1.8rem] sm:rounded-t-[2.2rem] rounded-b-xl overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
+                {/* Arched Top Silhouette Image Frame with compact viewport aspect ratio */}
+                <div className="w-full aspect-[4/3.2] sm:aspect-[4/3] rounded-t-[1.6rem] sm:rounded-t-[2rem] rounded-b-xl overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
                   <img
                     src={cat.image}
                     alt={cat.name}
