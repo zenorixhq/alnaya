@@ -1,4 +1,5 @@
 "use client";
+import { useReviewsData } from "@/hooks/useReviewsData";
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -48,8 +49,8 @@ export interface VideoReel {
   poster: string;
   views?: string;
   productTitle: string;
-  productSlug: string;
-  productPrice: number;
+  productSlug?: string;
+  productPrice?: number;
 }
 
 import initialReviewData from "@/data/clientReviews.json";
@@ -177,45 +178,7 @@ function AutoPlayingReelCard({
 }
 
 export function CustomerReviewsWithVideos() {
-  const [videoReels, setVideoReels] = useState<VideoReel[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem("alnaya_cached_reels");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch {}
-    }
-    return defaultVideoReels;
-  });
-
-  const [feedbackScreenshots, setFeedbackScreenshots] = useState<FeedbackScreenshot[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem("alnaya_cached_screenshots");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch {}
-    }
-    return defaultScreenshots;
-  });
-
-  const [reviewQuotes, setReviewQuotes] = useState<ReviewQuote[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = sessionStorage.getItem("alnaya_cached_quotes");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch {}
-    }
-    return defaultReviewQuotes;
-  });
-
+  const { videoReels, feedbackScreenshots, reviews: reviewQuotes } = useReviewsData();
   const [selectedVideo, setSelectedVideo] = useState<VideoReel | null>(null);
   const [selectedScreenshot, setSelectedScreenshot] = useState<FeedbackScreenshot | null>(null);
 
@@ -226,33 +189,6 @@ export function CustomerReviewsWithVideos() {
   const quotesScrollRef = useRef<HTMLDivElement>(null);
   const [isQuotesLeftDisabled, setIsQuotesLeftDisabled] = useState(true);
   const [isQuotesRightDisabled, setIsQuotesRightDisabled] = useState(false);
-
-  // Fetch fresh data from API and cache in sessionStorage for 0ms subsequent loads
-  useEffect(() => {
-    fetch(`/api/reviews?t=${Date.now()}`, { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data.videoReels) && data.videoReels.length > 0) {
-          setVideoReels(data.videoReels);
-          try {
-            sessionStorage.setItem("alnaya_cached_reels", JSON.stringify(data.videoReels));
-          } catch {}
-        }
-        if (Array.isArray(data.feedbackScreenshots) && data.feedbackScreenshots.length > 0) {
-          setFeedbackScreenshots(data.feedbackScreenshots);
-          try {
-            sessionStorage.setItem("alnaya_cached_screenshots", JSON.stringify(data.feedbackScreenshots));
-          } catch {}
-        }
-        if (Array.isArray(data.reviews) && data.reviews.length > 0) {
-          setReviewQuotes(data.reviews);
-          try {
-            sessionStorage.setItem("alnaya_cached_quotes", JSON.stringify(data.reviews));
-          } catch {}
-        }
-      })
-      .catch((e) => console.error("Could not fetch reviews data:", e));
-  }, []);
 
   // Update Left / Right Arrow states based on scroll position for Screenshots
   const updateScrollButtons = () => {

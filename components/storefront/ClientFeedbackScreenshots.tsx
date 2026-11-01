@@ -13,44 +13,16 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-export interface FeedbackScreenshot {
-  id: string;
-  title: string;
-  customerName: string;
-  location: string;
-  piece?: string;
-  imageUrl: string;
-  caption?: string;
-  date?: string;
-}
-
-import initialReviewData from "@/data/clientReviews.json";
+import { useReviewsData, FeedbackScreenshot } from "@/hooks/useReviewsData";
 
 interface ClientFeedbackScreenshotsProps {
   className?: string;
 }
 
 export function ClientFeedbackScreenshots({ className = "" }: ClientFeedbackScreenshotsProps) {
-  const [screenshots, setScreenshots] = useState<FeedbackScreenshot[]>(
-    () => (initialReviewData.feedbackScreenshots || []) as FeedbackScreenshot[]
-  );
+  const { feedbackScreenshots: screenshots } = useReviewsData();
   const [zoomedScreenshot, setZoomedScreenshot] = useState<FeedbackScreenshot | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const fetchScreenshots = () => {
-    fetch(`/api/reviews?t=${Date.now()}`, { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data.feedbackScreenshots)) {
-          setScreenshots(data.feedbackScreenshots);
-        }
-      })
-      .catch((e) => console.error("Error fetching feedback screenshots:", e));
-  };
-
-  useEffect(() => {
-    fetchScreenshots();
-  }, []);
 
   // Lock body scroll when lightbox is open
   useEffect(() => {

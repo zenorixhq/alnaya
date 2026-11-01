@@ -1,4 +1,5 @@
 "use client";
+import { useReviewsData } from "@/hooks/useReviewsData";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -183,19 +184,13 @@ export function InstagramReelSection() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
+  const { instagramVideos } = useReviewsData();
+
   useEffect(() => {
-    fetch(`/api/reviews?t=${Date.now()}`, { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data.instagramVideos)) {
-          setVideos(data.instagramVideos);
-          try {
-            localStorage.setItem("alnaya_instagram_reels", JSON.stringify(data.instagramVideos));
-          } catch (e) {}
-        }
-      })
-      .catch((e) => console.error("Error fetching Instagram videos:", e));
-  }, []);
+    if (Array.isArray(instagramVideos) && instagramVideos.length > 0) {
+      setVideos(instagramVideos as InstagramVideoItem[]);
+    }
+  }, [instagramVideos]);
 
   const handleScroll = () => {
     if (!carouselRef.current) return;

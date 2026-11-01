@@ -1,4 +1,5 @@
 "use client";
+import { useReviewsData } from "@/hooks/useReviewsData";
 
 import { useState, useEffect, useRef } from "react";
 import { Instagram, Play, Volume2, VolumeX, X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
@@ -64,56 +65,38 @@ export function FollowTheHouseSection() {
   const modalVideoRef = useRef<HTMLVideoElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch live Follow The House items from Admin Panel / API
+  const { instagramVideos } = useReviewsData();
+
   useEffect(() => {
-    const fetchPanels = () => {
-      fetch("/api/reviews?t=" + Date.now(), { cache: "no-store" })
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data.instagramVideos)) {
-            if (data.instagramVideos.length > 0) {
-              const mapped: HousePanel[] = data.instagramVideos.map((item: any, idx: number) => {
-                const isCorrupted =
-                  !item.poster ||
-                  typeof item.poster !== "string" ||
-                  item.poster.includes("radiant finish") ||
-                  (item.poster.startsWith("data:") && item.poster.length > 50000);
-                const cleanImage = !isCorrupted
-                  ? item.poster
-                  : (defaultPanels[idx % defaultPanels.length]?.image || `/images/follow-house/panel-${(idx % 5) + 1}.jpg`);
+    if (Array.isArray(instagramVideos) && instagramVideos.length > 0) {
+      const mapped: HousePanel[] = instagramVideos.map((item: any, idx: number) => {
+        const isCorrupted =
+          !item.poster ||
+          typeof item.poster !== "string" ||
+          item.poster.includes("radiant finish") ||
+          (item.poster.startsWith("data:") && item.poster.length > 50000);
+        const cleanImage = !isCorrupted
+          ? item.poster
+          : (defaultPanels[idx % defaultPanels.length]?.image || `/images/follow-house/panel-${(idx % 5) + 1}.jpg`);
 
-                return {
-                  id: item.id || idx + 1,
-                  image: cleanImage,
-                  videoUrl: item.videoUrl || "",
-                  alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
-                  caption: item.title || item.caption || "",
-                  handle: item.handle ? item.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in",
-                  instagramLink:
-                    item.instagramLink && !item.instagramLink.includes("gleamnest")
-                      ? item.instagramLink
-                      : instagramUrl,
-                };
-              });
-              setPanels(mapped);
-            } else {
-              setPanels([]);
-            }
-          }
-        })
-        .catch(() => {});
-    };
+        return {
+          id: item.id || idx + 1,
+          image: cleanImage,
+          videoUrl: item.videoUrl || "",
+          alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
+          caption: item.title || item.caption || "",
+          handle: item.handle ? item.handle.replace(/@?gleamnest\.in/gi, "@alnaya.in").replace(/gleamnest/gi, "alnaya") : "@alnaya.in",
+          instagramLink:
+            item.instagramLink && !item.instagramLink.includes("gleamnest")
+              ? item.instagramLink
+              : instagramUrl,
+        };
+      });
+      setPanels(mapped);
+    }
+  }, [instagramVideos, instagramUrl]);
 
-    fetchPanels();
 
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "alnaya_admin_instavideos" || e.key === "alnaya_follow_house_updated") {
-        fetchPanels();
-      }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [instagramUrl]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {

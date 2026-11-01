@@ -3275,7 +3275,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center gap-2.5 flex-wrap">
                 <button
                   type="button"
-                  onClick={refreshSiteImages}
+                  onClick={() => refreshSiteImages(true)}
                   className="px-3.5 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Refresh

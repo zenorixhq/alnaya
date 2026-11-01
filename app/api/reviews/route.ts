@@ -8,6 +8,10 @@ export const runtime = "nodejs";
 
 const dataFilePath = path.join(process.cwd(), "data", "clientReviews.json");
 
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
+};
+
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
   Pragma: "no-cache",
@@ -168,7 +172,7 @@ async function writeData(data: any) {
 
 export async function GET() {
   const data = await readData();
-  return NextResponse.json(data, { headers: NO_CACHE_HEADERS });
+  return NextResponse.json(data, { headers: CACHE_HEADERS });
 }
 
 export async function POST(req: Request) {
