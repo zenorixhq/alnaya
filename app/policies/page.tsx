@@ -20,6 +20,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { storeConfig } from "@/config/store.config";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 type PolicyTab =
   | "size-guide"
@@ -34,6 +35,7 @@ function PoliciesContent() {
   const [activeTab, setActiveTab] = useState<PolicyTab>(requestedTab);
   const [sizeSubTab, setSizeSubTab] = useState<"ring" | "bangle">("ring");
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const { images: siteImages } = useSiteImages();
 
   useEffect(() => {
     if (requestedTab) {
@@ -380,12 +382,12 @@ function PoliciesContent() {
                       {/* Graphic Banner & Diagram */}
                       <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                         <img
-                          src="/images/bangle-size-guide.jpg"
+                          src={siteImages.bangleSizeGuide || "/images/bangle-size-guide.jpg"}
                           alt="Alnaya Bangle Size Guide and Measurement Diagram"
                           className="w-full h-auto max-h-[460px] object-contain mx-auto"
                         />
                         <button
-                          onClick={() => setZoomedImage("/images/bangle-size-guide.jpg")}
+                          onClick={() => setZoomedImage(siteImages.bangleSizeGuide || "/images/bangle-size-guide.jpg")}
                           className="absolute bottom-4 right-4 px-3.5 py-2 rounded-xl bg-background/95 backdrop-blur border border-border shadow-lg text-xs font-semibold flex items-center gap-2 text-foreground hover:bg-background"
                         >
                           <Maximize2 className="w-4 h-4" />
@@ -452,12 +454,12 @@ function PoliciesContent() {
                 {/* Return Policy Image */}
                 <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                   <img
-                    src="/images/return-refund-policy.jpg"
+                    src={siteImages.returnPolicyImage || "/images/return-refund-policy.jpg"}
                     alt="Alnaya Return, Refund & Replacement Policy"
                     className="w-full h-auto max-h-[460px] object-contain mx-auto"
                   />
                   <button
-                    onClick={() => setZoomedImage("/images/return-refund-policy.jpg")}
+                    onClick={() => setZoomedImage(siteImages.returnPolicyImage || "/images/return-refund-policy.jpg")}
                     className="absolute bottom-4 right-4 px-3.5 py-2 rounded-xl bg-background/95 backdrop-blur border border-border shadow-lg text-xs font-semibold flex items-center gap-2 text-foreground hover:bg-background"
                   >
                     <Maximize2 className="w-4 h-4" />

@@ -4,8 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { storeConfig } from "@/config/store.config";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 export function HeroEditorial() {
+  const { images } = useSiteImages();
   return (
     <section className="relative w-full bg-[#FAF7F2] text-[#1C1917] overflow-hidden select-none border-b border-[#EADBBE]/40 lg:border-none lg:h-[100svh] lg:max-h-[100svh] flex flex-col justify-between">
       
@@ -13,17 +15,14 @@ export function HeroEditorial() {
       {/* DESKTOP HERO: Strictly enclosed within the window (100svh) */}
       {/* ========================================================= */}
       <div className="hidden lg:block absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <picture>
-          <source srcSet="/images/founder-aleena-saree-hero.webp" type="image/webp" />
-          <img
-            src="/images/founder-aleena-saree-hero.jpg"
-            alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-            className="w-full h-full object-cover object-[80%_center] xl:object-[84%_center]"
-            loading="eager"
-            decoding="sync"
-            style={{ imageRendering: "-webkit-optimize-contrast" }}
-          />
-        </picture>
+        <img
+          src={images.heroDesktop || "/images/founder-aleena-saree-hero.jpg"}
+          alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
+          className="w-full h-full object-cover object-[80%_center] xl:object-[84%_center]"
+          loading="eager"
+          decoding="sync"
+          style={{ imageRendering: "-webkit-optimize-contrast" }}
+        />
         {/* Soft Left Ambient Feather: ensures typography has perfect contrast over sunlight */}
         <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/60 to-transparent w-full max-w-xl xl:max-w-2xl pointer-events-none" />
 
@@ -127,17 +126,14 @@ export function HeroEditorial() {
         
         {/* 1. Mobile Portrait Image with Full Editorial Story on Left Side */}
         <div className="w-full relative aspect-[9/13] sm:aspect-[9/12] overflow-hidden select-none bg-[#FAF7F2]">
-          <picture>
-            <source srcSet="/images/founder-aleena-mobile.webp" type="image/webp" />
-            <img
-              src="/images/founder-aleena-mobile.jpg"
-              alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-              className="w-full h-full object-cover object-top"
-              loading="eager"
-              decoding="sync"
-              style={{ imageRendering: "-webkit-optimize-contrast" }}
-            />
-          </picture>
+          <img
+            src={images.heroMobile || "/images/founder-aleena-mobile.jpg"}
+            alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
+            className="w-full h-full object-cover object-top"
+            loading="eager"
+            decoding="sync"
+            style={{ imageRendering: "-webkit-optimize-contrast" }}
+          />
 
           {/* Left ambient feather gradient: ensures perfect contrast & legibility for all text */}
           <div className="absolute inset-y-0 left-0 w-[68%] bg-gradient-to-r from-[#FAF7F2]/85 via-[#FAF7F2]/50 to-transparent pointer-events-none" />
@@ -174,9 +170,9 @@ export function HeroEditorial() {
             {/* Subheading / Role with Ambient Signature Behind It (Not behind Discover Collection button) */}
             <div className="relative pt-0.5">
               {/* Cursive Signature Lines Positioned Directly Behind Subtitle & Headline */}
-              <div className="absolute -top-12 sm:-top-14 -left-5 sm:-left-7 w-[230px] sm:w-[270px] opacity-[0.11] select-none pointer-events-none -rotate-6 z-0 mix-blend-multiply leading-none">
+              <div className="absolute -top-12 sm:-top-14 -left-5 sm:-left-7 w-[230px] sm:w-[270px] opacity-[0.14] select-none pointer-events-none -rotate-6 z-0 mix-blend-multiply leading-none">
                 <img
-                  src="/images/aleena-signature-dark.png"
+                  src={images.heroSignature || "/images/aleena-signature-dark.png"}
                   alt=""
                   className="w-full h-auto object-contain"
                 />

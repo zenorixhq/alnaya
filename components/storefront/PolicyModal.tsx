@@ -18,6 +18,7 @@ import {
   Maximize2,
 } from "lucide-react";
 import { storeConfig } from "@/config/store.config";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 export type PolicyTab =
   | "size-guide"
@@ -33,6 +34,7 @@ interface PolicyModalProps {
 }
 
 export function PolicyModal({
+
   isOpen,
   onClose,
   initialTab = "size-guide",
@@ -40,6 +42,7 @@ export function PolicyModal({
   const [activeTab, setActiveTab] = useState<PolicyTab>(initialTab);
   const [sizeSubTab, setSizeSubTab] = useState<"ring" | "bangle">("ring");
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const { images: siteImages } = useSiteImages();
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -397,12 +400,12 @@ export function PolicyModal({
                     {/* Graphic Banner & Diagram */}
                     <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                       <img
-                        src="/images/bangle-size-guide.jpg"
+                        src={siteImages.bangleSizeGuide || "/images/bangle-size-guide.jpg"}
                         alt="Alnaya Official Bangle Size Guide & Hand Measurement Steps"
                         className="w-full h-auto max-h-[360px] object-contain mx-auto"
                       />
                       <button
-                        onClick={() => setZoomedImage("/images/bangle-size-guide.jpg")}
+                        onClick={() => setZoomedImage(siteImages.bangleSizeGuide || "/images/bangle-size-guide.jpg")}
                         className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-background/90 backdrop-blur border border-border shadow text-xs font-semibold flex items-center gap-1.5 text-foreground hover:bg-background"
                       >
                         <Maximize2 className="w-3.5 h-3.5" />
@@ -474,12 +477,12 @@ export function PolicyModal({
               {/* Graphic Banner */}
               <div className="relative group rounded-xl overflow-hidden border border-border bg-muted/20">
                 <img
-                  src="/images/return-refund-policy.jpg"
+                  src={siteImages.returnPolicyImage || "/images/return-refund-policy.jpg"}
                   alt="Alnaya Official Return, Refund and Damage Replacement Policy"
                   className="w-full h-auto max-h-[380px] object-contain mx-auto"
                 />
                 <button
-                  onClick={() => setZoomedImage("/images/return-refund-policy.jpg")}
+                  onClick={() => setZoomedImage(siteImages.returnPolicyImage || "/images/return-refund-policy.jpg")}
                   className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-background/90 backdrop-blur border border-border shadow text-xs font-semibold flex items-center gap-1.5 text-foreground hover:bg-background"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />

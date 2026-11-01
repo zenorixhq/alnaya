@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { storeConfig } from "@/config/store.config";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 interface BrandLogoProps {
   variant?: "full" | "compact" | "emblem-only";
@@ -17,6 +18,8 @@ export function BrandLogo({
   className = "",
   theme = "light",
 }: BrandLogoProps) {
+  const { images } = useSiteImages();
+
   return (
     <Link
       href="/"
@@ -26,7 +29,7 @@ export function BrandLogo({
       {/* 1. Official Alnaya Circular Emblem */}
       <div className="relative w-9 h-9 sm:w-11 sm:h-11 flex-shrink-0 flex items-center justify-center rounded-full overflow-hidden border border-primary/25 shadow-sm group-hover:scale-105 transition-all duration-300">
         <img
-          src="/alnaya-logo.png"
+          src={images.brandLogo || storeConfig?.brand?.logo?.imageUrl || "/alnaya-logo.png"}
           alt="Alnaya Logo"
           className="w-full h-full object-cover"
         />

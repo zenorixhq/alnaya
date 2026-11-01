@@ -43,6 +43,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
+import { useSiteImages } from "@/hooks/useSiteImages";
+import { SiteImagesConfig, defaultSiteImages } from "@/types/siteImages";
 
 export default function AdminDashboardPage() {
   // Authentication State
@@ -72,8 +74,67 @@ export default function AdminDashboardPage() {
   const updateProduct = useProductStore((s) => s.updateProduct);
   const deleteProduct = useProductStore((s) => s.deleteProduct);
 
-  const [activeTab, setActiveTab] = useState<"overview" | "orders" | "inventory" | "config" | "reviews" | "collections" | "reels">("inventory");
+  const [activeTab, setActiveTab] = useState<"overview" | "orders" | "inventory" | "config" | "reviews" | "collections" | "reels" | "site-images">("inventory");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Website Storefront Images State
+  const { images: siteImages, updateImages: updateSiteImages, refresh: refreshSiteImages } = useSiteImages();
+  const [localSiteImages, setLocalSiteImages] = useState<SiteImagesConfig>(siteImages);
+  const [isSavingSiteImages, setIsSavingSiteImages] = useState(false);
+  const [siteImagesSaveSuccess, setSiteImagesSaveSuccess] = useState(false);
+  const [uploadingImageKey, setUploadingImageKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLocalSiteImages(siteImages);
+  }, [siteImages]);
+
+  const handleSiteImageUpload = async (key: keyof SiteImagesConfig, file: File) => {
+    try {
+      setUploadingImageKey(key);
+      setUploadProgressText(`Uploading ${file.name}...`);
+      const publicUrl = await uploadFileToServer(file, "images");
+      if (!publicUrl) throw new Error("Image upload failed");
+
+      const updated = { ...localSiteImages, [key]: publicUrl };
+      setLocalSiteImages(updated);
+      await updateSiteImages({ [key]: publicUrl });
+      setSiteImagesSaveSuccess(true);
+      setTimeout(() => setSiteImagesSaveSuccess(false), 3500);
+    } catch (err: any) {
+      console.error(`Error uploading site image for ${key}:`, err);
+      alert("Failed to upload image: " + (err.message || "Unknown error"));
+    } finally {
+      setUploadingImageKey(null);
+      setUploadProgressText("");
+    }
+  };
+
+  const handleSaveAllSiteImages = async () => {
+    try {
+      setIsSavingSiteImages(true);
+      const ok = await updateSiteImages(localSiteImages);
+      if (ok) {
+        setSiteImagesSaveSuccess(true);
+        setTimeout(() => setSiteImagesSaveSuccess(false), 3500);
+      } else {
+        throw new Error("Server could not save images");
+      }
+    } catch (err: any) {
+      alert("Failed to save changes: " + (err.message || "Unknown error"));
+    } finally {
+      setIsSavingSiteImages(false);
+    }
+  };
+
+  const handleResetSiteImage = async (key: keyof SiteImagesConfig) => {
+    if (!confirm(`Reset this image to the original factory default?`)) return;
+    const defaultUrl = defaultSiteImages[key];
+    const updated = { ...localSiteImages, [key]: defaultUrl };
+    setLocalSiteImages(updated);
+    await updateSiteImages({ [key]: defaultUrl });
+    setSiteImagesSaveSuccess(true);
+    setTimeout(() => setSiteImagesSaveSuccess(false), 3500);
+  };
 
   // Curated Collections (Category Cards) State
   const [categoriesList, setCategoriesList] = useState<Category[]>(() => {
@@ -1975,6 +2036,18 @@ export default function AdminDashboardPage() {
             <Instagram className="w-4 h-4 text-[#E1306C]" />
             <span>Follow The House (Reels) ({instagramVideosList.length})</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("site-images")}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+              activeTab === "site-images"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <ImageIcon className="w-4 h-4 text-[#7E22CE]" />
+            <span>Website Media &amp; Images</span>
+          </button>
         </div>
 
         {/* Tab: Product Catalog Management & Editing */}
@@ -3181,6 +3254,567 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+        {/* Tab: Website Media & Storefront Images */}
+        {activeTab === "site-images" && (
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-8 font-glacial">
+            {/* Tab Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/70 pb-5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-[#7E22CE]" />
+                  <h3 className="text-lg font-bold text-foreground font-editorial tracking-wide">
+                    Website Media &amp; Storefront Images
+                  </h3>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                  Upload, customize, and replace all images across the website — including About Us, Desktop &amp; Mobile Hero banners, Founder Signature, and Brand Identity. Uploaded files save instantly to high-speed cloud CDN.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={refreshSiteImages}
+                  className="px-3.5 py-2 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Refresh
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAllSiteImages}
+                  disabled={isSavingSiteImages}
+                  className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs flex items-center gap-2 shadow-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{isSavingSiteImages ? "Saving Changes..." : "Save All Images"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Save Success Banner */}
+            {siteImagesSaveSuccess && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Live website images have been updated and are now live across the storefront!</span>
+              </div>
+            )}
+
+            {/* SECTION 1: ABOUT US SECTION (Requested by User) */}
+            <div className="space-y-4">
+              <div className="border-b border-border/60 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-[#7E22CE] uppercase tracking-wider">
+                    Storefront Section
+                  </span>
+                  <span className="text-muted-foreground">•</span>
+                  <h4 className="text-sm font-bold text-foreground">About Us Photography Spread</h4>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  These two images form the side-by-side photography showcase in the &quot;About Us&quot; section on the homepage.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* About Us Image 1 */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">About Us Photo 1 (Left Showcase)</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("aboutImage1")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset Default
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Primary jewelry close-up featured on the left of the 2-image spread.
+                    </p>
+                  </div>
+
+                  {/* Preview Box */}
+                  <div className="relative aspect-[4/5] max-h-[300px] w-full bg-stone-100 dark:bg-stone-900 rounded-xl overflow-hidden border border-border group mx-auto">
+                    <img
+                      src={localSiteImages.aboutImage1 || "/images/about-model-necklace.jpg"}
+                      alt="About Us 1 Preview"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {uploadingImageKey === "aboutImage1" && (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center text-white text-xs font-semibold gap-2">
+                        <Upload className="w-5 h-5 animate-bounce" />
+                        <span>Uploading photo...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Upload Controls */}
+                  <div className="space-y-2.5 pt-2">
+                    <label
+                      htmlFor="site-img-aboutImage1"
+                      className="w-full py-2.5 px-4 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90 transition-all shadow-xs"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Upload New Photo (Device)</span>
+                    </label>
+                    <input
+                      id="site-img-aboutImage1"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("aboutImage1", file);
+                      }}
+                    />
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-muted-foreground">Or Direct Image URL:</span>
+                      <input
+                        type="text"
+                        value={localSiteImages.aboutImage1 || ""}
+                        onChange={(e) =>
+                          setLocalSiteImages((prev) => ({ ...prev, aboutImage1: e.target.value }))
+                        }
+                        placeholder="https://... or /images/..."
+                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-card font-mono text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* About Us Image 2 */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">About Us Photo 2 (Right Showcase)</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("aboutImage2")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset Default
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Secondary styling close-up featured on the right of the 2-image spread.
+                    </p>
+                  </div>
+
+                  {/* Preview Box */}
+                  <div className="relative aspect-[4/5] max-h-[300px] w-full bg-stone-100 dark:bg-stone-900 rounded-xl overflow-hidden border border-border group mx-auto">
+                    <img
+                      src={localSiteImages.aboutImage2 || "/images/about-model-cuff.jpg"}
+                      alt="About Us 2 Preview"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {uploadingImageKey === "aboutImage2" && (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center text-white text-xs font-semibold gap-2">
+                        <Upload className="w-5 h-5 animate-bounce" />
+                        <span>Uploading photo...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Upload Controls */}
+                  <div className="space-y-2.5 pt-2">
+                    <label
+                      htmlFor="site-img-aboutImage2"
+                      className="w-full py-2.5 px-4 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90 transition-all shadow-xs"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Upload New Photo (Device)</span>
+                    </label>
+                    <input
+                      id="site-img-aboutImage2"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("aboutImage2", file);
+                      }}
+                    />
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-muted-foreground">Or Direct Image URL:</span>
+                      <input
+                        type="text"
+                        value={localSiteImages.aboutImage2 || ""}
+                        onChange={(e) =>
+                          setLocalSiteImages((prev) => ({ ...prev, aboutImage2: e.target.value }))
+                        }
+                        placeholder="https://... or /images/..."
+                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-border bg-card font-mono text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 2: HERO SECTION MEDIA */}
+            <div className="space-y-4 pt-4 border-t border-border/60">
+              <div className="border-b border-border/60 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-[#7E22CE] uppercase tracking-wider">
+                    Storefront Section
+                  </span>
+                  <span className="text-muted-foreground">•</span>
+                  <h4 className="text-sm font-bold text-foreground">Hero Section Media &amp; Watermarks</h4>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Desktop &amp; Mobile hero portraits of founder Aleena and the cursive background signature.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Desktop Hero Banner */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">Desktop Hero Banner</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("heroDesktop")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Wide landscape photo shown on PC &amp; laptop displays.
+                    </p>
+                  </div>
+
+                  <div className="relative aspect-video max-h-[180px] w-full bg-stone-100 rounded-xl overflow-hidden border border-border">
+                    <img
+                      src={localSiteImages.heroDesktop || "/images/founder-aleena-saree-hero.jpg"}
+                      alt="Desktop Hero Preview"
+                      className="w-full h-full object-cover object-right"
+                    />
+                    {uploadingImageKey === "heroDesktop" && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-semibold">
+                        Uploading...
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="site-img-heroDesktop"
+                      className="w-full py-2 px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-foreground"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Change Desktop Photo</span>
+                    </label>
+                    <input
+                      id="site-img-heroDesktop"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("heroDesktop", file);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Mobile Hero Portrait */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">Mobile Hero Portrait</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("heroMobile")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Vertical portrait shown on smartphones (portrait orientation).
+                    </p>
+                  </div>
+
+                  <div className="relative aspect-[9/13] max-h-[180px] w-full bg-stone-100 rounded-xl overflow-hidden border border-border mx-auto">
+                    <img
+                      src={localSiteImages.heroMobile || "/images/founder-aleena-mobile.jpg"}
+                      alt="Mobile Hero Preview"
+                      className="w-full h-full object-cover object-top"
+                    />
+                    {uploadingImageKey === "heroMobile" && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-semibold">
+                        Uploading...
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="site-img-heroMobile"
+                      className="w-full py-2 px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-foreground"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Change Mobile Photo</span>
+                    </label>
+                    <input
+                      id="site-img-heroMobile"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("heroMobile", file);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Founder Signature Calligraphy */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">Founder Calligraphy Signature</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("heroSignature")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Transparent PNG signature displayed behind the hero story text.
+                    </p>
+                  </div>
+
+                  <div className="relative aspect-video max-h-[180px] w-full bg-[#FAF7F2] rounded-xl p-4 flex items-center justify-center border border-border">
+                    <img
+                      src={localSiteImages.heroSignature || "/images/aleena-signature-dark.png"}
+                      alt="Signature Preview"
+                      className="max-h-16 w-auto object-contain"
+                    />
+                    {uploadingImageKey === "heroSignature" && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-semibold">
+                        Uploading...
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="site-img-heroSignature"
+                      className="w-full py-2 px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-foreground"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload Signature PNG</span>
+                    </label>
+                    <input
+                      id="site-img-heroSignature"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("heroSignature", file);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 3: BRAND IDENTITY & POLICIES */}
+            <div className="space-y-4 pt-4 border-t border-border/60">
+              <div className="border-b border-border/60 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-[#7E22CE] uppercase tracking-wider">
+                    Storefront Section
+                  </span>
+                  <span className="text-muted-foreground">•</span>
+                  <h4 className="text-sm font-bold text-foreground">Brand Logo &amp; Sizing Guides</h4>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Brand emblem in the navigation bar, and policy graphics shown in modals.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Brand Logo */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">Brand Logo Emblem</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("brandLogo")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Circular emblem displayed in header, footer, and navigation.
+                    </p>
+                  </div>
+
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/30 mx-auto bg-card shadow-sm flex items-center justify-center p-1">
+                    <img
+                      src={localSiteImages.brandLogo || "/alnaya-logo.png"}
+                      alt="Brand Logo"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="site-img-brandLogo"
+                      className="w-full py-2 px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-foreground"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload New Logo</span>
+                    </label>
+                    <input
+                      id="site-img-brandLogo"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("brandLogo", file);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Bangle Size Guide */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">Bangle Size Guide Diagram</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("bangleSizeGuide")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Sizing chart diagram shown in product size guide modals.
+                    </p>
+                  </div>
+
+                  <div className="relative aspect-video max-h-[140px] w-full bg-stone-100 rounded-xl overflow-hidden border border-border">
+                    <img
+                      src={localSiteImages.bangleSizeGuide || "/images/bangle-size-guide.jpg"}
+                      alt="Size Guide Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="site-img-bangleSizeGuide"
+                      className="w-full py-2 px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-foreground"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload Sizing Chart</span>
+                    </label>
+                    <input
+                      id="site-img-bangleSizeGuide"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("bangleSizeGuide", file);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Return Policy Visual */}
+                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground">Return &amp; Refund Graphic</span>
+                      <button
+                        type="button"
+                        onClick={() => handleResetSiteImage("returnPolicyImage")}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Guarantee and transparency graphic in policies modal.
+                    </p>
+                  </div>
+
+                  <div className="relative aspect-video max-h-[140px] w-full bg-stone-100 rounded-xl overflow-hidden border border-border">
+                    <img
+                      src={localSiteImages.returnPolicyImage || "/images/return-refund-policy.jpg"}
+                      alt="Return Policy Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="site-img-returnPolicyImage"
+                      className="w-full py-2 px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-foreground"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload Policy Graphic</span>
+                    </label>
+                    <input
+                      id="site-img-returnPolicyImage"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleSiteImageUpload("returnPolicyImage", file);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links to other Media Tabs */}
+            <div className="p-4 rounded-xl bg-[#FAF5FF] dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-bold text-[#7E22CE] block">Looking for other media sections?</span>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Category card photos can be customized in Curated Collections, and Instagram videos in Follow The House.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("collections")}
+                  className="px-3 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-purple-200 text-xs font-semibold text-[#7E22CE] hover:bg-purple-50 transition-colors"
+                >
+                  Category Cards →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("reels")}
+                  className="px-3 py-1.5 rounded-lg bg-white dark:bg-stone-900 border border-purple-200 text-xs font-semibold text-[#7E22CE] hover:bg-purple-50 transition-colors"
+                >
+                  Instagram Reels →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* Product Add / Edit Modal */}
       {isModalOpen && (
