@@ -138,8 +138,19 @@ export default function CheckoutPage() {
         throw new Error(orderData.error || "Failed to initiate payment gateway");
       }
 
-      if (typeof window === "undefined" || !(window as any).Razorpay) {
-        alert("Payment gateway is initializing. Please wait 2 seconds and try again.");
+      let rzpReady = typeof window !== "undefined" && !!(window as any).Razorpay;
+      if (!rzpReady && typeof window !== "undefined") {
+        rzpReady = await new Promise<boolean>((resolve) => {
+          const script = document.createElement("script");
+          script.src = "https://checkout.razorpay.com/v1/checkout.js";
+          script.onload = () => resolve(true);
+          script.onerror = () => resolve(false);
+          document.body.appendChild(script);
+        });
+      }
+
+      if (!rzpReady) {
+        alert("Payment gateway could not be loaded. Please check your internet connection and try again.");
         setIsSubmitting(false);
         return;
       }
