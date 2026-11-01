@@ -312,18 +312,18 @@ function ProductCatalogContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-24 sm:pb-12 space-y-4 sm:space-y-5 font-glacial">
       {/* 1. Visual Category Cards Bar (Positioned high at top for immediate browsing) */}
-      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2.5 sm:p-3.5 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs font-glacial">
-        <div className="flex items-start gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pb-1 scrollbar-none scroll-smooth -mx-1 px-1">
+      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs font-glacial">
+        <div className="flex items-start gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pt-2 pb-2.5 px-2 scrollbar-none scroll-smooth">
           {/* "All Pieces" Card */}
           <button
             onClick={() => setSelectedCategory("all")}
-            className="flex flex-col items-center shrink-0 group focus:outline-none w-[72px] sm:w-[84px] md:w-[92px]"
+            className="flex flex-col items-center shrink-0 group focus:outline-none w-[72px] sm:w-[84px] md:w-[92px] p-0.5"
           >
             <div
-              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 ${
+              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 border-2 ${
                 selectedCategory === "all"
-                  ? "bg-white ring-2 ring-[#7E22CE] border-[#7E22CE] shadow-md -translate-y-0.5"
-                  : "bg-white border border-stone-200/90 shadow-sm hover:border-purple-300 hover:shadow-md hover:-translate-y-0.5"
+                  ? "bg-white border-[#7E22CE] shadow-md -translate-y-0.5"
+                  : "bg-white border-stone-200/90 shadow-xs hover:border-[#7E22CE] hover:shadow-md hover:-translate-y-0.5"
               }`}
             >
               <img
@@ -361,13 +361,13 @@ function ProductCatalogContent() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.slug)}
-                className="flex flex-col items-center shrink-0 group focus:outline-none w-[72px] sm:w-[84px] md:w-[92px]"
+                className="flex flex-col items-center shrink-0 group focus:outline-none w-[72px] sm:w-[84px] md:w-[92px] p-0.5"
               >
                 <div
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 ${
+                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 border-2 ${
                     selectedCategory === cat.slug
-                      ? "bg-white ring-2 ring-[#7E22CE] border-[#7E22CE] shadow-md -translate-y-0.5"
-                      : "bg-white border border-stone-200/90 shadow-sm hover:border-purple-300 hover:shadow-md hover:-translate-y-0.5"
+                      ? "bg-white border-[#7E22CE] shadow-md -translate-y-0.5"
+                      : "bg-white border-stone-200/90 shadow-xs hover:border-[#7E22CE] hover:shadow-md hover:-translate-y-0.5"
                   }`}
                 >
                   <img
