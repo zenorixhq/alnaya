@@ -140,63 +140,63 @@ export function HeroEditorial() {
           </picture>
 
           {/* Left ambient feather gradient: ensures perfect contrast & legibility for all text */}
-          <div className="absolute inset-y-0 left-0 w-[64%] bg-gradient-to-r from-[#FAF7F2]/80 via-[#FAF7F2]/45 to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-[68%] bg-gradient-to-r from-[#FAF7F2]/85 via-[#FAF7F2]/50 to-transparent pointer-events-none" />
 
           {/* Bottom subtle transition feather */}
           <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#FAF7F2] via-[#FAF7F2]/50 to-transparent pointer-events-none" />
 
-          {/* Subtle Cursive Signature Lines in Background */}
-          <div className="absolute top-[42%] -translate-y-1/2 -left-3 sm:-left-5 w-[280px] sm:w-[330px] opacity-[0.09] select-none pointer-events-none -rotate-6 z-0 mix-blend-multiply leading-none">
-            <img
-              src="/images/aleena-signature-dark.png"
-              alt=""
-              className="w-full h-auto object-contain"
-            />
-          </div>
-
           {/* Heading, Subheading, Subtext Manifesto & Discover Collection Button Positioned on the Left Side */}
-          <div className="absolute top-3.5 sm:top-5 left-3.5 sm:left-6 w-[58%] sm:w-[50%] z-10 space-y-1.5 sm:space-y-2">
+          <div className="absolute top-4 sm:top-6 left-4 sm:left-6 w-[60%] sm:w-[52%] max-w-[260px] sm:max-w-[310px] z-10 space-y-2 sm:space-y-2.5">
             {/* Brand Eyebrow */}
             <div className="flex items-center gap-1.5">
-              <span className="font-editorial text-[9px] sm:text-xs font-semibold tracking-[0.24em] uppercase text-[#1C1917]">
+              <span className="font-editorial text-[10px] sm:text-xs font-semibold tracking-[0.26em] uppercase text-[#1C1917]">
                 {storeConfig?.meta?.name || "ALNAYA"}
               </span>
-              <span className="text-[9px] text-[#9A7B4F] select-none">✤</span>
-              <span className="text-[7.5px] sm:text-[9px] font-medium tracking-[0.16em] uppercase text-[#786E5E]">
+              <span className="text-[10px] text-[#9A7B4F] select-none">✤</span>
+              <span className="text-[8.5px] sm:text-[10px] font-medium tracking-[0.18em] uppercase text-[#786E5E]">
                 JEWELLERY
               </span>
             </div>
 
             {/* Handwritten Script Kicker */}
             <div>
-              <span className="font-script text-lg sm:text-2xl text-[#9A7B4F] select-none block leading-none">
+              <span className="font-script text-xl sm:text-2xl text-[#9A7B4F] select-none block leading-none">
                 From my heart
               </span>
             </div>
 
             {/* Headline Display */}
-            <h1 className="font-editorial text-2xl sm:text-3xl font-normal tracking-tight text-[#1C1917] leading-[1.08]">
+            <h1 className="font-editorial text-3xl sm:text-4xl font-normal tracking-tight text-[#1C1917] leading-[1.06]">
               <span>Hi, I&apos;m </span>
               <span className="font-medium text-[#1C1917]">Aleena</span>
             </h1>
 
-            {/* Subheading / Role */}
-            <div className="pt-0.5">
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.22em] text-[#786E5E] block leading-none">
+            {/* Subheading / Role with Ambient Signature Behind It (Not behind Discover Collection button) */}
+            <div className="relative pt-0.5">
+              {/* Cursive Signature Lines Positioned Directly Behind Subtitle & Headline */}
+              <div className="absolute -top-12 sm:-top-14 -left-5 sm:-left-7 w-[230px] sm:w-[270px] opacity-[0.11] select-none pointer-events-none -rotate-6 z-0 mix-blend-multiply leading-none">
+                <img
+                  src="/images/aleena-signature-dark.png"
+                  alt=""
+                  className="w-full h-auto object-contain"
+                />
+              </div>
+
+              <span className="relative z-10 text-[11px] sm:text-xs font-bold uppercase tracking-[0.24em] text-[#786E5E] block leading-none">
                 FOUNDER &amp; CREATIVE SOUL
               </span>
             </div>
 
-            {/* Subtext: Founder Personal Manifesto */}
-            <p className="text-[10px] sm:text-xs text-[#3D352A] font-light leading-relaxed max-w-[210px] sm:max-w-xs font-sans pt-0.5">
+            {/* Subtext: Founder Personal Manifesto (Increased size for enhanced mobile readability) */}
+            <p className="text-[12px] sm:text-[13px] text-[#3D352A] font-light leading-[1.52] max-w-[225px] sm:max-w-xs font-sans pt-1">
               I started ALNAYA with a simple belief that jewellery is more than just an accessory, it&apos;s a part of your story. Every piece is thoughtfully designed to bring out your unique beauty, celebrate your moments, and stay with you for a lifetime.
             </p>
 
             {/* Discover Collection Button */}
-            <div className="pt-1.5 sm:pt-2">
+            <div className="pt-2 sm:pt-2.5">
               <Link
                 href="/products"
-                className="inline-flex items-center justify-center px-5 py-2 sm:px-6 sm:py-2.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-[11px] sm:text-xs font-semibold tracking-wide shadow-md transition-all duration-300 active:scale-[0.98]"
+                className="inline-flex items-center justify-center px-6 py-2.5 sm:px-7 sm:py-3 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-md transition-all duration-300 active:scale-[0.98]"
               >
                 <span>Discover Collection</span>
               </Link>
