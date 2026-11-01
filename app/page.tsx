@@ -30,7 +30,7 @@ export default function HomePage() {
       <HeroEditorial />
 
       {/* 2. Curated Catalog / Shop by Category Grid (Positioned high up right below Hero) */}
-      <section className="w-full py-12 sm:py-20 border-b border-[#EADBBE]/60 bg-[#FAF7F2]">
+      <section className="w-full py-12 sm:py-20 border-b border-[#EADBBE]/60 bg-gradient-to-b from-white via-[#FAF7F2] to-[#FAF7F2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>

@@ -7,22 +7,28 @@ import { storeConfig } from "@/config/store.config";
 
 export function HeroEditorial() {
   return (
-    <section className="relative w-full bg-[#FAF7F2] text-[#1C1917] overflow-hidden select-none border-b border-[#EADBBE]/60 lg:h-[100svh] lg:max-h-[100svh] flex flex-col justify-between">
+    <section className="relative w-full bg-[#FAF7F2] text-[#1C1917] overflow-hidden select-none border-b border-[#EADBBE]/40 lg:border-none lg:h-[100svh] lg:max-h-[100svh] flex flex-col justify-between">
       
       {/* ========================================================= */}
       {/* DESKTOP HERO: Strictly enclosed within the window (100svh) */}
       {/* ========================================================= */}
       <div className="hidden lg:block absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <img
-          src="/images/founder-aleena-saree-hero.jpg"
-          alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
-          className="w-full h-full object-cover object-[80%_center] xl:object-[84%_center]"
-          loading="eager"
-          decoding="sync"
-          style={{ imageRendering: "-webkit-optimize-contrast" }}
-        />
-        {/* Soft Left Ambient Feather: blends smoothly into the #FAF7F2 canvas */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/80 to-transparent w-full max-w-2xl xl:max-w-3xl pointer-events-none" />
+        <picture>
+          <source srcSet="/images/founder-aleena-saree-hero.webp" type="image/webp" />
+          <img
+            src="/images/founder-aleena-saree-hero.jpg"
+            alt="Aleena - Founder & Creative Soul, ALNAYA Timeless Jewellery"
+            className="w-full h-full object-cover object-[80%_center] xl:object-[84%_center]"
+            loading="eager"
+            decoding="sync"
+            style={{ imageRendering: "-webkit-optimize-contrast" }}
+          />
+        </picture>
+        {/* Soft Left Ambient Feather: ensures typography has perfect contrast over sunlight */}
+        <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/60 to-transparent w-full max-w-xl xl:max-w-2xl pointer-events-none" />
+
+        {/* Bottom Smooth Blur-to-White Transition */}
+        <div className="absolute inset-x-0 bottom-0 h-32 lg:h-48 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none backdrop-blur-[2px]" />
       </div>
 
       {/* Desktop Content Container (Vertically centered, fits 100% within viewport without scrolling) */}
@@ -53,29 +59,29 @@ export function HeroEditorial() {
 
           {/* Handwritten Script Kicker (From my heart) */}
           <div>
-            <span className="font-script text-2xl lg:text-3xl text-[#9A7B4F] select-none block leading-none">
+            <span className="font-script text-2xl lg:text-3xl xl:text-4xl text-[#9A7B4F] select-none block leading-none">
               From my heart
             </span>
           </div>
 
           {/* Display Headline (Hi, I'm Aleena) */}
-          <div className="space-y-1.5">
-            <h1 className="font-editorial text-4xl lg:text-5xl xl:text-[3.85rem] font-normal tracking-tight text-[#1C1917] leading-[1.06]">
+          <div className="space-y-2">
+            <h1 className="font-editorial text-4xl lg:text-5xl xl:text-[4rem] font-normal tracking-tight text-[#1C1917] leading-[1.06]">
               <span>Hi, I&apos;m </span>
               <span className="font-medium text-[#1C1917]">Aleena</span>
             </h1>
 
-            {/* Subheading / Role with Warm Gold Divider Line */}
-            <div className="space-y-1.5 pt-0.5">
-              <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#786E5E]">
+            {/* Subheading / Role with Warm Gold Divider Line (Bigger, bolder presence) */}
+            <div className="space-y-1.5 pt-1">
+              <div className="text-xs lg:text-sm xl:text-[15px] font-bold uppercase tracking-[0.26em] text-[#786E5E]">
                 FOUNDER &amp; CREATIVE SOUL
               </div>
-              <div className="w-14 h-[1.5px] bg-gradient-to-r from-[#9A7B4F] via-[#C5A059] to-transparent rounded-full" />
+              <div className="w-16 lg:w-20 h-[2px] bg-gradient-to-r from-[#9A7B4F] via-[#C5A059] to-transparent rounded-full" />
             </div>
           </div>
 
           {/* Founder's Personal Manifesto */}
-          <p className="text-xs lg:text-sm xl:text-[15px] text-[#4A4235] font-light leading-relaxed max-w-xl font-sans">
+          <p className="text-sm lg:text-[15px] xl:text-base text-[#4A4235] font-light leading-relaxed max-w-xl font-sans">
             I started ALNAYA with a simple belief — that jewellery is more than just an accessory, it&apos;s a part of your story. Every piece is thoughtfully designed to bring out your unique beauty, celebrate your moments, and stay with you for a lifetime.
           </p>
 
@@ -176,7 +182,7 @@ export function HeroEditorial() {
 
             {/* Subheading / Role */}
             <div className="pt-0.5">
-              <span className="text-[8.5px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#786E5E] block leading-none">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.22em] text-[#786E5E] block leading-none">
                 FOUNDER &amp; CREATIVE SOUL
               </span>
             </div>
