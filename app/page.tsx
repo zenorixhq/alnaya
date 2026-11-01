@@ -32,62 +32,65 @@ export default function HomePage() {
       {/* 2. About Us Section (Positioned right after Hero as requested) */}
       <AboutUsSection />
 
-      {/* 3. The Maison Archive / Shop by Category Grid */}
-      <section className="w-full py-8 sm:py-12 lg:py-14 border-b border-[#EADBBE]/60 bg-gradient-to-b from-white via-[#FAF7F2] to-[#FAF7F2]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 sm:space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#7E22CE] uppercase tracking-widest font-glacial">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>The Maison Archive</span>
+      {/* 3. The Maison Archive / Shop by Category Grid - Enclosed within a compact window container */}
+      <section className="w-full py-6 sm:py-8 lg:py-10 bg-[#FAF7F2] border-b border-[#EADBBE]/60">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white/85 backdrop-blur-xs border border-[#EADBBE] rounded-3xl p-4 sm:p-6 lg:p-7 shadow-xs space-y-4 sm:space-y-5">
+            {/* Window Header */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-[#EADBBE]/50 pb-3">
+              <div>
+                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-[#7E22CE] uppercase tracking-widest font-glacial">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>The Maison Archive</span>
+                </div>
+                <h2 className="font-editorial text-2xl sm:text-3xl font-normal text-[#1C1917] mt-0.5 tracking-wide">
+                  Shop by Category
+                </h2>
               </div>
-              <h2 className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-normal text-[#1C1917] mt-1 tracking-wide">
-                Shop by Category
-              </h2>
-            </div>
-            <Link
-              href="/products"
-              className="text-xs sm:text-sm font-semibold text-[#7E22CE] hover:text-[#581C87] flex items-center gap-1 group transition-colors font-glacial"
-            >
-              <span>View All Categories</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          {/* Editorial Framed Arch Category Cards: Exactly 6 cards in a 2*3 grid on desktop within the window */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5">
-            {categoryList.slice(0, 6).map((cat, idx) => (
               <Link
-                key={cat.id}
-                href={`/products?category=${cat.slug}`}
-                className="group relative bg-white border border-[#EADBBE]/90 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 shadow-xs hover:shadow-xl hover:border-[#7E22CE]/60 hover:-translate-y-1 transition-all duration-300 ease-out flex flex-col justify-between"
+                href="/products"
+                className="text-xs sm:text-sm font-semibold text-[#7E22CE] hover:text-[#581C87] flex items-center gap-1 group transition-colors font-glacial"
               >
-                {/* Arched Top Silhouette Image Frame with compact viewport aspect ratio */}
-                <div className="w-full aspect-[4/3.2] sm:aspect-[4/3] rounded-t-[1.6rem] sm:rounded-t-[2rem] rounded-b-xl overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                  />
-                  {idx === 0 && (
-                    <span className="absolute top-2 right-2 text-[8px] sm:text-[9px] font-bold bg-[#7E22CE] text-white px-2 py-0.5 rounded-full shadow-xs uppercase tracking-wider font-glacial">
-                      NEW DROP
-                    </span>
-                  )}
-                </div>
-
-                {/* Bottom Typography & Action */}
-                <div className="pt-2 sm:pt-2.5 pb-0.5 px-0.5 flex flex-col items-center text-center">
-                  <h3 className="font-editorial text-sm sm:text-base font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight">
-                    {cat.name.replace(/\s*Collection/gi, "").trim()}
-                  </h3>
-                  <div className="flex items-center gap-1 text-[9.5px] sm:text-[10.5px] font-semibold tracking-widest uppercase text-[#9A7B4F] group-hover:text-[#7E22CE] transition-colors font-glacial mt-1">
-                    <span>EXPLORE</span>
-                    <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-                  </div>
-                </div>
+                <span>View All Categories</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
-            ))}
+            </div>
+
+            {/* Editorial Framed Arch Category Cards: Exactly 6 cards in a 2*3 grid on desktop fitting within the window */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+              {categoryList.slice(0, 6).map((cat, idx) => (
+                <Link
+                  key={cat.id}
+                  href={`/products?category=${cat.slug}`}
+                  className="group relative bg-[#FFFDF9] border border-[#EADBBE]/80 rounded-2xl sm:rounded-2.5xl p-2 sm:p-2.5 shadow-2xs hover:shadow-md hover:border-[#7E22CE]/60 hover:-translate-y-0.5 transition-all duration-300 ease-out flex flex-col justify-between"
+                >
+                  {/* Arched Top Silhouette Image Frame with compact viewport height */}
+                  <div className="w-full h-28 sm:h-32 md:h-36 lg:h-40 rounded-t-[1.4rem] sm:rounded-t-[1.8rem] rounded-b-lg overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                    />
+                    {idx === 0 && (
+                      <span className="absolute top-2 right-2 text-[8px] sm:text-[9px] font-bold bg-[#7E22CE] text-white px-2 py-0.5 rounded-full shadow-xs uppercase tracking-wider font-glacial">
+                        NEW DROP
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Bottom Typography & Action */}
+                  <div className="pt-2 pb-0.5 px-0.5 flex flex-col items-center text-center">
+                    <h3 className="font-editorial text-xs sm:text-sm md:text-[15px] font-semibold tracking-wide text-[#1C1917] group-hover:text-[#7E22CE] transition-colors leading-tight truncate max-w-full">
+                      {cat.name.replace(/\s*Collection/gi, "").trim()}
+                    </h3>
+                    <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold tracking-widest uppercase text-[#9A7B4F] group-hover:text-[#7E22CE] transition-colors font-glacial mt-1">
+                      <span>EXPLORE</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
