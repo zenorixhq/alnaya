@@ -8,6 +8,19 @@ import { useSiteImages } from "@/hooks/useSiteImages";
 
 export function HeroEditorial() {
   const { images } = useSiteImages();
+
+  const scrollToCollection = () => {
+    const target = document.getElementById("shop-collection") || document.getElementById("about-us");
+    if (target) {
+      if (typeof window !== "undefined" && (window as any).__lenis) {
+        (window as any).__lenis.scrollTo(target, { offset: -30, duration: 1.2 });
+      } else {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      window.location.href = "/products";
+    }
+  };
   return (
     <section className="relative w-full bg-[#FAF7F2] text-[#1C1917] overflow-hidden select-none border-b border-[#EADBBE]/40 lg:border-none lg:h-[100svh] lg:max-h-[100svh] flex flex-col justify-between">
       
@@ -100,12 +113,19 @@ export function HeroEditorial() {
 
           {/* Interactive Action Button */}
           <div className="flex flex-wrap items-center gap-3 pt-2 font-glacial">
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs lg:text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group font-glacial"
+            <button
+              type="button"
+              onClick={scrollToCollection}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs lg:text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group font-glacial cursor-pointer"
             >
               <span>Discover Collection</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-1.5 px-6 py-3.5 rounded-full border border-stone-300/90 hover:border-[#7E22CE] text-[#1C1917] hover:text-[#7E22CE] text-xs lg:text-sm font-semibold transition-all hover:bg-white/40"
+            >
+              <span>Shop All Pieces</span>
             </Link>
           </div>
 
@@ -121,6 +141,21 @@ export function HeroEditorial() {
             <span className="font-medium">Hypoallergenic Everyday Luxury</span>
           </div>
 
+        </div>
+
+        {/* Subtle Editorial Scroll Down Prompt (Desktop) */}
+        <div className="absolute bottom-3 xl:bottom-5 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-auto">
+          <button
+            type="button"
+            onClick={scrollToCollection}
+            className="flex flex-col items-center gap-1 text-[10px] uppercase tracking-[0.22em] text-[#786E5E] hover:text-[#7E22CE] transition-all group cursor-pointer focus:outline-none"
+            aria-label="Scroll down to explore collection"
+          >
+            <span className="font-semibold text-[9px] tracking-[0.25em]">Scroll to Explore</span>
+            <div className="w-5 h-8 rounded-full border-2 border-stone-300/80 group-hover:border-[#7E22CE] flex items-start justify-center p-1 transition-colors shadow-2xs">
+              <div className="w-1 h-2 bg-[#9A7B4F] group-hover:bg-[#7E22CE] rounded-full animate-bounce mt-0.5" />
+            </div>
+          </button>
         </div>
       </div>
 
@@ -199,12 +234,19 @@ export function HeroEditorial() {
             </p>
 
             {/* Discover Collection Button */}
-            <div className="pt-2 sm:pt-2.5">
-              <Link
-                href="/products"
-                className="inline-flex items-center justify-center px-6 py-2.5 sm:px-7 sm:py-3 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-md transition-all duration-300 active:scale-[0.98] font-glacial"
+            <div className="pt-2 sm:pt-2.5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={scrollToCollection}
+                className="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#1C1917] hover:bg-[#7E22CE] text-white text-xs sm:text-sm font-semibold tracking-wide shadow-md transition-all duration-300 active:scale-[0.98] font-glacial cursor-pointer"
               >
                 <span>Discover Collection</span>
+              </button>
+              <Link
+                href="/products"
+                className="inline-flex items-center justify-center px-4 py-2.5 sm:py-3 rounded-full border border-stone-300/90 text-[#1C1917] text-xs font-semibold hover:border-[#7E22CE] hover:text-[#7E22CE] transition-all font-glacial"
+              >
+                <span>Shop All</span>
               </Link>
             </div>
           </div>
@@ -220,6 +262,18 @@ export function HeroEditorial() {
           <span className="font-medium">Radiant Mirror Gold</span>
           <span>•</span>
           <span className="font-medium">Skin Safe</span>
+        </div>
+
+        {/* Mobile Scroll Down Prompt */}
+        <div className="w-full flex items-center justify-center py-1.5 pb-2.5 bg-[#FAF7F2]">
+          <button
+            type="button"
+            onClick={scrollToCollection}
+            className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-semibold text-[#786E5E] hover:text-[#7E22CE] transition-colors cursor-pointer py-1 px-3 rounded-full hover:bg-stone-200/50"
+          >
+            <span>Scroll to Explore</span>
+            <span className="text-xs animate-bounce font-bold">↓</span>
+          </button>
         </div>
       </div>
 

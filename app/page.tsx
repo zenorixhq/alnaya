@@ -30,10 +30,13 @@ export default function HomePage() {
       <HeroEditorial />
 
       {/* 2. About Us Section (Positioned right after Hero as requested) */}
-      <AboutUsSection />
+      <div id="about-us" className="scroll-mt-16 sm:scroll-mt-20">
+        <AboutUsSection />
+      </div>
 
       {/* 3. The Maison Archive / Shop by Category Grid - Enclosed within a compact window container */}
-      <section className="w-full py-6 sm:py-8 lg:py-10 bg-[#FAF7F2] border-b border-[#EADBBE]/60">
+      <div id="shop-collection" className="scroll-mt-16 sm:scroll-mt-20">
+        <section className="w-full py-6 sm:py-8 lg:py-10 bg-[#FAF7F2] border-b border-[#EADBBE]/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 w-full">
           <div className="bg-white/85 backdrop-blur-xs border border-[#EADBBE] rounded-3xl p-4 sm:p-6 lg:p-7 shadow-xs space-y-4 sm:space-y-5">
             {/* Window Header */}
@@ -94,6 +97,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* 4. Five Signature Brand Badges & WhatsApp Direct Contact Banner */}
       <BrandValueBadges />

@@ -97,7 +97,7 @@ export function PolicyModal({
       />
 
       {/* Main Modal Card */}
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-card rounded-2xl border border-border shadow-2xl overflow-hidden z-10 animate-in fade-in-0 zoom-in-95">
+      <div data-lenis-prevent className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-card rounded-2xl border border-border shadow-2xl overflow-hidden z-10 animate-in fade-in-0 zoom-in-95">
         {/* Header Bar */}
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2.5">

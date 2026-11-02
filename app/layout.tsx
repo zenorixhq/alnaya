@@ -7,6 +7,7 @@ import { Footer } from "@/components/storefront/Footer";
 import { CartDrawer } from "@/components/storefront/CartDrawer";
 import { QuickViewModal } from "@/components/storefront/QuickViewModal";
 import { WhatsAppFloat } from "@/components/storefront/WhatsAppFloat";
+import { SmoothScrollProvider } from "@/components/storefront/SmoothScrollProvider";
 
 export const metadata: Metadata = {
   title: {
@@ -38,15 +39,17 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" style={dynamicThemeStyles} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col font-sans bg-background text-foreground" suppressHydrationWarning>
-        <AnnouncementBar />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <SmoothScrollProvider>
+          <AnnouncementBar />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
 
-        {/* Global Slide-overs & Modals */}
-        <CartDrawer />
-        <QuickViewModal />
-        <WhatsAppFloat />
+          {/* Global Slide-overs & Modals */}
+          <CartDrawer />
+          <QuickViewModal />
+          <WhatsAppFloat />
+        </SmoothScrollProvider>
       </body>
     </html>
   );

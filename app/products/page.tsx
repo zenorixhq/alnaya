@@ -10,6 +10,9 @@ import {
   SlidersHorizontal,
   X,
   ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   RotateCcw,
   Search,
   Sparkles,
@@ -172,6 +175,55 @@ function ProductCatalogContent() {
 
   // Sentinel ref for infinite scroll
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const categoryScrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Floating Back to Top Button state
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 350);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    if (typeof window !== "undefined" && (window as any).__lenis) {
+      (window as any).__lenis.scrollTo(0, { duration: 1.1 });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const scrollToCatalog = () => {
+    const grid = document.getElementById("catalog-grid-top");
+    if (grid) {
+      if (typeof window !== "undefined" && (window as any).__lenis) {
+        (window as any).__lenis.scrollTo(grid, { offset: -90, duration: 1.0 });
+      } else {
+        grid.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
+  const handleSelectCategory = (catSlug: string) => {
+    setSelectedCategory(catSlug);
+    // Smooth scroll the category card into center view
+    const card = document.getElementById(`category-card-${catSlug}`);
+    if (card && categoryScrollRef.current) {
+      card.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+    // Smooth scroll down to the catalog grid
+    scrollToCatalog();
+  };
+
+  const scrollCategoryBar = (direction: "left" | "right") => {
+    if (categoryScrollRef.current) {
+      const amount = direction === "left" ? -280 : 280;
+      categoryScrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
+    }
+  };
 
   // Reset batch count when filters or sort change
   useEffect(() => {
@@ -284,6 +336,7 @@ function ProductCatalogContent() {
     setInStockOnly(false);
     setSortBy("featured");
     setVisibleCount(BATCH_SIZE);
+    scrollToCatalog();
   };
 
   const applyDraftFilters = () => {
@@ -292,6 +345,7 @@ function ProductCatalogContent() {
     setInStockOnly(draftInStockOnly);
     setSearchTerm(draftSearchTerm);
     setIsFilterOpen(false);
+    scrollToCatalog();
   };
 
   const resetDraftFilters = () => {
@@ -312,12 +366,26 @@ function ProductCatalogContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-24 sm:pb-12 space-y-4 sm:space-y-5 font-glacial">
       {/* 1. Visual Category Cards Bar (Positioned high at top for immediate browsing) */}
-      <div className="bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs font-glacial">
-        <div className="flex items-start gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pt-3 pb-3.5 px-3 scrollbar-none scroll-smooth">
+      <div className="relative group bg-[#F3F4F6] sm:bg-[#F3F4F6]/90 p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-stone-200/70 shadow-xs font-glacial">
+        {/* Left Scroll Button (Desktop) */}
+        <button
+          type="button"
+          onClick={() => scrollCategoryBar("left")}
+          className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-stone-800 shadow-md border border-stone-200/80 items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-105 cursor-pointer"
+          aria-label="Scroll categories left"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        <div
+          ref={categoryScrollRef}
+          className="flex items-start gap-2.5 sm:gap-4 md:gap-5 overflow-x-auto pt-3 pb-3.5 px-3 sm:px-6 scrollbar-none scroll-smooth select-none"
+        >
           {/* "All Pieces" Card */}
           <button
-            onClick={() => setSelectedCategory("all")}
-            className="flex flex-col items-center shrink-0 group focus:outline-none w-[74px] sm:w-[86px] md:w-[94px] p-1"
+            id="category-card-all"
+            onClick={() => handleSelectCategory("all")}
+            className="flex flex-col items-center shrink-0 group/card focus:outline-none w-[74px] sm:w-[86px] md:w-[94px] p-1 cursor-pointer"
           >
             <div
               className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 border-2 ${
@@ -329,14 +397,14 @@ function ProductCatalogContent() {
               <img
                 src="/images/category-cards/all.png"
                 alt="Shop All Pieces"
-                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-contain group-hover/card:scale-105 transition-transform duration-300"
               />
             </div>
             <span
               className={`text-xs sm:text-[13px] text-center whitespace-nowrap mt-2 transition-colors ${
                 selectedCategory === "all"
                   ? "font-bold text-[#7E22CE]"
-                  : "font-medium text-stone-700 group-hover:text-stone-900"
+                  : "font-medium text-stone-700 group-hover/card:text-stone-900"
               }`}
             >
               Shop All
@@ -360,8 +428,9 @@ function ProductCatalogContent() {
             return (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.slug)}
-                className="flex flex-col items-center shrink-0 group focus:outline-none w-[74px] sm:w-[86px] md:w-[94px] p-1"
+                id={`category-card-${cat.slug}`}
+                onClick={() => handleSelectCategory(cat.slug)}
+                className="flex flex-col items-center shrink-0 group/card focus:outline-none w-[74px] sm:w-[86px] md:w-[94px] p-1 cursor-pointer"
               >
                 <div
                   className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl p-2 flex items-center justify-center transition-all duration-300 border-2 ${
@@ -373,14 +442,14 @@ function ProductCatalogContent() {
                   <img
                     src={iconSrc}
                     alt={displayName}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover/card:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <span
                   className={`text-xs sm:text-[13px] text-center whitespace-nowrap mt-2 transition-colors truncate max-w-full ${
                     selectedCategory === cat.slug
                       ? "font-bold text-[#7E22CE]"
-                      : "font-medium text-stone-700 group-hover:text-stone-900"
+                      : "font-medium text-stone-700 group-hover/card:text-stone-900"
                   }`}
                   title={displayName}
                 >
@@ -393,6 +462,16 @@ function ProductCatalogContent() {
             );
           })}
         </div>
+
+        {/* Right Scroll Button (Desktop) */}
+        <button
+          type="button"
+          onClick={() => scrollCategoryBar("right")}
+          className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 hover:bg-white text-stone-800 shadow-md border border-stone-200/80 items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-105 cursor-pointer"
+          aria-label="Scroll categories right"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
 
       {/* 2. Header & Title Banner + Search */}
@@ -494,6 +573,9 @@ function ProductCatalogContent() {
           </div>
         </div>
       </div>
+
+      {/* Anchor for smooth scrolling when switching filters or categories */}
+      <div id="catalog-grid-top" className="scroll-mt-24 sm:scroll-mt-28" />
 
       {/* 4. Product Grid */}
       {!hasLoaded && products.length === 0 ? (
@@ -862,6 +944,19 @@ function ProductCatalogContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Floating Smooth Scroll to Top Button */}
+      {showBackToTop && (
+        <button
+          type="button"
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-[#1C1917]/90 hover:bg-[#7E22CE] text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 border border-white/20 backdrop-blur-sm group cursor-pointer"
+          title="Smooth scroll to top"
+          aria-label="Scroll to top"
+        >
+          <ChevronUp className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
+        </button>
       )}
     </div>
   );
