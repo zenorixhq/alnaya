@@ -65,11 +65,36 @@ export function FollowTheHouseSection() {
   const modalVideoRef = useRef<HTMLVideoElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const { instagramVideos } = useReviewsData();
+  const { instagramVideos, videoReels } = useReviewsData();
 
   useEffect(() => {
+    const list: HousePanel[] = [];
+
+    // 1. First, include custom uploaded video reels (e.g. vid-1793620240600 "Jhumkha")
+    if (Array.isArray(videoReels) && videoReels.length > 0) {
+      videoReels.forEach((vr) => {
+        if (
+          vr.videoUrl &&
+          (vr.videoUrl.includes(".mp4") ||
+            vr.videoUrl.includes("blob.vercel-storage.com") ||
+            vr.videoUrl.includes(".webm"))
+        ) {
+          list.push({
+            id: vr.id,
+            image: vr.poster || "/images/follow-house/panel-1.jpg",
+            videoUrl: vr.videoUrl,
+            alt: `Alnaya Fine Jewelry - ${vr.title}`,
+            caption: vr.title || "Alnaya Jewelry Styling",
+            handle: vr.handle || "@alnaya.in",
+            instagramLink: instagramUrl,
+          });
+        }
+      });
+    }
+
+    // 2. Next, map instagramVideos or default fallback panels
     if (Array.isArray(instagramVideos) && instagramVideos.length > 0) {
-      const mapped: HousePanel[] = instagramVideos.map((item: any, idx: number) => {
+      instagramVideos.forEach((item: any, idx: number) => {
         const isCorrupted =
           !item.poster ||
           typeof item.poster !== "string" ||
@@ -79,8 +104,8 @@ export function FollowTheHouseSection() {
           ? item.poster
           : (defaultPanels[idx % defaultPanels.length]?.image || `/images/follow-house/panel-${(idx % 5) + 1}.jpg`);
 
-        return {
-          id: item.id || idx + 1,
+        list.push({
+          id: item.id || `insta-${idx + 1}`,
           image: cleanImage,
           videoUrl: item.videoUrl || "",
           alt: item.title ? `Alnaya Fine Jewelry - ${item.title}` : `Alnaya Fine Jewelry`,
@@ -90,11 +115,16 @@ export function FollowTheHouseSection() {
             item.instagramLink && !item.instagramLink.includes("gleamnest")
               ? item.instagramLink
               : instagramUrl,
-        };
+        });
       });
-      setPanels(mapped);
+    } else if (list.length === 0) {
+      defaultPanels.forEach((p) => list.push(p));
     }
-  }, [instagramVideos, instagramUrl]);
+
+    if (list.length > 0) {
+      setPanels(list);
+    }
+  }, [instagramVideos, videoReels, instagramUrl]);
 
 
 

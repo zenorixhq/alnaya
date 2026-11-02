@@ -325,6 +325,14 @@ export default function AdminDashboardPage() {
           });
           setInstagramVideosList(cleanInsta);
           try { sessionStorage.setItem("alnaya_admin_instavideos", JSON.stringify(cleanInsta)); } catch (e) {}
+          try {
+            sessionStorage.removeItem("alnaya_reviews_cache_v3");
+            sessionStorage.removeItem("alnaya_reviews_cache_time_v3");
+            sessionStorage.removeItem("alnaya_reviews_cache_v2");
+            sessionStorage.removeItem("alnaya_reviews_cache_time");
+            localStorage.setItem("alnaya_reviews_last_updated", Date.now().toString());
+            window.dispatchEvent(new CustomEvent("alnaya:reviews-updated"));
+          } catch (e) {}
         }
       })
       .catch((err) => console.error("Error fetching reviews:", err));
