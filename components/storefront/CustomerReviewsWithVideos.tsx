@@ -3,6 +3,7 @@ import { useReviewsData } from "@/hooks/useReviewsData";
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
+import { useProductStore } from "@/store/useProductStore";
 import {
   Play,
   Volume2,
@@ -16,6 +17,8 @@ import {
   Maximize2,
   ShieldCheck,
   Star,
+  ShoppingBag,
+  ArrowRight,
 } from "lucide-react";
 
 export interface ReviewQuote {
@@ -51,19 +54,91 @@ export interface VideoReel {
   productPrice?: number;
 }
 
+export function resolveReelProduct(
+  item: { productSlug?: string; productTitle?: string; productPrice?: number } | null | undefined,
+  products: any[]
+): { href: string; title: string; price?: number; image?: string } | null {
+  if (!item) return null;
+  const rawSlug = (item.productSlug || "").trim();
+  const rawTitle = (item.productTitle || "").trim();
+  const rawPrice = item.productPrice;
+
+  // 1. Direct valid slug match
+  if (rawSlug && rawSlug !== "all" && rawSlug !== "none" && rawSlug !== "#") {
+    const directMatch = Array.isArray(products)
+      ? products.find((p) => p?.slug && p.slug.toLowerCase() === rawSlug.toLowerCase())
+      : null;
+
+    if (directMatch) {
+      return {
+        href: `/products/${directMatch.slug}`,
+        title: directMatch.title || rawTitle || "Shop Piece",
+        price: directMatch.price ?? rawPrice,
+        image: Array.isArray(directMatch.images) && directMatch.images.length > 0 ? directMatch.images[0] : undefined,
+      };
+    }
+
+    return {
+      href: `/products/${rawSlug}`,
+      title: rawTitle || "Shop Piece",
+      price: rawPrice,
+    };
+  }
+
+  // 2. If productTitle exists, match against store catalog
+  if (rawTitle) {
+    const q = rawTitle.toLowerCase();
+    if (Array.isArray(products) && products.length > 0) {
+      const match = products.find((p) => {
+        if (!p) return false;
+        const pTitle = (p.title || "").toLowerCase();
+        const pSlug = (p.slug || "").toLowerCase();
+        return (
+          pTitle === q ||
+          pSlug === q ||
+          pTitle.includes(q) ||
+          q.includes(pTitle) ||
+          pSlug.includes(q)
+        );
+      });
+
+      if (match) {
+        return {
+          href: `/products/${match.slug}`,
+          title: match.title,
+          price: match.price ?? rawPrice,
+          image: Array.isArray(match.images) && match.images.length > 0 ? match.images[0] : undefined,
+        };
+      }
+    }
+
+    // 3. Fallback to catalog search query
+    return {
+      href: `/products?search=${encodeURIComponent(rawTitle)}`,
+      title: rawTitle,
+      price: rawPrice,
+    };
+  }
+
+  return null;
+}
+
 type CarouselItem =
   | { kind: "video"; id: string; data: VideoReel }
   | { kind: "screenshot"; id: string; data: FeedbackScreenshot };
 
 function VideoCardPreview({
   reel,
+  products = [],
   onClick,
 }: {
   reel: VideoReel;
+  products?: any[];
   onClick: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
+  const productInfo = useMemo(() => resolveReelProduct(reel, products), [reel, products]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -169,10 +244,25 @@ function VideoCardPreview({
           {reel.handle}
         </p>
         <div className="flex items-center justify-between pt-0.5">
-          {reel.productTitle && (
+          {productInfo ? (
+            <Link
+              href={productInfo.href}
+              onClick={(e) => e.stopPropagation()}
+              className="pointer-events-auto inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-purple-200 hover:text-white font-semibold bg-white/20 hover:bg-purple-700/80 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/25 hover:border-purple-300 transition-all truncate max-w-[140px] shadow-sm active:scale-95"
+              title={`Shop piece: ${productInfo.title}`}
+            >
+              <ShoppingBag className="w-2.5 h-2.5 text-purple-300 shrink-0" />
+              <span className="truncate">{productInfo.title}</span>
+              {productInfo.price ? (
+                <span className="font-mono text-purple-200 ml-0.5">₹{productInfo.price}</span>
+              ) : null}
+            </Link>
+          ) : reel.productTitle ? (
             <span className="text-[9px] sm:text-[10px] text-purple-200 font-semibold bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/10 truncate max-w-[140px]">
               {reel.productTitle}
             </span>
+          ) : (
+            <span />
           )}
           <span className="text-[10px] text-purple-300 font-medium group-hover:text-white transition-colors">
             Play Reel →
@@ -185,11 +275,18 @@ function VideoCardPreview({
 
 function ScreenshotCardPreview({
   item,
+  products = [],
   onClick,
 }: {
   item: FeedbackScreenshot;
+  products?: any[];
   onClick: () => void;
 }) {
+  const productInfo = useMemo(
+    () => (item.piece ? resolveReelProduct({ productTitle: item.piece }, products) : null),
+    [item.piece, products]
+  );
+
   return (
     <div
       onClick={onClick}
@@ -237,10 +334,24 @@ function ScreenshotCardPreview({
         )}
 
         <div className="flex items-center justify-between pt-0.5">
-          {item.piece && (
-            <span className="text-[9px] sm:text-[10px] text-emerald-200 font-medium bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/10 truncate max-w-[140px]">
-              {item.piece}
-            </span>
+          {item.piece ? (
+            productInfo ? (
+              <Link
+                href={productInfo.href}
+                onClick={(e) => e.stopPropagation()}
+                className="pointer-events-auto inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-emerald-200 hover:text-white font-medium bg-white/15 hover:bg-emerald-700/60 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/15 hover:border-emerald-300 transition-all truncate max-w-[140px] shadow-sm active:scale-95"
+                title={`Shop piece: ${productInfo.title}`}
+              >
+                <ShoppingBag className="w-2.5 h-2.5 text-emerald-300 shrink-0" />
+                <span className="truncate">{item.piece}</span>
+              </Link>
+            ) : (
+              <span className="text-[9px] sm:text-[10px] text-emerald-200 font-medium bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/10 truncate max-w-[140px]">
+                {item.piece}
+              </span>
+            )
+          ) : (
+            <span />
           )}
           <span className="text-[10px] text-purple-300 font-medium group-hover:text-white transition-colors">
             View Review →
@@ -252,9 +363,20 @@ function ScreenshotCardPreview({
 }
 
 export function CustomerReviewsWithVideos() {
+  const products = useProductStore((s) => s.products);
   const { videoReels, feedbackScreenshots, reviews: reviewQuotes } = useReviewsData();
   const [selectedVideo, setSelectedVideo] = useState<VideoReel | null>(null);
   const [selectedScreenshot, setSelectedScreenshot] = useState<FeedbackScreenshot | null>(null);
+
+  const modalProduct = useMemo(
+    () => (selectedVideo ? resolveReelProduct(selectedVideo, products) : null),
+    [selectedVideo, products]
+  );
+
+  const screenshotProductInfo = useMemo(
+    () => (selectedScreenshot?.piece ? resolveReelProduct({ productTitle: selectedScreenshot.piece }, products) : null),
+    [selectedScreenshot, products]
+  );
 
   const [activeTab, setActiveTab] = useState<"all" | "videos" | "screenshots">("all");
 
@@ -484,6 +606,7 @@ export function CustomerReviewsWithVideos() {
                 <VideoCardPreview
                   key={item.id}
                   reel={item.data}
+                  products={products}
                   onClick={() => setSelectedVideo(item.data)}
                 />
               );
@@ -492,6 +615,7 @@ export function CustomerReviewsWithVideos() {
               <ScreenshotCardPreview
                 key={item.id}
                 item={item.data}
+                products={products}
                 onClick={() => setSelectedScreenshot(item.data)}
               />
             );
@@ -641,9 +765,21 @@ export function CustomerReviewsWithVideos() {
             {/* Modal Footer with Full Details Revealed on Click */}
             <div className="p-4 sm:p-5 bg-white border-t border-[#EADBBE] space-y-2.5 flex-shrink-0 overflow-y-auto max-h-[30vh]">
               {selectedScreenshot.piece && (
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold">
-                  Verified Piece: {selectedScreenshot.piece}
-                </span>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold">
+                    Verified Piece: {selectedScreenshot.piece}
+                  </span>
+                  {screenshotProductInfo?.href && (
+                    <Link
+                      href={screenshotProductInfo.href}
+                      className="px-3.5 py-1.5 rounded-full bg-[#1C1917] hover:bg-purple-900 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5 text-purple-200" />
+                      <span>Shop Piece</span>
+                      <ArrowRight className="w-3 h-3 text-white/80" />
+                    </Link>
+                  )}
+                </div>
               )}
               {selectedScreenshot.caption && (
                 <div className="space-y-1">
@@ -700,20 +836,43 @@ export function CustomerReviewsWithVideos() {
             </div>
 
             {/* Product Tag Bar & Details */}
-            <div className="p-4 bg-stone-950 flex items-center justify-between text-white border-t border-stone-800">
-              <div>
-                <p className="text-xs font-semibold">{selectedVideo.productTitle}</p>
-                <p className="text-[11px] text-purple-300 font-mono">
-                  {selectedVideo.productPrice ? `₹${selectedVideo.productPrice}` : selectedVideo.handle}
-                </p>
+            <div className="p-3.5 sm:p-4 bg-stone-950 flex items-center justify-between text-white border-t border-stone-800 gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                {modalProduct?.image && (
+                  <img
+                    src={modalProduct.image}
+                    alt={modalProduct.title}
+                    className="w-10 h-10 rounded-lg object-cover border border-stone-700 shrink-0"
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold truncate text-white">
+                    {modalProduct?.title || selectedVideo.productTitle || selectedVideo.title}
+                  </p>
+                  <p className="text-[11px] text-purple-300 font-mono">
+                    {modalProduct?.price || selectedVideo.productPrice
+                      ? `₹${modalProduct?.price || selectedVideo.productPrice}`
+                      : selectedVideo.handle}
+                  </p>
+                </div>
               </div>
 
-              {selectedVideo.productSlug && selectedVideo.productSlug !== "all" && (
+              {modalProduct?.href ? (
                 <Link
-                  href={`/products/${selectedVideo.productSlug}`}
-                  className="px-4 py-1.5 rounded-full bg-white text-stone-900 text-xs font-semibold hover:bg-stone-200 transition-colors"
+                  href={modalProduct.href}
+                  className="px-4 py-2 rounded-full bg-white hover:bg-stone-100 text-stone-900 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 shrink-0 active:scale-95"
                 >
-                  Shop Piece
+                  <ShoppingBag className="w-3.5 h-3.5 text-purple-700" />
+                  <span>Shop Piece</span>
+                  <ArrowRight className="w-3 h-3 text-stone-600" />
+                </Link>
+              ) : (
+                <Link
+                  href="/products"
+                  className="px-4 py-2 rounded-full bg-white hover:bg-stone-100 text-stone-900 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 shrink-0 active:scale-95"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5 text-purple-700" />
+                  <span>Explore Pieces</span>
                 </Link>
               )}
             </div>

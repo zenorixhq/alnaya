@@ -4670,6 +4670,41 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
+              {/* Quick Select from Store Catalog */}
+              <div className="space-y-1.5 bg-stone-50 dark:bg-stone-900/60 p-3 rounded-xl border border-border">
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>Select Product from Store (Auto-fills title, price & slug)</span>
+                  <span className="text-[10px] text-primary font-medium">{products.length} pieces in store</span>
+                </label>
+                <select
+                  value={videoForm.productSlug || ""}
+                  onChange={(e) => {
+                    const selSlug = e.target.value;
+                    if (!selSlug) return;
+                    const found = products.find((p) => p.slug === selSlug);
+                    if (found) {
+                      setVideoForm({
+                        ...videoForm,
+                        productSlug: found.slug,
+                        productTitle: found.title,
+                        productPrice: found.price || 0,
+                      });
+                    }
+                  }}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                >
+                  <option value="">-- Choose a product to auto-tag (Optional) --</option>
+                  {products.map((p) => (
+                    <option key={p.id || p.slug} value={p.slug}>
+                      {p.title} - ₹{p.price} ({p.slug})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-muted-foreground">
+                  Selecting a piece automatically sets the exact title, price, and URL slug so video reels link directly to the product page.
+                </p>
+              </div>
+
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1 col-span-2">
                   <label className="text-xs font-semibold text-foreground">Tagged Product Name</label>

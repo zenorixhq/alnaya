@@ -1,8 +1,10 @@
 "use client";
 import { useReviewsData } from "@/hooks/useReviewsData";
-
-import { useState, useEffect, useRef } from "react";
-import { Instagram, Play, Volume2, VolumeX, X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { useProductStore } from "@/store/useProductStore";
+import { resolveReelProduct } from "@/components/storefront/CustomerReviewsWithVideos";
+import Link from "next/link";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Instagram, Play, Volume2, VolumeX, X, ExternalLink, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 
 export interface HousePanel {
   id: string | number;
@@ -12,6 +14,9 @@ export interface HousePanel {
   caption?: string;
   handle?: string;
   instagramLink?: string;
+  productTitle?: string;
+  productSlug?: string;
+  productPrice?: number;
 }
 
 const defaultPanels: HousePanel[] = [
@@ -59,11 +64,24 @@ const defaultPanels: HousePanel[] = [
 
 export function FollowTheHouseSection() {
   const instagramUrl = "https://www.instagram.com/alnaya.in?psln=cDNzY3liNjltb203";
+  const products = useProductStore((s) => s.products);
   const [panels, setPanels] = useState<HousePanel[]>(defaultPanels);
   const [activeVideoModal, setActiveVideoModal] = useState<HousePanel | null>(null);
   const [isMuted, setIsMuted] = useState(true);
   const modalVideoRef = useRef<HTMLVideoElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const modalProductInfo = useMemo(() => {
+    if (!activeVideoModal) return null;
+    return resolveReelProduct(
+      {
+        productSlug: activeVideoModal.productSlug,
+        productTitle: activeVideoModal.productTitle,
+        productPrice: activeVideoModal.productPrice,
+      },
+      products
+    );
+  }, [activeVideoModal, products]);
 
   const { instagramVideos, videoReels } = useReviewsData();
 
@@ -87,6 +105,9 @@ export function FollowTheHouseSection() {
             caption: vr.title || "Alnaya Jewelry Styling",
             handle: vr.handle || "@alnaya.in",
             instagramLink: instagramUrl,
+            productTitle: vr.productTitle,
+            productSlug: vr.productSlug,
+            productPrice: vr.productPrice,
           });
         }
       });
@@ -213,6 +234,15 @@ export function FollowTheHouseSection() {
                 panel.videoUrl.startsWith("data:video") ||
                 panel.videoUrl.includes("assets.mixkit.co"));
 
+            const panelProductInfo = resolveReelProduct(
+              {
+                productSlug: panel.productSlug,
+                productTitle: panel.productTitle,
+                productPrice: panel.productPrice,
+              },
+              products
+            );
+
             return (
               <a
                 key={panel.id || idx}
@@ -262,13 +292,31 @@ export function FollowTheHouseSection() {
 
                 {/* Editorial Caption Gradient Overlay */}
                 {panel.caption && (
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2.5 sm:p-3.5 pt-7 sm:pt-9 transition-opacity duration-300 opacity-95 lg:opacity-0 lg:group-hover:opacity-100">
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2.5 sm:p-3.5 pt-7 sm:pt-9 transition-opacity duration-300 opacity-95 lg:opacity-0 lg:group-hover:opacity-100 space-y-1">
                     <p className="text-white text-xs sm:text-sm font-medium tracking-wide line-clamp-1">
                       {panel.caption}
                     </p>
-                    <p className="text-purple-200 text-[10px] sm:text-xs font-light tracking-wider uppercase mt-0.5 truncate">
-                      {hasPlayableVideo ? "Play Video Reel 🎬" : "View on Instagram →"}
-                    </p>
+                    <div className="flex items-center justify-between pt-0.5">
+                      {panelProductInfo ? (
+                        <Link
+                          href={panelProductInfo.href}
+                          onClick={(e) => e.stopPropagation()}
+                          className="pointer-events-auto inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-purple-200 hover:text-white font-semibold bg-white/20 hover:bg-purple-700/80 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/25 hover:border-purple-300 transition-all truncate max-w-[140px] shadow-sm active:scale-95"
+                          title={`Shop piece: ${panelProductInfo.title}`}
+                        >
+                          <ShoppingBag className="w-2.5 h-2.5 text-purple-300 shrink-0" />
+                          <span className="truncate">{panelProductInfo.title}</span>
+                          {panelProductInfo.price ? (
+                            <span className="font-mono text-purple-200 ml-0.5">₹{panelProductInfo.price}</span>
+                          ) : null}
+                        </Link>
+                      ) : (
+                        <span />
+                      )}
+                      <span className="text-[10px] text-purple-200 uppercase tracking-wider font-light">
+                        {hasPlayableVideo ? "Play Reel 🎬" : "Instagram →"}
+                      </span>
+                    </div>
                   </div>
                 )}
               </a>
@@ -351,20 +399,41 @@ export function FollowTheHouseSection() {
               )}
             </div>
 
-            {/* Modal Footer with Instagram CTA */}
-            <div className="p-4 bg-stone-950 border-t border-white/10 flex items-center justify-between gap-3">
-              <span className="text-xs text-stone-300 font-light truncate">
-                {activeVideoModal.caption || "Follow @alnaya.in on Instagram"}
-              </span>
-              <a
-                href={activeVideoModal.instagramLink || instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-full bg-[#E1306C] hover:bg-[#c9245c] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
-              >
-                <span>Instagram</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+            {/* Modal Footer with Product CTA & Instagram CTA */}
+            <div className="p-3.5 sm:p-4 bg-stone-950 border-t border-white/10 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-xs text-stone-200 font-medium truncate block">
+                  {modalProductInfo?.title || activeVideoModal.productTitle || activeVideoModal.caption || "Follow @alnaya.in on Instagram"}
+                </span>
+                {(modalProductInfo?.price || activeVideoModal.productPrice) ? (
+                  <span className="text-[11px] text-purple-300 font-mono">
+                    ₹{modalProductInfo?.price || activeVideoModal.productPrice}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-stone-400">Handcrafted Fine Jewelry</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {modalProductInfo?.href && (
+                  <Link
+                    href={modalProductInfo.href}
+                    className="px-3.5 py-1.5 rounded-full bg-white hover:bg-stone-200 text-stone-900 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-md active:scale-95"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5 text-purple-700" />
+                    <span>Shop Piece</span>
+                  </Link>
+                )}
+                <a
+                  href={activeVideoModal.instagramLink || instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-full bg-[#E1306C] hover:bg-[#c9245c] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                >
+                  <span>Instagram</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
