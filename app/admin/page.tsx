@@ -225,6 +225,9 @@ export default function AdminDashboardPage() {
     customerName: "",
     location: "Kerala, India",
     piece: "",
+    productTitle: "",
+    productSlug: "",
+    productPrice: 150,
     imageUrl: "",
     caption: "",
     date: "Verified Recent Buyer",
@@ -1095,6 +1098,9 @@ export default function AdminDashboardPage() {
         customerName: "",
         location: "Kerala, India",
         piece: "",
+        productTitle: "",
+        productSlug: "",
+        productPrice: 150,
         imageUrl: "",
         caption: "",
         date: "Verified Recent Buyer",
@@ -4883,15 +4889,86 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Jewelry Piece Purchased</label>
+              {/* Quick Select from Store Catalog */}
+              <div className="space-y-1.5 bg-stone-50 dark:bg-stone-900/60 p-3 rounded-xl border border-border">
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>Select Product from Store (Auto-fills title, price & slug)</span>
+                  <span className="text-[10px] text-primary font-medium">{products.length} pieces in store</span>
+                </label>
+                <select
+                  value={screenshotForm.productSlug || ""}
+                  onChange={(e) => {
+                    const selSlug = e.target.value;
+                    if (!selSlug) return;
+                    const found = products.find((p) => p.slug === selSlug);
+                    if (found) {
+                      setScreenshotForm({
+                        ...screenshotForm,
+                        piece: found.title,
+                        productSlug: found.slug,
+                        productTitle: found.title,
+                        productPrice: found.price || 0,
+                      });
+                    }
+                  }}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                >
+                  <option value="">-- Choose a product to auto-tag (Optional) --</option>
+                  {products.map((p) => (
+                    <option key={p.id || p.slug} value={p.slug}>
+                      {p.title} - ₹{p.price} ({p.slug})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-muted-foreground">
+                  Selecting a piece automatically sets the exact title, price, and URL slug so screenshot reviews link directly to the product page with a Shop Piece button.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1 col-span-2">
+                  <label className="text-xs font-semibold text-foreground">Tagged Product Name</label>
                   <input
                     type="text"
-                    placeholder="e.g. Clover Bangle (Size 2-6)"
-                    value={screenshotForm.piece}
-                    onChange={(e) => setScreenshotForm({ ...screenshotForm, piece: e.target.value })}
+                    placeholder="e.g. Clover Bangle (Size 2.6)"
+                    value={screenshotForm.productTitle || screenshotForm.piece}
+                    onChange={(e) =>
+                      setScreenshotForm({
+                        ...screenshotForm,
+                        productTitle: e.target.value,
+                        piece: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Price (₹)</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 299"
+                    value={screenshotForm.productPrice || ""}
+                    onChange={(e) =>
+                      setScreenshotForm({
+                        ...screenshotForm,
+                        productPrice: Number(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Direct Product Slug / Link</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. clover-bangle (links to /products/[slug])"
+                    value={screenshotForm.productSlug || ""}
+                    onChange={(e) => setScreenshotForm({ ...screenshotForm, productSlug: e.target.value })}
+                    className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
                   />
                 </div>
 

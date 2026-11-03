@@ -73,7 +73,10 @@
       "title": "WhatsApp / DM Customer Review",
       "customerName": "Abcd",
       "location": "Kerala, India",
-      "piece": "Everyday Fine Jewelry",
+      "piece": "Jhumka",
+      "productTitle": "Jhumka",
+      "productSlug": "jhumka-mvva2wku",
+      "productPrice": 399,
       "imageUrl": "https://ewwkaxsqnautvwg9.public.blob.vercel-storage.com/screenshots/1793619536577-1000412798.webp",
       "caption": "Thank you alnaya",
       "date": "Verified Recent Buyer"
@@ -83,9 +86,12 @@
       "title": "Instagram DM Delivery Feedback",
       "customerName": "Sneha Thomas",
       "location": "Calicut, Kerala",
-      "piece": "Clover Bangle (Size 2-6)",
+      "piece": "Clover Bangle (Size 2.6)",
+      "productTitle": "Clover Bangle",
+      "productSlug": "clover-bangle",
+      "productPrice": 299,
       "imageUrl": "https://images.unsplash.com/photo-1611591475806-039775089201?auto=format&fit=crop&q=80&w=800",
-      "caption": "“Hey team alnaya, bangle arrived via DTDC in 2 days. The hallmark stainless mirror finish looks like 22K gold. Size 2-6 fits my wrist perfectly according to your size guide! ❤️”",
+      "caption": "“Hey team alnaya, bangle arrived via DTDC in 2 days. The hallmark stainless mirror finish looks like 22K gold. Size 2.6 fits my wrist perfectly according to your size guide! ❤️”",
       "date": "Verified 5 days ago"
     },
     {
@@ -94,6 +100,9 @@
       "customerName": "Rhea Kapoor",
       "location": "Bengaluru, Karnataka",
       "piece": "Four-Leaf Clover Charm Set",
+      "productTitle": "Four-Leaf Clover Charm Set",
+      "productSlug": "four-leaf-clover-charm-set",
+      "productPrice": 349,
       "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800",
       "caption": "“Thank you for sharing the photo confirmation on WhatsApp before dispatch! My bestie loved the surprise gift box. 100% hypoallergenic too, zero rashes on her skin.”",
       "date": "Verified 1 week ago"
@@ -104,6 +113,9 @@
       "customerName": "Dr. Pooja M.",
       "location": "Thiruvananthapuram, Kerala",
       "piece": "Waterproof Croissant Hoops",
+      "productTitle": "Waterproof Croissant Hoops",
+      "productSlug": "waterproof-croissant-hoops",
+      "productPrice": 249,
       "imageUrl": "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&q=80&w=800",
       "caption": "“As a doctor I wash my hands 30+ times a day. These rings haven't tarnished a bit even with hospital sanitizers! Truly surgical grade steel. Highly recommend!”",
       "date": "Verified 2 weeks ago"
