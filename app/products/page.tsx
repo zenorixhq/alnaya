@@ -266,6 +266,13 @@ function ProductCatalogContent() {
         return true;
       })
       .sort((a, b) => {
+        // Always bring Best Seller marked products to the top
+        const bestSellerA = a.isBestSeller ? 1 : 0;
+        const bestSellerB = b.isBestSeller ? 1 : 0;
+        if (bestSellerA !== bestSellerB) {
+          return bestSellerB - bestSellerA;
+        }
+
         const priceA = a.salePrice || a.price;
         const priceB = b.salePrice || b.price;
 

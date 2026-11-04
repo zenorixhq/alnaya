@@ -193,6 +193,13 @@ export const useCartStore = create<CartStore>()(
       },
 
       getShippingFee: (stateParam?: string) => {
+        // =========================================================================
+        // TEMPORARY TEST OVERRIDE: Set shipping fee to ₹0 for ₹1 test checkout.
+        // To re-enable delivery charges after testing, uncomment the original code below.
+        // =========================================================================
+        return 0;
+
+        /* --- UNCOMMENT BELOW TO RE-ENABLE DELIVERY CHARGES ---
         const subtotal = get().getSubtotal();
         if (subtotal === 0) return 0;
         const threshold = storeConfig.commerce.freeShippingThreshold;
@@ -203,6 +210,7 @@ export const useCartStore = create<CartStore>()(
         return isKerala
           ? (storeConfig.commerce.shippingFeeKerala ?? 50)
           : (storeConfig.commerce.shippingFeeOutsideKerala ?? 60);
+        --- END OF DELIVERY CHARGE LOGIC --- */
       },
 
       getTaxAmount: () => {

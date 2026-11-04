@@ -231,13 +231,14 @@ ${greetingMessage}
     }
   };
 
-  // 8 pieces total: same category first, followed by catalog favorites (2*4 desktop, 2*2 mobile)
-  const categoryProducts = products.filter(
-    (p) => p.id !== product.id && p.category === product.category
-  );
-  const otherProducts = products.filter(
-    (p) => p.id !== product.id && p.category !== product.category
-  );
+  // 8 pieces total: same category first, followed by catalog favorites (prioritizing Best Sellers)
+  const sortByBestSeller = (a: any, b: any) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0);
+  const categoryProducts = products
+    .filter((p) => p.id !== product.id && p.category === product.category)
+    .sort(sortByBestSeller);
+  const otherProducts = products
+    .filter((p) => p.id !== product.id && p.category !== product.category)
+    .sort(sortByBestSeller);
   const relatedProducts = [...categoryProducts, ...otherProducts].slice(0, 8);
 
   return (

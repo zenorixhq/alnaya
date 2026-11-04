@@ -48,12 +48,18 @@ const CACHE_HEADERS = {
 export async function GET() {
   try {
     const dbProducts = await prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { isBestSeller: "desc" },
+        { createdAt: "desc" },
+      ],
     });
 
     if (dbProducts.length === 0) {
-      // Return fallback products if DB empty
-      return NextResponse.json(fallbackProducts, { headers: CACHE_HEADERS });
+      // Return fallback products sorted by best seller first
+      const sortedFallback = [...fallbackProducts].sort(
+        (a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0)
+      );
+      return NextResponse.json(sortedFallback, { headers: CACHE_HEADERS });
     }
 
     // Format DB products into application Product interface
@@ -61,7 +67,10 @@ export async function GET() {
     return NextResponse.json(formatted, { headers: CACHE_HEADERS });
   } catch (err) {
     console.error("GET /api/products error:", err);
-    return NextResponse.json(fallbackProducts, { headers: CACHE_HEADERS });
+    const sortedFallback = [...fallbackProducts].sort(
+      (a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0)
+    );
+    return NextResponse.json(sortedFallback, { headers: CACHE_HEADERS });
   }
 }
 

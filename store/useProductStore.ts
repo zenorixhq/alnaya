@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { Product } from "@/types/store";
 
-const STORAGE_KEY = "alnaya_catalog_live_v4";
+const STORAGE_KEY = "alnaya_catalog_live_v5";
 
 // Auto-purge obsolete and legacy catalog cache keys from previous versions
 if (typeof window !== "undefined") {
@@ -70,8 +70,9 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
       if (Array.isArray(data)) {
-        set({ products: data, hasLoaded: true, isLoading: false, error: null });
-        persistProducts(data);
+        const sorted = [...data].sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+        set({ products: sorted, hasLoaded: true, isLoading: false, error: null });
+        persistProducts(sorted);
       } else {
         set({ hasLoaded: true, isLoading: false });
       }
