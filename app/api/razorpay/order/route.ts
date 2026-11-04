@@ -35,15 +35,15 @@ export async function POST(req: Request) {
 
     const rawKeyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
     const keyId =
-      rawKeyId && !rawKeyId.includes("TmUYZ") && !rawKeyId.includes("Tvxxm")
+      rawKeyId && !rawKeyId.includes("TmUYZ") && !rawKeyId.includes("Tvxxm") && !rawKeyId.includes("Tvzvx")
         ? rawKeyId
-        : "rzp_test_TvzvxAkA5DqpL5";
+        : "rzp_live_Tw10ncniHzIDNS";
 
     const rawSecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET || "";
     const keySecret =
-      rawSecret && !rawSecret.includes("8wuz") && !rawSecret.includes("fGBx")
+      rawSecret && !rawSecret.includes("8wuz") && !rawSecret.includes("fGBx") && !rawSecret.includes("NXHZ")
         ? rawSecret
-        : "NXHZL8G9YfxjY0AoUA0ZnElM";
+        : "fucsYkk2r0mCB8ZqkvF7bzKa";
 
     if (!keyId || !keySecret) {
       return NextResponse.json(

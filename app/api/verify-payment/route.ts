@@ -35,9 +35,9 @@ export async function POST(req: Request) {
 
     const rawSecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET || "";
     const keySecret =
-      rawSecret && !rawSecret.includes("8wuz") && !rawSecret.includes("fGBx")
+      rawSecret && !rawSecret.includes("8wuz") && !rawSecret.includes("fGBx") && !rawSecret.includes("NXHZ")
         ? rawSecret
-        : "NXHZL8G9YfxjY0AoUA0ZnElM";
+        : "fucsYkk2r0mCB8ZqkvF7bzKa";
 
     if (!keySecret) {
       return NextResponse.json(
