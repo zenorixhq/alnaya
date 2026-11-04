@@ -15,14 +15,17 @@ export async function POST(req: Request) {
       );
     }
 
+    const rawKeyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
     const keyId =
-      process.env.RAZORPAY_KEY_ID ||
-      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-      "rzp_test_TvzvxAkA5DqpL5";
+      rawKeyId && !rawKeyId.includes("TmUYZ") && !rawKeyId.includes("Tvxxm")
+        ? rawKeyId
+        : "rzp_test_TvzvxAkA5DqpL5";
+
+    const rawSecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET || "";
     const keySecret =
-      process.env.RAZORPAY_KEY_SECRET ||
-      process.env.RAZORPAY_SECRET ||
-      "NXHZL8G9YfxjY0AoUA0ZnElM";
+      rawSecret && !rawSecret.includes("8wuz") && !rawSecret.includes("fGBx")
+        ? rawSecret
+        : "NXHZL8G9YfxjY0AoUA0ZnElM";
 
     if (!keyId || !keySecret) {
       return NextResponse.json(
