@@ -41,6 +41,9 @@ import {
   Instagram,
   Camera,
   Sparkles,
+  MessageCircle,
+  Copy,
+  Check,
 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -427,6 +430,169 @@ export default function AdminDashboardPage() {
       });
     } catch (err) {
       console.error("Failed to persist order status:", err);
+    }
+  };
+
+  // Order Fulfillment & WhatsApp State
+  const [orderSearchQuery, setOrderSearchQuery] = useState("");
+  const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
+
+  const cleanPhoneForWhatsApp = (rawPhone?: string) => {
+    let digits = (rawPhone || "").replace(/\D/g, "");
+    if (digits.startsWith("0") && digits.length === 11) {
+      digits = digits.slice(1);
+    }
+    if (digits.length === 10) {
+      digits = `91${digits}`;
+    }
+    return digits;
+  };
+
+  const generateWhatsAppConfirmationMessage = (order: any) => {
+    const customerName =
+      order.customer?.fullName ||
+      (order.customer as any)?.name ||
+      order.customerName ||
+      "Valued Collector";
+    const orderNum = order.orderNumber || order.id || "ALN-ORDER";
+    const items = order.items || [];
+    const itemsText =
+      items.length > 0
+        ? items
+            .map(
+              (it: any) =>
+                `• ${it.quantity || 1}x ${it.title || it.name || "Handcrafted Jewelry"}${
+                  it.selectedVariant ? ` (${it.selectedVariant})` : ""
+                } - ${formatPrice(it.price || it.salePrice || 0)}`
+            )
+            .join("\n")
+        : "• Handcrafted Luxury Jewelry";
+
+    const total = formatPrice(order.grandTotal || 0);
+    const street =
+      order.customer?.address?.street ||
+      (order.customer as any)?.shippingAddress?.line1 ||
+      order.shippingAddress ||
+      "";
+    const city =
+      order.customer?.address?.city ||
+      (order.customer as any)?.shippingAddress?.city ||
+      "";
+    const state =
+      order.customer?.address?.state ||
+      (order.customer as any)?.shippingAddress?.state ||
+      "";
+    const postalCode =
+      order.customer?.address?.postalCode ||
+      (order.customer as any)?.shippingAddress?.postalCode ||
+      "";
+    const fullAddress =
+      [street, city, state, postalCode].filter(Boolean).join(", ") ||
+      "Delivery address provided during checkout";
+
+    const paymentInfo =
+      order.paymentStatus === "paid" || order.paymentMethod === "razorpay"
+        ? "Paid via Razorpay (Online Verified)"
+        : (order.paymentMethod ? `Method: ${order.paymentMethod}` : "Paid Online");
+
+    return `✨ *ALNAYA JEWELLERY • ORDER CONFIRMATION* ✨
+
+Dear ${customerName},
+
+Thank you for choosing Alnaya! We are delighted to confirm that your order *#${orderNum}* has been received and verified. 💖
+
+📋 *Order Details:*
+${itemsText}
+
+💰 *Total Paid:* ${total} (${paymentInfo})
+
+📦 *Delivery Address:*
+${fullAddress}
+
+🚚 *Fulfillment Status:* In preparation for express dispatch via DTDC / Speed Post.
+
+📦 *Important Unboxing Reminder:*
+Please ensure you record an uninterrupted 360-degree unboxing video from the moment you open the outer courier parcel. This is mandatory as per store policy to claim transit protection or replacement.
+
+Our team will share packaging photos and your live tracking link prior to courier handover. If you have any questions or customization notes, feel free to reply to this chat! ✨
+
+Warm regards,
+*Team Alnaya*
+https://alnaya-ten.vercel.app`;
+  };
+
+  const generateWhatsAppDispatchMessage = (order: any) => {
+    const customerName =
+      order.customer?.fullName ||
+      (order.customer as any)?.name ||
+      order.customerName ||
+      "Valued Collector";
+    const orderNum = order.orderNumber || order.id || "ALN-ORDER";
+    const tracking =
+      order.trackingNumber ||
+      `DTDC-KL-${(parseInt((orderNum || "100000").replace(/\D/g, "") || "100000", 10) * 7).toString().slice(0, 6)}`;
+
+    return `🚚 *ALNAYA JEWELLERY • ORDER DISPATCHED* 📦
+
+Dear ${customerName},
+
+Exciting news! Your handcrafted jewelry order *#${orderNum}* has been carefully inspected, packed in our signature luxury pouch, and handed over to our express courier partner. ✨
+
+📦 *Courier Partner:* DTDC Express / India Post
+🔖 *Tracking Number:* *${tracking}*
+🌐 *Track Shipment:* https://www.dtdc.in/tracking.asp
+
+📦 *Unboxing Reminder:*
+Please remember to record a continuous 360° unboxing video upon receiving the package.
+
+Your parcel is on its way and will arrive within 2-4 business days. Thank you for your trust in Alnaya! 💖
+
+*Team Alnaya*
+https://alnaya-ten.vercel.app`;
+  };
+
+  const handleSendWhatsApp = (order: any, type: "confirmation" | "dispatch" = "confirmation") => {
+    const rawPhone =
+      order.customer?.phone ||
+      (order.customer as any)?.mobile ||
+      order.customerPhone ||
+      "";
+    let phone = cleanPhoneForWhatsApp(rawPhone);
+
+    if (!phone) {
+      const input = window.prompt(
+        "Customer phone number was not detected. Please enter customer's WhatsApp mobile number (10 digits or with country code):",
+        ""
+      );
+      if (!input) return;
+      phone = cleanPhoneForWhatsApp(input);
+    }
+
+    if (!phone) {
+      alert("Please provide a valid mobile number.");
+      return;
+    }
+
+    const message =
+      type === "dispatch"
+        ? generateWhatsAppDispatchMessage(order)
+        : generateWhatsAppConfirmationMessage(order);
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleCopyWhatsAppText = async (order: any, type: "confirmation" | "dispatch" = "confirmation") => {
+    const message =
+      type === "dispatch"
+        ? generateWhatsAppDispatchMessage(order)
+        : generateWhatsAppConfirmationMessage(order);
+    try {
+      await navigator.clipboard.writeText(message);
+      setCopiedOrderId(`${order.id}_${type}`);
+      setTimeout(() => setCopiedOrderId(null), 2500);
+    } catch (err) {
+      console.error("Clipboard copy failed:", err);
     }
   };
 
@@ -2262,27 +2428,65 @@ export default function AdminDashboardPage() {
         {/* Tab: Order Fulfillment */}
         {activeTab === "orders" && (
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
                   Order Fulfillment Queue
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Manage incoming customer orders, review deliveries, and update processing statuses.
+                  Manage incoming customer orders, review deliveries, and send 1-click WhatsApp confirmations.
                 </p>
               </div>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary self-start sm:self-auto">
                 {orders.length} Total Orders
               </span>
             </div>
 
-            <div className="space-y-4">
-              {orders.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground text-xs bg-muted/20 rounded-xl border border-border">
-                  No orders found in fulfillment queue yet.
-                </div>
-              ) : (
-                orders.map((order) => {
+            {/* Search & Filter Orders */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 justify-between pt-1">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search order #, customer, or phone..."
+                  value={orderSearchQuery}
+                  onChange={(e) => setOrderSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+              {orderSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setOrderSearchQuery("")}
+                  className="text-xs text-muted-foreground hover:text-foreground self-start sm:self-auto"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4 pt-2">
+              {(() => {
+                const displayedOrders = orders.filter((o) => {
+                  if (!orderSearchQuery.trim()) return true;
+                  const q = orderSearchQuery.toLowerCase();
+                  const num = (o.orderNumber || o.id || "").toLowerCase();
+                  const name = (o.customer?.fullName || (o as any).customerName || "").toLowerCase();
+                  const phone = (o.customer?.phone || (o as any).customerPhone || "").toLowerCase();
+                  return num.includes(q) || name.includes(q) || phone.includes(q);
+                });
+
+                if (displayedOrders.length === 0) {
+                  return (
+                    <div className="text-center py-12 text-muted-foreground text-xs bg-muted/20 rounded-xl border border-border">
+                      {orderSearchQuery
+                        ? `No orders matching "${orderSearchQuery}".`
+                        : "No orders found in fulfillment queue yet."}
+                    </div>
+                  );
+                }
+
+                return displayedOrders.map((order) => {
                   const customerName =
                     order.customer?.fullName ||
                     (order.customer as any)?.name ||
@@ -2309,7 +2513,7 @@ export default function AdminDashboardPage() {
                   return (
                     <div
                       key={order.id}
-                      className="p-4 rounded-xl border border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary/40 transition-colors"
+                      className="p-4 rounded-xl border border-border bg-muted/20 flex flex-col lg:flex-row lg:items-center justify-between gap-4 hover:border-primary/40 transition-colors"
                     >
                       <div className="space-y-1.5 flex-1">
                         <div className="flex items-center gap-3 flex-wrap">
@@ -2323,8 +2527,25 @@ export default function AdminDashboardPage() {
                             {order.paymentMethod || "WhatsApp Order"}
                           </span>
                         </div>
-                        <p className="text-xs text-foreground font-medium">
-                          {customerName} • {customerEmail} {customerPhone ? `• ${customerPhone}` : ""}
+                        <p className="text-xs text-foreground font-medium flex items-center gap-1.5 flex-wrap">
+                          <span>{customerName}</span>
+                          <span>•</span>
+                          <span>{customerEmail}</span>
+                          {customerPhone && (
+                            <>
+                              <span>•</span>
+                              <a
+                                href={`https://wa.me/${cleanPhoneForWhatsApp(customerPhone)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="Chat on WhatsApp"
+                                className="text-[#075E54] dark:text-[#25D366] hover:underline font-bold inline-flex items-center gap-1"
+                              >
+                                <MessageCircle className="w-3 h-3 fill-current" />
+                                <span>{customerPhone}</span>
+                              </a>
+                            </>
+                          )}
                         </p>
                         <p className="text-[11px] text-muted-foreground">
                           {streetAddress}
@@ -2344,8 +2565,8 @@ export default function AdminDashboardPage() {
                         )}
                       </div>
 
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4 shrink-0">
-                        <div className="text-right sm:text-right">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 shrink-0 flex-wrap lg:justify-end">
+                        <div className="text-left sm:text-right">
                           <span className="text-[10px] uppercase font-bold text-muted-foreground">Total</span>
                           <p className="text-sm font-black text-foreground">
                             {formatPrice(order.grandTotal || 0)}
@@ -2365,11 +2586,47 @@ export default function AdminDashboardPage() {
                           <option value="delivered">Delivered</option>
                           <option value="cancelled">Cancelled</option>
                         </select>
+
+                        {/* WhatsApp Actions */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => handleSendWhatsApp(order, "confirmation")}
+                            title="Send Order Confirmation via WhatsApp to customer"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#075E54] dark:text-[#25D366] border border-[#25D366]/40 text-xs font-bold transition-all shadow-sm active:scale-95"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 fill-current text-[#25D366]" />
+                            <span>WhatsApp Confirmation</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSendWhatsApp(order, "dispatch")}
+                            title="Send Dispatch & Tracking link via WhatsApp"
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-semibold transition-all"
+                          >
+                            <Truck className="w-3.5 h-3.5 text-primary" />
+                            <span className="hidden sm:inline">Dispatch</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleCopyWhatsAppText(order, "confirmation")}
+                            title="Copy confirmation message to clipboard"
+                            className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium transition-all"
+                          >
+                            {copiedOrderId === `${order.id}_confirmation` ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
-                })
-              )}
+                });
+              })()}
             </div>
           </div>
         )}
