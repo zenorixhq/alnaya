@@ -448,12 +448,64 @@ export default function AdminDashboardPage() {
     return digits;
   };
 
+  const formatTitleCase = (str?: string) => {
+    if (!str) return "Valued Collector";
+    return str
+      .trim()
+      .split(/\s+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  const cleanDeliveryAddress = (order: any): string => {
+    const raw =
+      order.shippingAddress ||
+      order.customer?.address?.street ||
+      (order.customer as any)?.shippingAddress?.line1 ||
+      "";
+
+    let clean = (raw || "").trim();
+
+    // Check if separate city/state/pin exist and aren't already included
+    const city = order.customer?.address?.city || (order.customer as any)?.shippingAddress?.city;
+    const state = order.customer?.address?.state || (order.customer as any)?.shippingAddress?.state;
+    const pin = order.customer?.address?.postalCode || (order.customer as any)?.shippingAddress?.postalCode;
+
+    if (city && city !== "India" && !clean.toLowerCase().includes(city.toLowerCase())) {
+      clean += `, ${city}`;
+    }
+    if (state && state !== "IN" && !clean.toLowerCase().includes(state.toLowerCase())) {
+      clean += `, ${state}`;
+    }
+    if (pin && !clean.includes(pin)) {
+      clean += ` - ${pin}`;
+    }
+
+    // Clean up duplicated address chunks or trailing duplicated countries e.g. ", India, India, IN"
+    clean = clean
+      .replace(/(?:,\s*India)+(?:,\s*IN)?/gi, ", India")
+      .replace(/(?:,\s*IN)+/gi, "")
+      .replace(/\s*,\s*,/g, ",")
+      .trim();
+
+    // Deduplicate repeated lines (e.g. if entered in street and repeated in address)
+    const lines = clean.split(/[\r\n]+/).map((l: string) => l.trim()).filter(Boolean);
+    if (lines.length > 1) {
+      const uniqueLines = Array.from(new Set(lines));
+      clean = uniqueLines.join(", ");
+    }
+
+    return clean || "Delivery address provided during checkout";
+  };
+
   const generateWhatsAppConfirmationMessage = (order: any) => {
-    const customerName =
+    const rawName =
       order.customer?.fullName ||
       (order.customer as any)?.name ||
       order.customerName ||
-      "Valued Collector";
+      "";
+    const customerName = formatTitleCase(rawName);
+
     const orderNum = order.orderNumber || order.id || "ALN-ORDER";
     const items = order.items || [];
     const itemsText =
@@ -463,92 +515,100 @@ export default function AdminDashboardPage() {
               (it: any) =>
                 `• ${it.quantity || 1}x ${it.title || it.name || "Handcrafted Jewelry"}${
                   it.selectedVariant ? ` (${it.selectedVariant})` : ""
-                } - ${formatPrice(it.price || it.salePrice || 0)}`
+                } — ${formatPrice(it.price || it.salePrice || 0)}`
             )
             .join("\n")
-        : "• Handcrafted Luxury Jewelry";
+        : "• 1x Handcrafted Luxury Jewelry Piece";
 
     const total = formatPrice(order.grandTotal || 0);
-    const street =
-      order.customer?.address?.street ||
-      (order.customer as any)?.shippingAddress?.line1 ||
-      order.shippingAddress ||
-      "";
-    const city =
-      order.customer?.address?.city ||
-      (order.customer as any)?.shippingAddress?.city ||
-      "";
-    const state =
-      order.customer?.address?.state ||
-      (order.customer as any)?.shippingAddress?.state ||
-      "";
-    const postalCode =
-      order.customer?.address?.postalCode ||
-      (order.customer as any)?.shippingAddress?.postalCode ||
-      "";
-    const fullAddress =
-      [street, city, state, postalCode].filter(Boolean).join(", ") ||
-      "Delivery address provided during checkout";
+    const fullAddress = cleanDeliveryAddress(order);
 
     const paymentInfo =
       order.paymentStatus === "paid" || order.paymentMethod === "razorpay"
-        ? "Paid via Razorpay (Online Verified)"
-        : (order.paymentMethod ? `Method: ${order.paymentMethod}` : "Paid Online");
+        ? "Paid via Razorpay (Verified)"
+        : (order.paymentMethod ? `${order.paymentMethod}` : "Paid Online");
 
-    return `✨ *ALNAYA JEWELLERY • ORDER CONFIRMATION* ✨
+    return `✨ *ALNAYA JEWELLERY* ✨
+_Everyday & Ethnic Luxury_
 
-Dear ${customerName},
+━━━━━━━━━━━━━━━━━━━━
+*ORDER CONFIRMED • #${orderNum}*
+━━━━━━━━━━━━━━━━━━━━
 
-Thank you for choosing Alnaya! We are delighted to confirm that your order *#${orderNum}* has been received and verified. 💖
+Dear *${customerName}*,
 
-📋 *Order Details:*
+Thank you for choosing *Alnaya*. We are delighted to confirm that your order *#${orderNum}* has been successfully received & verified! 💖
+
+🛍️ *Order Summary:*
 ${itemsText}
 
-💰 *Total Paid:* ${total} (${paymentInfo})
+💳 *Total Paid:* *${total}* (${paymentInfo})
 
-📦 *Delivery Address:*
+📍 *Delivery Address:*
 ${fullAddress}
 
-🚚 *Fulfillment Status:* In preparation for express dispatch via DTDC / Speed Post.
+🚚 *Fulfillment Status:*
+In preparation for express courier dispatch via *DTDC Express / India Post* (Speed Post).
 
-📦 *Important Unboxing Reminder:*
-Please ensure you record an uninterrupted 360-degree unboxing video from the moment you open the outer courier parcel. This is mandatory as per store policy to claim transit protection or replacement.
+────────────────────
+📹 *MANDATORY UNBOXING POLICY* 📦
+Please record an uninterrupted *360-degree unboxing video* starting from before opening the outer courier parcel until all pieces are inspected. This is mandatory as per store policy to claim transit protection or replacement.
+────────────────────
 
-Our team will share packaging photos and your live tracking link prior to courier handover. If you have any questions or customization notes, feel free to reply to this chat! ✨
+✨ *What happens next?*
+Our team will share actual packaging photos and your live tracking link directly on WhatsApp prior to courier handover.
+
+🤍 *Have questions or special requests?* Simply reply to this chat anytime!
 
 Warm regards,
 *Team Alnaya*
-https://alnaya-ten.vercel.app`;
+🌐 https://alnaya.in
+
+🛍️ *Discover more handcrafted heirlooms:*
+https://alnaya.in/products`;
   };
 
   const generateWhatsAppDispatchMessage = (order: any) => {
-    const customerName =
+    const rawName =
       order.customer?.fullName ||
       (order.customer as any)?.name ||
       order.customerName ||
-      "Valued Collector";
+      "";
+    const customerName = formatTitleCase(rawName);
+
     const orderNum = order.orderNumber || order.id || "ALN-ORDER";
     const tracking =
       order.trackingNumber ||
       `DTDC-KL-${(parseInt((orderNum || "100000").replace(/\D/g, "") || "100000", 10) * 7).toString().slice(0, 6)}`;
 
     return `🚚 *ALNAYA JEWELLERY • ORDER DISPATCHED* 📦
+_Everyday & Ethnic Luxury_
 
-Dear ${customerName},
+━━━━━━━━━━━━━━━━━━━━
+*SHIPMENT IN TRANSIT • #${orderNum}*
+━━━━━━━━━━━━━━━━━━━━
 
-Exciting news! Your handcrafted jewelry order *#${orderNum}* has been carefully inspected, packed in our signature luxury pouch, and handed over to our express courier partner. ✨
+Dear *${customerName}*,
+
+Wonderful news! Your handcrafted jewelry order *#${orderNum}* has been carefully inspected, packed in our signature luxury pouch, and handed over to our express courier partner. ✨
 
 📦 *Courier Partner:* DTDC Express / India Post
 🔖 *Tracking Number:* *${tracking}*
 🌐 *Track Shipment:* https://www.dtdc.in/tracking.asp
 
-📦 *Unboxing Reminder:*
-Please remember to record a continuous 360° unboxing video upon receiving the package.
+────────────────────
+📹 *Unboxing Reminder:*
+Please remember to record an uninterrupted 360° unboxing video upon receiving your parcel.
+────────────────────
 
-Your parcel is on its way and will arrive within 2-4 business days. Thank you for your trust in Alnaya! 💖
+Your parcel is on its way and will arrive within 2–4 business days. Thank you for your trust in Alnaya! 💖
 
+Warm regards,
 *Team Alnaya*
-https://alnaya-ten.vercel.app`;
+🌐 https://alnaya.in
+
+🛍️ *Explore new arrivals:*
+https://alnaya.in/products`;
   };
 
   const handleSendWhatsApp = (order: any, type: "confirmation" | "dispatch" = "confirmation") => {
@@ -2487,11 +2547,12 @@ https://alnaya-ten.vercel.app`;
                 }
 
                 return displayedOrders.map((order) => {
-                  const customerName =
+                  const customerName = formatTitleCase(
                     order.customer?.fullName ||
                     (order.customer as any)?.name ||
                     (order as any).customerName ||
-                    "Valued Customer";
+                    "Valued Customer"
+                  );
                   const customerEmail =
                     order.customer?.email ||
                     (order as any).customerEmail ||
@@ -2500,15 +2561,7 @@ https://alnaya-ten.vercel.app`;
                     order.customer?.phone ||
                     (order as any).customerPhone ||
                     "";
-                  const streetAddress =
-                    order.customer?.address?.street ||
-                    (order.customer as any)?.shippingAddress?.line1 ||
-                    (order as any).shippingAddress ||
-                    "Direct delivery";
-                  const cityAddress =
-                    order.customer?.address?.city ||
-                    (order.customer as any)?.shippingAddress?.city ||
-                    "";
+                  const fullDisplayAddress = cleanDeliveryAddress(order);
 
                   return (
                     <div
@@ -2548,8 +2601,7 @@ https://alnaya-ten.vercel.app`;
                           )}
                         </p>
                         <p className="text-[11px] text-muted-foreground">
-                          {streetAddress}
-                          {cityAddress ? `, ${cityAddress}` : ""}
+                          {fullDisplayAddress}
                         </p>
                         {order.items && order.items.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 pt-1">

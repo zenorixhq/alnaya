@@ -158,7 +158,7 @@ export default function CheckoutPage() {
       const logoUrl =
         typeof window !== "undefined"
           ? `${window.location.origin}/alnaya-logo.png`
-          : "https://alnaya-ten.vercel.app/alnaya-logo.png";
+          : "https://alnaya.in/alnaya-logo.png";
 
       const options = {
         key: orderData.key,
