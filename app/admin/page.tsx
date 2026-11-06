@@ -666,12 +666,12 @@ https://alnaya.in/products`;
   const [isSavingItem, setIsSavingItem] = useState(false);
 
   // Media Optimization & Upload
-  const compressImageIfNeeded = async (file: File, maxDim = 1400, quality = 0.82): Promise<File> => {
+  const compressImageIfNeeded = async (file: File, maxDim = 1200, quality = 0.80): Promise<File> => {
     if (!file.type.startsWith("image/")) return file;
     // Don't re-encode vector or animated images
     if (file.type === "image/svg+xml" || file.type === "image/gif") return file;
-    // Already lightweight and compact
-    if (file.size <= 100 * 1024) return file;
+    // Already lightweight and compact (threshold: 150 KB)
+    if (file.size <= 150 * 1024) return file;
 
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -700,10 +700,9 @@ https://alnaya.in/products`;
 
           ctx.drawImage(img, 0, 0, width, height);
 
-          // WebP delivers 30-40% smaller file size with zero perceptible quality loss
-          const supportsWebp = canvas.toDataURL("image/webp").indexOf("data:image/webp") === 0;
-          const targetMime = supportsWebp ? "image/webp" : "image/jpeg";
-          const targetExt = supportsWebp ? ".webp" : ".jpg";
+          // Razor-sharp lightweight web JPEG (~60 KB – 90 KB) at max 1200px
+          const targetMime = "image/jpeg";
+          const targetExt = ".jpg";
 
           canvas.toBlob(
             (blob) => {
@@ -1056,8 +1055,8 @@ https://alnaya.in/products`;
     try {
       let fileToUpload = file;
 
-      // 1. Convert images to low size immediately (crisp 1400px, 0.82 WebP/JPEG, ~80-160KB)
-      if (file.type.startsWith("image/") && file.size > 100 * 1024) {
+      // 1. Convert images to low size immediately (crisp 1200px max, 0.80 web JPEG, ~60-90KB)
+      if (file.type.startsWith("image/") && file.size > 150 * 1024) {
         const origSizeMB = (file.size / (1024 * 1024)).toFixed(1);
         setUploadProgressText(`Optimizing image (${origSizeMB} MB ➔ converting to fast web format)...`);
         fileToUpload = await compressImageIfNeeded(file);
@@ -2440,8 +2439,12 @@ https://alnaya.in/products`;
                       <td className="py-3">
                         <div className="flex items-center gap-3">
                           <img
-                            src={product.images[0]}
-                            alt=""
+                            src={product.images && product.images.length > 0 ? product.images[0] : "/images/about-model-necklace.jpg"}
+                            alt={product.title || "Product"}
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = "/images/about-model-necklace.jpg";
+                            }}
                             className="w-10 h-12 object-cover rounded-md border border-border"
                           />
                           <div>
@@ -2967,6 +2970,10 @@ https://alnaya.in/products`;
                         <img
                           src={item.imageUrl}
                           alt={item.customerName || item.title}
+                          loading="lazy"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/images/about-model-necklace.jpg";
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute top-2 right-2 flex items-center gap-1">
@@ -3308,6 +3315,10 @@ https://alnaya.in/products`;
                     <img
                       src={cat.image}
                       alt={cat.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/images/about-model-necklace.jpg";
+                      }}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none" />
