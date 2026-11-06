@@ -20,7 +20,7 @@ export interface ProductFeature {
   title: string;
   description: string;
   icon: typeof Sparkles;
-  policyTab: "care-guide" | "shipping" | "return-refund" | "ordering-instructions" | "size-guide";
+  policyTab: "care-guide" | "shipping" | "return-refund" | "ordering-instructions";
   linkText: string;
 }
 
@@ -82,7 +82,7 @@ export const PRODUCT_FEATURES: ProductFeature[] = [
 ];
 
 interface ProductFeatureSliderProps {
-  onOpenPolicy?: (tab: "care-guide" | "shipping" | "return-refund" | "ordering-instructions" | "size-guide") => void;
+  onOpenPolicy?: (tab: "care-guide" | "shipping" | "return-refund" | "ordering-instructions") => void;
   className?: string;
 }
 

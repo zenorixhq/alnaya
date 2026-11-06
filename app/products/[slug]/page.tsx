@@ -18,9 +18,11 @@ import {
   ShoppingBag,
   Share2,
   ChevronRight,
+  ChevronLeft,
   ChevronDown,
   ArrowRight,
   CheckCircle2,
+  Lock,
   MessageCircle,
   Sparkles,
   Ruler,
@@ -56,6 +58,35 @@ export default function ProductDetailPage({
   const [copiedLink, setCopiedLink] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>("");
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  const handlePrevImage = () => {
+    if (!product || !product.images || product.images.length <= 1) return;
+    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : product.images.length - 1));
+  };
+
+  const handleNextImage = () => {
+    if (!product || !product.images || product.images.length <= 1) return;
+    setActiveImageIndex((prev) => (prev < product.images.length - 1 ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        handleNextImage();
+      } else {
+        handlePrevImage();
+      }
+    }
+    setTouchStartX(null);
+  };
 
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
@@ -176,53 +207,6 @@ export default function ProductDetailPage({
     router.push("/checkout");
   };
 
-  const handleDirectWhatsAppOrder = () => {
-    const combinedOptions: { [key: string]: string } = { ...currentOptions };
-    if (sizeInfo && effectiveSize) {
-      combinedOptions[sizeInfo.label] = effectiveSize;
-    }
-
-    const selectedVariantSummary = Object.entries(combinedOptions)
-      .map(([k, v]) => `• *${k}:* *${v}*`)
-      .join("\n");
-
-    const phone = storeConfig.brand.contact.whatsappNumber;
-    const itemTotalFormatted = formatPrice(effectivePrice * quantity, selectedCurrency);
-
-    let greetingMessage = "";
-    if (isOutOfStock) {
-      greetingMessage = `Hello Alnaya! I am inquiring about *${product.title}* in *${effectiveSize || "this size"}*, which is currently out of stock on your website. Could you please notify me when it's back in stock or if custom piece sizing is available? Thank you! 💖`;
-    } else {
-      greetingMessage = isQatar
-        ? "I want to order this piece from your website! Please confirm availability and share payment/delivery details for Qatar (Free Delivery). Thank you! 💖"
-        : "I want to order this piece from your website! Please confirm availability and share your *UPI QR code* so I can pay and confirm my delivery. Thank you! 💖";
-    }
-
-    const message = `━━━━━━━━━━━━━━━━━━━━━
-✨ *A L N A Y A* ✨
-_${isOutOfStock ? "Size Restock & Custom Inquiry" : "Instant Order Inquiry"}_
-━━━━━━━━━━━━━━━━━━━━━
-
-💍 *SELECTED PIECE*
-• *Title:* *${product.title}*
-${selectedVariantSummary ? `${selectedVariantSummary}\n` : ""}• *Quantity:* ${quantity}
-${isOutOfStock ? `• *Status:* ⚠️ *Size Currently Out of Stock*\n` : `• *Item Total:* *${itemTotalFormatted}*\n`}• *Destination:* *${isQatar ? "Qatar (Complimentary Delivery)" : "India"}*
-
-💬 *Hello Alnaya Team!*
-${greetingMessage}
-━━━━━━━━━━━━━━━━━━━━━`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const isMobile = typeof window !== "undefined" && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    const waUrl = isMobile
-      ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`
-      : `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
-
-    if (typeof window !== "undefined") {
-      window.open(waUrl, "_blank");
-    }
-  };
-
   const handleShare = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
@@ -275,21 +259,68 @@ ${greetingMessage}
             </div>
           )}
 
-          {/* Main Large Display - Framed to fit jewelry completely without cutoffs */}
-          <div className="flex-1 aspect-square rounded-2xl overflow-hidden bg-[#FAF8F5] dark:bg-stone-900/40 border border-border relative flex items-center justify-center p-4 sm:p-8">
+          {/* Main Large Display with Left/Right Navigation & Touch Swipe */}
+          <div
+            className="flex-1 aspect-square rounded-2xl overflow-hidden bg-[#FAF8F5] dark:bg-stone-900/40 border border-border relative flex items-center justify-center p-4 sm:p-8 select-none group"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={product.images[activeImageIndex] || product.images[0]}
               alt={product.title}
-              className={`w-full h-full object-contain object-center drop-shadow-md ${
+              className={`w-full h-full object-contain object-center drop-shadow-md transition-opacity duration-200 ${
                 isOutOfStock ? "opacity-75 grayscale-[20%]" : ""
               }`}
             />
+
+            {/* Left & Right Arrow Navigation Controls */}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePrevImage}
+                  className="absolute left-2.5 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-background/90 hover:bg-background text-foreground border border-border shadow-md backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20"
+                  aria-label="Previous photo"
+                  title="Previous photo (or swipe left)"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextImage}
+                  className="absolute right-2.5 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-background/90 hover:bg-background text-foreground border border-border shadow-md backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20"
+                  aria-label="Next photo"
+                  title="Next photo (or swipe right)"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+
+                {/* Bottom Dots & Counter Indicator */}
+                <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-background/85 backdrop-blur-sm border border-border/80 shadow-sm z-20">
+                  {product.images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`h-1.5 rounded-full transition-all ${
+                        activeImageIndex === idx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/40 hover:bg-muted-foreground"
+                      }`}
+                      aria-label={`Go to photo ${idx + 1}`}
+                    />
+                  ))}
+                  <span className="text-[10px] font-bold text-muted-foreground ml-1 font-mono">
+                    {activeImageIndex + 1}/{product.images.length}
+                  </span>
+                </div>
+              </>
+            )}
+
             {isOutOfStock ? (
-              <span className="absolute top-4 left-4 bg-stone-900/90 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg tracking-wider uppercase border border-stone-700/60 backdrop-blur-sm">
+              <span className="absolute top-4 left-4 bg-stone-900/90 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg tracking-wider uppercase border border-stone-700/60 backdrop-blur-sm z-10">
                 OUT OF STOCK
               </span>
             ) : discountPercent > 0 ? (
-              <span className="absolute top-4 left-4 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+              <span className="absolute top-4 left-4 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full shadow-md z-10">
                 Save {discountPercent}%
               </span>
             ) : null}
@@ -360,16 +391,6 @@ ${greetingMessage}
                   <span>{sizeInfo.label}:</span>
                   <span className="font-semibold text-primary">{selectedSize || sizeInfo.defaultSize}</span>
                 </div>
-                {!sizeInfo.isAdjustableOnly && (
-                  <button
-                    type="button"
-                    onClick={() => setPolicyModalTab("size-guide")}
-                    className="text-primary hover:underline font-semibold flex items-center gap-1"
-                  >
-                    <Ruler className="w-3.5 h-3.5" />
-                    <span>Size Guide</span>
-                  </button>
-                )}
               </div>
 
               {sizeInfo.isAdjustableOnly ? (
@@ -438,7 +459,7 @@ ${greetingMessage}
                         <span>⚠️ {effectiveSize} is Currently Out of Stock</span>
                       </div>
                       <p className="text-[11px] text-amber-800 leading-snug">
-                        We don't have units of this size in stock right now. Please select an available size above, or click below to chat with us on WhatsApp for size restock & custom orders.
+                        We don't have units of this size in stock right now. Please select an available size above.
                       </p>
                     </div>
                   ) : (
@@ -454,8 +475,8 @@ ${greetingMessage}
                     <Sparkles className="w-3 h-3 text-primary flex-shrink-0" />
                     <span>
                       {sizeInfo.type === "ring"
-                        ? "Alnaya cm sizing (5cm = Size 5, 6cm = Size 7). Need help? Open our interactive Size Guide."
-                        : "Standard Indian Bangle sizing (2-2 to 2-10). Check inner diameter in Size Guide."}
+                        ? "Alnaya standard ring sizing (Sizes 5 to 10)."
+                        : "Standard Indian Bangle sizing (Sizes 2-2 to 2-10)."}
                     </span>
                   </p>
                 </div>
@@ -561,29 +582,33 @@ ${greetingMessage}
 
             {/* CTA Buttons */}
             <div className="space-y-3 pt-4">
+              {/* Buy Now (Direct Express Checkout) */}
               <button
                 type="button"
-                onClick={handleDirectWhatsAppOrder}
-                className="w-full py-4 px-6 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.99]"
+                disabled={isOutOfStock}
+                onClick={handleBuyNow}
+                className="w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <MessageCircle className="w-5 h-5 fill-current" />
+                <Lock className="w-4 h-4 text-accent" />
                 <span>
                   {isCurrentSizeOutOfStock
-                    ? `Inquire About ${effectiveSize} Restock on WhatsApp`
+                    ? `${effectiveSize} Out of Stock`
                     : isOverallOutOfStock
-                    ? "Inquire Availability on WhatsApp"
-                    : "Instant Order on WhatsApp"}
+                    ? "Currently Out of Stock"
+                    : "Buy Now • Instant Checkout"}
                 </span>
+                <ArrowRight className="w-4 h-4" />
               </button>
 
+              {/* Add to Bag */}
               <button
                 type="button"
                 disabled={isOutOfStock}
                 onClick={handleAddToCart}
-                className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed ${
+                className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed border-2 ${
                   isAdded
-                    ? "bg-emerald-600 text-white border-2 border-emerald-600 shadow-md"
-                    : "bg-card border-2 border-primary text-primary hover:bg-primary/5"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
+                    : "bg-card border-primary text-primary hover:bg-primary/5"
                 }`}
               >
                 {isAdded ? (
@@ -594,13 +619,7 @@ ${greetingMessage}
                 ) : (
                   <>
                     <ShoppingBag className="w-4 h-4" />
-                    <span>
-                      {isCurrentSizeOutOfStock
-                        ? `${effectiveSize} Out of Stock`
-                        : isOverallOutOfStock
-                        ? "Out of Stock"
-                        : "Add to Shopping Bag"}
-                    </span>
+                    <span>Add to Shopping Bag</span>
                   </>
                 )}
               </button>
@@ -641,14 +660,6 @@ ${greetingMessage}
 
             {/* Quick Policies Navigation Links */}
             <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
-              <button
-                type="button"
-                onClick={() => setPolicyModalTab("size-guide")}
-                className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 font-medium"
-              >
-                <Ruler className="w-3.5 h-3.5 text-primary" />
-                <span>Size Guide</span>
-              </button>
               <button
                 type="button"
                 onClick={() => setPolicyModalTab("return-refund")}
@@ -776,39 +787,39 @@ ${greetingMessage}
           const maxStock = product.inStock !== false ? Math.max(0, product.stockCount !== undefined ? product.stockCount : 10) : 0;
           const isOutOfStock = maxStock <= 0;
           return (
-            <>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={isOutOfStock}
                 onClick={handleAddToCart}
-                className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+                className={`py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed border-2 ${
                   isAdded
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-card border-2 border-primary text-primary"
+                    ? "bg-emerald-600 text-white shadow-sm border-emerald-600"
+                    : "bg-card border-primary text-primary"
                 }`}
               >
                 {isAdded ? <CheckCircle2 className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
-                <span>{isAdded ? "Added!" : isOutOfStock ? "Out of Stock" : "Bag"}</span>
+                <span>{isAdded ? "Added!" : "Bag"}</span>
               </button>
               <button
                 type="button"
                 disabled={isOutOfStock}
-                onClick={handleDirectWhatsAppOrder}
-                className="py-2.5 px-3.5 rounded-xl bg-[#25D366] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={handleBuyNow}
+                className="py-2.5 px-4 rounded-xl bg-primary text-primary-foreground font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <MessageCircle className="w-4 h-4 fill-current" />
-                <span>{isOutOfStock ? "Sold Out" : "WhatsApp"}</span>
+                <span>{isOutOfStock ? "Out of Stock" : "Buy Now"}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
-            </>
+            </div>
           );
         })()}
       </div>
 
-      {/* Interactive Policy & Size Guide Modal */}
+      {/* Interactive Policy Modal */}
       <PolicyModal
         isOpen={!!policyModalTab}
         onClose={() => setPolicyModalTab(null)}
-        initialTab={policyModalTab || "size-guide"}
+        initialTab={policyModalTab || "care-guide"}
       />
     </div>
   );

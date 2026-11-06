@@ -273,6 +273,8 @@ export default function AdminDashboardPage() {
     shortDescription: string;
     description: string;
     imageUrl: string;
+    images: string[];
+    newImageUrlInput: string;
     featured: boolean;
     isBestSeller: boolean;
     isNewArrival: boolean;
@@ -290,6 +292,8 @@ export default function AdminDashboardPage() {
     shortDescription: "",
     description: "",
     imageUrl: "",
+    images: [],
+    newImageUrlInput: "",
     featured: false,
     isBestSeller: false,
     isNewArrival: true,
@@ -1788,7 +1792,9 @@ https://alnaya.in/products`;
       stockCount: "10",
       shortDescription: "",
       description: "",
-      imageUrl: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800",
+      imageUrl: "",
+      images: [],
+      newImageUrlInput: "",
       featured: false,
       isBestSeller: false,
       isNewArrival: true,
@@ -1855,6 +1861,10 @@ https://alnaya.in/products`;
       }
     });
 
+    const existingImages = Array.isArray(product.images) && product.images.length > 0
+      ? [...product.images]
+      : ((product as any).imageUrl ? [(product as any).imageUrl] : []);
+
     setFormState({
       title: product.title,
       category: product.category,
@@ -1865,7 +1875,9 @@ https://alnaya.in/products`;
       stockCount: product.stockCount.toString(),
       shortDescription: product.shortDescription,
       description: product.description,
-      imageUrl: product.images[0] || "",
+      imageUrl: existingImages[0] || "",
+      images: existingImages,
+      newImageUrlInput: "",
       featured: !!product.featured,
       isBestSeller: !!product.isBestSeller,
       isNewArrival: !!product.isNewArrival,
@@ -1883,22 +1895,80 @@ https://alnaya.in/products`;
   };
 
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (file.size > 25 * 1024 * 1024) {
-      alert("Image is larger than 25MB. Please choose a smaller image.");
-      return;
-    }
-
+    setIsUploading(true);
     try {
-      const publicUrl = await uploadFileToServer(file, "images");
-      setFormState((prev) => ({ ...prev, imageUrl: publicUrl }));
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 25 * 1024 * 1024) {
+          alert(`Image "${file.name}" is larger than 25MB. Skipped.`);
+          continue;
+        }
+        setUploadProgressText(`Uploading ${i + 1} of ${files.length}: ${file.name}...`);
+        const publicUrl = await uploadFileToServer(file, "images");
+        if (publicUrl) {
+          uploadedUrls.push(publicUrl);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setFormState((prev) => {
+          const combined = [...prev.images, ...uploadedUrls];
+          return {
+            ...prev,
+            images: combined,
+            imageUrl: combined[0] || prev.imageUrl,
+          };
+        });
+      }
     } catch (err: any) {
       alert("Error uploading image: " + (err.message || "Upload failed"));
     } finally {
+      setIsUploading(false);
+      setUploadProgressText("");
       e.target.value = "";
     }
+  };
+
+  const handleAddImageUrl = () => {
+    const url = formState.newImageUrlInput.trim();
+    if (!url) return;
+    setFormState((prev) => {
+      const combined = [...prev.images, url];
+      return {
+        ...prev,
+        images: combined,
+        newImageUrlInput: "",
+        imageUrl: combined[0] || prev.imageUrl,
+      };
+    });
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setFormState((prev) => {
+      const updated = prev.images.filter((_, idx) => idx !== indexToRemove);
+      return {
+        ...prev,
+        images: updated,
+        imageUrl: updated[0] || "",
+      };
+    });
+  };
+
+  const handleSetCoverImage = (indexToCover: number) => {
+    setFormState((prev) => {
+      const target = prev.images[indexToCover];
+      const remaining = prev.images.filter((_, idx) => idx !== indexToCover);
+      const reordered = [target, ...remaining];
+      return {
+        ...prev,
+        images: reordered,
+        imageUrl: target,
+      };
+    });
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -1977,6 +2047,14 @@ https://alnaya.in/products`;
         }
       }
 
+      const finalImages = formState.images.filter((img) => img && img.trim().length > 0);
+      if (finalImages.length === 0 && formState.imageUrl) {
+        finalImages.push(formState.imageUrl);
+      }
+      if (finalImages.length === 0) {
+        finalImages.push("https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800");
+      }
+
       if (editingProduct) {
         // Update existing product in DB and Store
         await updateProduct(editingProduct.id, {
@@ -1990,7 +2068,7 @@ https://alnaya.in/products`;
           inStock: finalStockCount > 0,
           shortDescription: formState.shortDescription || formState.title,
           description: formState.description || formState.title,
-          images: [formState.imageUrl],
+          images: finalImages,
           featured: formState.featured,
           isBestSeller: formState.isBestSeller,
           isNewArrival: formState.isNewArrival,
@@ -2019,7 +2097,7 @@ https://alnaya.in/products`;
           inStock: finalStockCount > 0,
           shortDescription: formState.shortDescription || formState.title,
           description: formState.description || formState.title,
-          images: [formState.imageUrl],
+          images: finalImages,
           tags: [formState.category, "New"],
           rating: 5,
           reviewCount: 0,
@@ -4014,52 +4092,7 @@ https://alnaya.in/products`;
                   </div>
                 </div>
 
-                {/* Bangle Size Guide */}
-                <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-foreground">Bangle Size Guide Diagram</span>
-                      <button
-                        type="button"
-                        onClick={() => handleResetSiteImage("bangleSizeGuide")}
-                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
-                      >
-                        Reset
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      Sizing chart diagram shown in product size guide modals.
-                    </p>
-                  </div>
 
-                  <div className="relative aspect-video max-h-[140px] w-full bg-stone-100 rounded-xl overflow-hidden border border-border">
-                    <img
-                      src={localSiteImages.bangleSizeGuide || "/images/bangle-size-guide.jpg"}
-                      alt="Size Guide Preview"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="site-img-bangleSizeGuide"
-                      className="w-full py-2 px-3 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-foreground"
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>Upload Sizing Chart</span>
-                    </label>
-                    <input
-                      id="site-img-bangleSizeGuide"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleSiteImageUpload("bangleSizeGuide", file);
-                      }}
-                    />
-                  </div>
-                </div>
 
                 {/* Return Policy Visual */}
                 <div className="bg-muted/20 border border-border/80 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
@@ -4563,71 +4596,122 @@ https://alnaya.in/products`;
                 </div>
               </div>
 
-              {/* Product Image (Upload from Device or Web URL) */}
-              <div className="space-y-2 border border-border p-3.5 rounded-xl bg-muted/20">
+              {/* Product Photos (Multiple Upload from Device or Web URLs) */}
+              <div className="space-y-3 border border-border p-3.5 rounded-xl bg-muted/20">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                     <ImageIcon className="w-3.5 h-3.5 text-primary" />
-                    <span>Product Image *</span>
+                    <span>Product Photos ({formState.images.length}) *</span>
                   </label>
-                  <span className="text-[11px] text-muted-foreground">Auto-compressed to fast web format</span>
+                  <span className="text-[11px] text-muted-foreground">Select multiple photos or add URLs</span>
                 </div>
 
                 {isUploading && (
                   <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-medium flex items-center gap-2 animate-pulse">
                     <Clock className="w-3.5 h-3.5 animate-spin shrink-0" />
-                    <span>{uploadProgressText || "Optimizing and uploading photo..."}</span>
+                    <span>{uploadProgressText || "Optimizing and uploading photos..."}</span>
                   </div>
                 )}
 
-                {/* File picker */}
+                {/* File picker for MULTIPLE files */}
                 <div>
                   <label
                     htmlFor="admin-file-upload"
-                    className={`w-full px-3 py-2.5 rounded-lg border border-dashed border-border hover:border-primary bg-background hover:bg-muted/40 cursor-pointer flex items-center justify-center gap-2 text-xs font-medium text-foreground transition-colors ${
+                    className={`w-full px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary bg-background hover:bg-muted/40 cursor-pointer flex items-center justify-center gap-2 text-xs font-bold text-foreground transition-all shadow-sm ${
                       isUploading ? "opacity-50 pointer-events-none" : ""
                     }`}
                   >
                     <Upload className="w-4 h-4 text-primary" />
-                    <span>Choose Photo from Device / Phone</span>
+                    <span>Choose Photos from Device (Select Multiple)</span>
                   </label>
                   <input
                     id="admin-file-upload"
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleImageFileUpload}
                     className="hidden"
                   />
                 </div>
 
+                {/* Paste public image URL */}
                 <div className="space-y-1">
-                  <label className="text-[11px] text-muted-foreground">Or paste public Image URL:</label>
-                  <input
-                    type="url"
-                    placeholder="https://... or bucket link"
-                    value={formState.imageUrl.startsWith("data:") ? "" : formState.imageUrl}
-                    onChange={(e) => setFormState({ ...formState, imageUrl: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
-                  />
+                  <label className="text-[11px] text-muted-foreground">Or add Image URL directly:</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="url"
+                      placeholder="https://... image link"
+                      value={formState.newImageUrlInput || ""}
+                      onChange={(e) => setFormState({ ...formState, newImageUrlInput: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddImageUrl();
+                        }
+                      }}
+                      className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      className="px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold hover:bg-muted border border-border"
+                    >
+                      Add URL
+                    </button>
+                  </div>
                 </div>
 
-                {/* Preview Thumbnail */}
-                {formState.imageUrl && (
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="w-16 h-20 rounded-md overflow-hidden border border-border bg-card">
-                      <img src={formState.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                {/* Gallery Grid Preview */}
+                {formState.images && formState.images.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-border/80">
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
+                      <span>Uploaded Photos ({formState.images.length})</span>
+                      <span>The 1st photo is used as main catalog cover</span>
                     </div>
-                    <div className="text-xs space-y-1">
-                      <p className="font-medium text-foreground">
-                        {formState.imageUrl.startsWith("data:") ? "Photo Selected ✓" : "Web URL Linked ✓"}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setFormState({ ...formState, imageUrl: "" })}
-                        className="text-[11px] text-red-600 hover:underline"
-                      >
-                        Remove Photo
-                      </button>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {formState.images.map((imgUrl, idx) => (
+                        <div
+                          key={idx}
+                          className={`relative group rounded-xl overflow-hidden border-2 bg-card p-1 aspect-square flex flex-col items-center justify-center ${
+                            idx === 0 ? "border-primary shadow-sm" : "border-border/80"
+                          }`}
+                        >
+                          <img
+                            src={imgUrl}
+                            alt={`Product photo ${idx + 1}`}
+                            className="w-full h-full object-contain rounded-lg"
+                          />
+
+                          {/* Badge for cover photo */}
+                          {idx === 0 && (
+                            <span className="absolute top-1.5 left-1.5 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary text-primary-foreground shadow">
+                              Cover
+                            </span>
+                          )}
+
+                          {/* Actions overlay */}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1 rounded-lg">
+                            {idx !== 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleSetCoverImage(idx)}
+                                className="text-[10px] font-bold text-white bg-primary/90 hover:bg-primary px-2 py-0.5 rounded shadow"
+                              >
+                                Set Cover
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(idx)}
+                              className="text-[10px] font-bold text-rose-300 hover:text-white bg-rose-900/80 hover:bg-rose-700 px-2 py-0.5 rounded flex items-center gap-1 shadow"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

@@ -121,14 +121,6 @@ export function Footer() {
             <ul className="space-y-2 text-xs sm:text-[13px] text-stone-400">
               <li>
                 <button
-                  onClick={() => setPolicyModalTab("size-guide")}
-                  className="hover:text-white transition-colors text-left"
-                >
-                  Bangle & Ring Size Guide
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => setPolicyModalTab("care-guide")}
                   className="hover:text-white transition-colors text-left"
                 >
@@ -224,7 +216,7 @@ export function Footer() {
       <PolicyModal
         isOpen={!!policyModalTab}
         onClose={() => setPolicyModalTab(null)}
-        initialTab={policyModalTab || "size-guide"}
+        initialTab={policyModalTab || "care-guide"}
       />
     </footer>
   );
