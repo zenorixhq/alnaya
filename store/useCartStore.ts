@@ -193,25 +193,16 @@ export const useCartStore = create<CartStore>()(
       },
 
       getShippingFee: (stateParam?: string) => {
-        // =========================================================================
-        // TEMPORARY OVERRIDE: Shipping charges commented out for now.
-        // Returns 0 so all orders have free delivery.
-        // To re-enable, remove 'return 0;' and uncomment the logic below.
-        // =========================================================================
-        return 0;
-
-        /* --- UNCOMMENT BELOW TO RE-ENABLE DELIVERY CHARGES ---
         const subtotal = get().getSubtotal();
         if (subtotal === 0) return 0;
         const threshold = storeConfig.commerce.freeShippingThreshold;
-        if (subtotal >= threshold) return 0;
+        if (threshold && subtotal >= threshold) return 0;
 
         const state = (stateParam || get().shippingState || "Kerala").trim().toLowerCase();
-        const isKerala = state === "kerala";
+        const isKerala = state === "kerala" || state === "kl";
         return isKerala
           ? (storeConfig.commerce.shippingFeeKerala ?? 50)
           : (storeConfig.commerce.shippingFeeOutsideKerala ?? 60);
-        --- END OF DELIVERY CHARGE LOGIC --- */
       },
 
       getTaxAmount: () => {
