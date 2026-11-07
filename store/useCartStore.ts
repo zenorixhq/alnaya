@@ -27,6 +27,7 @@ interface CartStore {
   setCurrency: (code: string) => void;
   applyCoupon: (code: string) => { success: boolean; message: string };
   removeCoupon: () => void;
+  autoApplyFirstPurchaseCoupon: () => void;
 
   // Quick View
   openQuickView: (product: Product) => void;
@@ -91,6 +92,7 @@ export const useCartStore = create<CartStore>()(
           };
           set({ items: [...currentItems, newItem], isCartOpen: true });
         }
+        get().autoApplyFirstPurchaseCoupon();
       },
 
       removeItem: (itemId) => {
@@ -158,7 +160,7 @@ export const useCartStore = create<CartStore>()(
           if (hasPurchased || (placedOrders && JSON.parse(placedOrders || "[]").length > 0)) {
             return {
               success: false,
-              message: `Promo code ${found.code} is valid only on your first purchase.`,
+              message: `Promo code ${found.code} is valid only on your first purchase. Standard amount applies.`,
             };
           }
         }
@@ -173,6 +175,29 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeCoupon: () => set({ appliedCoupon: null }),
+
+      autoApplyFirstPurchaseCoupon: () => {
+        if (typeof window === "undefined") return;
+        const hasPurchased = localStorage.getItem("alnaya_has_purchased") === "true";
+        const placedOrders = localStorage.getItem("alnaya_placed_orders");
+        const isReturning = hasPurchased || (placedOrders && JSON.parse(placedOrders || "[]").length > 0);
+
+        if (isReturning) {
+          if (get().appliedCoupon?.firstPurchaseOnly) {
+            set({ appliedCoupon: null });
+          }
+          return;
+        }
+
+        if (!get().appliedCoupon) {
+          const firstCoupon = storeConfig.commerce.activeCoupons.find(
+            (c) => c.code === "ALNAYA5" || c.firstPurchaseOnly
+          );
+          if (firstCoupon) {
+            set({ appliedCoupon: firstCoupon });
+          }
+        }
+      },
 
       openQuickView: (product) => set({ quickViewProduct: product }),
       closeQuickView: () => set({ quickViewProduct: null }),

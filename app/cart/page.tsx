@@ -209,7 +209,11 @@ export default function CartPage() {
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-emerald-600 font-medium">
-                <span>Discount ({appliedCoupon?.code})</span>
+                <span>
+                  {appliedCoupon?.firstPurchaseOnly
+                    ? `First Order Offer (5% - ${appliedCoupon.code})`
+                    : `Discount (${appliedCoupon?.code})`}
+                </span>
                 <span>-{formatPrice(discount, selectedCurrency)}</span>
               </div>
             )}

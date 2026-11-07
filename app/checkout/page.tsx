@@ -43,6 +43,7 @@ export default function CheckoutPage() {
   const appliedCoupon = useCartStore((s) => s.appliedCoupon);
   const applyCoupon = useCartStore((s) => s.applyCoupon);
   const removeCoupon = useCartStore((s) => s.removeCoupon);
+  const autoApplyFirstPurchaseCoupon = useCartStore((s) => s.autoApplyFirstPurchaseCoupon);
 
   const [couponCode, setCouponCode] = useState("");
   const [couponMsg, setCouponMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -62,7 +63,52 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Check local storage purchase status on load
+    const hasPurchased = typeof window !== "undefined" && localStorage.getItem("alnaya_has_purchased") === "true";
+    if (hasPurchased) {
+      if (appliedCoupon?.firstPurchaseOnly) {
+        removeCoupon();
+      }
+    } else {
+      autoApplyFirstPurchaseCoupon();
+    }
+  }, [appliedCoupon, autoApplyFirstPurchaseCoupon, removeCoupon]);
+
+  // Real-time verification: check phone and email against previous database orders
+  useEffect(() => {
+    const cleanPhone = formData.phone.replace(/\D/g, "");
+    const email = formData.email.trim();
+
+    if (cleanPhone.length >= 10 || (email.length > 5 && email.includes("@"))) {
+      const params = new URLSearchParams();
+      params.set("checkFirstPurchase", "true");
+      if (cleanPhone.length >= 10) params.set("phone", cleanPhone);
+      if (email.includes("@")) params.set("email", email);
+
+      fetch(`/api/orders?${params.toString()}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.isFirstPurchase === false) {
+            // Returning customer: already ordered before in database
+            localStorage.setItem("alnaya_has_purchased", "true");
+            if (appliedCoupon?.firstPurchaseOnly) {
+              removeCoupon();
+              setCouponMsg({
+                type: "error",
+                text: "Welcome back! The 5% first-purchase offer was already redeemed on an earlier order. Standard order amount applies.",
+              });
+            }
+          } else if (data && data.isFirstPurchase === true) {
+            // First time purchase confirmed
+            const localHasPurchased = typeof window !== "undefined" && localStorage.getItem("alnaya_has_purchased") === "true";
+            if (!localHasPurchased && !appliedCoupon) {
+              autoApplyFirstPurchaseCoupon();
+            }
+          }
+        })
+        .catch((err) => console.warn("Check first purchase error:", err));
+    }
+  }, [formData.phone, formData.email, appliedCoupon, autoApplyFirstPurchaseCoupon, removeCoupon]);
 
   const subtotal = useCartStore((s) => s.getSubtotal)();
   const discount = useCartStore((s) => s.getDiscountAmount)();
@@ -94,9 +140,32 @@ export default function CheckoutPage() {
     );
   }
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!couponCode.trim()) return;
+
+    const cleanCode = couponCode.trim().toUpperCase();
+    const isFirstOrderCode = cleanCode === "ALNAYA5" || cleanCode === "WELCOME5";
+
+    // If first-purchase coupon, verify with database if phone or email is filled
+    const cleanPhone = formData.phone.replace(/\D/g, "");
+    if (isFirstOrderCode && cleanPhone.length >= 10) {
+      try {
+        const checkRes = await fetch(`/api/orders?checkFirstPurchase=true&phone=${cleanPhone}`);
+        const checkData = await checkRes.json();
+        if (checkData && checkData.isFirstPurchase === false) {
+          localStorage.setItem("alnaya_has_purchased", "true");
+          setCouponMsg({
+            type: "error",
+            text: `Promo code ${cleanCode} is valid only on your first purchase. Standard amount applies.`,
+          });
+          return;
+        }
+      } catch (err) {
+        // Proceed with client check
+      }
+    }
+
     const res = applyCoupon(couponCode);
     if (res.success) {
       setCouponMsg({ type: "success", text: res.message });
@@ -635,14 +704,26 @@ export default function CheckoutPage() {
                   )}
 
                   {appliedCoupon && (
-                    <div className="mt-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
-                      <span className="font-bold text-emerald-700 flex items-center gap-1">
-                        <Tag className="w-3.5 h-3.5" /> {appliedCoupon.code} applied
-                      </span>
+                    <div className="mt-2 p-2.5 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 text-primary font-semibold">
+                        <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
+                        <div>
+                          <span>
+                            {appliedCoupon.firstPurchaseOnly
+                              ? `First Purchase Offer (${appliedCoupon.amount}% OFF - ${appliedCoupon.code})`
+                              : `${appliedCoupon.code} applied`}
+                          </span>
+                          {appliedCoupon.firstPurchaseOnly && (
+                            <p className="text-[10px] text-muted-foreground font-normal">
+                              Valid on your first order. Subsequent orders will be at standard amount.
+                            </p>
+                          )}
+                        </div>
+                      </div>
                       <button
                         type="button"
                         onClick={removeCoupon}
-                        className="text-[10px] text-destructive hover:underline font-semibold"
+                        className="text-[10px] text-destructive hover:underline font-semibold ml-2 shrink-0"
                       >
                         Remove
                       </button>
@@ -659,7 +740,11 @@ export default function CheckoutPage() {
 
                   {discount > 0 && (
                     <div className="flex justify-between text-emerald-600 font-medium">
-                      <span>Discount ({appliedCoupon?.code})</span>
+                      <span>
+                        {appliedCoupon?.firstPurchaseOnly
+                          ? `First Order Offer (5% - ${appliedCoupon.code})`
+                          : `Discount (${appliedCoupon?.code})`}
+                      </span>
                       <span>-{formatPrice(discount)}</span>
                     </div>
                   )}

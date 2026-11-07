@@ -10,14 +10,31 @@ export async function GET(req: Request) {
     const checkFirst = searchParams.get("checkFirstPurchase") || searchParams.get("firstPurchaseOnly");
 
     // 1. Coupon validation: Check if customer is making their first purchase
-    if (checkFirst === "true" && phone) {
-      const cleanPhone = phone.replace(/[^0-9]/g, "");
-      if (cleanPhone.length >= 7) {
-        const existingOrder = await prisma.order.findFirst({
-          where: {
+    if (checkFirst === "true") {
+      const cleanPhone = (phone || "").replace(/[^0-9]/g, "");
+      const email = searchParams.get("email")?.trim().toLowerCase();
+
+      if (cleanPhone.length >= 7 || (email && email.includes("@"))) {
+        const orConditions: any[] = [];
+        if (cleanPhone.length >= 7) {
+          orConditions.push({
             customerPhone: {
               contains: cleanPhone.slice(-8),
             },
+          });
+        }
+        if (email && email.includes("@")) {
+          orConditions.push({
+            customerEmail: {
+              equals: email,
+              mode: "insensitive",
+            },
+          });
+        }
+
+        const existingOrder = await prisma.order.findFirst({
+          where: {
+            OR: orConditions,
           },
         });
         return NextResponse.json({ isFirstPurchase: !existingOrder });

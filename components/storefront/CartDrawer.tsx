@@ -214,8 +214,12 @@ export function CartDrawer() {
                 {appliedCoupon ? (
                   <div className="flex items-center justify-between bg-primary/10 border border-primary/20 px-3 py-2 rounded-lg text-xs">
                     <div className="flex items-center gap-2 text-primary font-semibold">
-                      <Tag className="w-3.5 h-3.5" />
-                      <span>{appliedCoupon.code} ({appliedCoupon.amount}{appliedCoupon.discountType === "percentage" ? "% OFF" : " OFF"}{appliedCoupon.firstPurchaseOnly ? " - First Order" : ""})</span>
+                      <Sparkles className="w-3.5 h-3.5 text-accent" />
+                      <span>
+                        {appliedCoupon.firstPurchaseOnly
+                          ? `${appliedCoupon.code} (5% First Purchase Offer)`
+                          : `${appliedCoupon.code} applied`}
+                      </span>
                     </div>
                     <button
                       onClick={removeCoupon}
@@ -263,7 +267,11 @@ export function CartDrawer() {
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium">
-                    <span>Coupon Discount</span>
+                    <span>
+                      {appliedCoupon?.firstPurchaseOnly
+                        ? `First Order Offer (5% - ${appliedCoupon.code})`
+                        : `Coupon Discount (${appliedCoupon?.code})`}
+                    </span>
                     <span>-{formatPrice(discount)}</span>
                   </div>
                 )}
