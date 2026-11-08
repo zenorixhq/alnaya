@@ -13,28 +13,68 @@ export function WebsiteLoadingAnimation() {
     const hasSeen = typeof window !== "undefined" && sessionStorage.getItem("alnaya_intro_shown");
     if (hasSeen) {
       setIsVisible(false);
+      try {
+        document.documentElement.classList.add("alnaya-intro-complete");
+      } catch (e) {}
       return;
     }
 
-    // Sequence the luxury intro animation:
-    // 0ms - 900ms: Brand monogram glow, letters reveal, gold accent line expands
-    // 900ms: Begin graceful fade-out
-    // 1450ms: Remove completely from DOM
-    const fadeTimer = setTimeout(() => {
-      setIsFading(true);
-    }, 900);
+    // Preload high-definition hero images in background cache while splash is shown
+    if (typeof window !== "undefined") {
+      const preloadDesktop = new Image();
+      preloadDesktop.src = "/images/founder-aleena-saree-hero-hd.png";
+      const preloadMobile = new Image();
+      preloadMobile.src = "/images/founder-aleena-mobile-hd.png";
+    }
 
-    const removeTimer = setTimeout(() => {
-      setIsVisible(false);
-      try {
-        sessionStorage.setItem("alnaya_intro_shown", "true");
-      } catch (e) {}
-    }, 1450);
+    const startTime = Date.now();
+    const MIN_SPLASH_TIME = 950; // Guaranteed window for luxury monogram & expanding gold line
+    let completed = false;
 
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(removeTimer);
+    const revealPage = () => {
+      if (completed) return;
+      completed = true;
+
+      const elapsed = Date.now() - startTime;
+      const waitRemaining = Math.max(0, MIN_SPLASH_TIME - elapsed);
+
+      // Trigger fade out after home page is confirmed ready & minimum animation time met
+      const fadeTimer = setTimeout(() => {
+        setIsFading(true);
+        try {
+          sessionStorage.setItem("alnaya_intro_shown", "true");
+          document.documentElement.classList.add("alnaya-intro-complete");
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent("alnaya:intro-ready"));
+      }, waitRemaining);
+
+      // Cleanly unmount splash from DOM after smooth 700ms dissolution
+      const removeTimer = setTimeout(() => {
+        setIsVisible(false);
+      }, waitRemaining + 700);
+
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(removeTimer);
+      };
     };
+
+    // If window is already loaded, proceed with minimum display time
+    if (document.readyState === "complete") {
+      const cleanup = revealPage();
+      return () => {
+        if (cleanup) cleanup();
+      };
+    } else {
+      window.addEventListener("load", revealPage, { once: true });
+      // Safety failsafe so user is never locked out on slow or stalled networks
+      const safetyTimer = setTimeout(revealPage, 2400);
+
+      return () => {
+        window.removeEventListener("load", revealPage);
+        clearTimeout(safetyTimer);
+      };
+    }
   }, []);
 
   if (!isVisible) return null;
