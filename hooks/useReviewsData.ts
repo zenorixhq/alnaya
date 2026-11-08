@@ -94,17 +94,12 @@ export function useReviewsData() {
   const [data, setData] = useState<ReviewsData>(() => getInitialReviews());
   const hasMounted = useRef(false);
 
-  const fetchFreshReviews = useCallback(async () => {
+  const fetchFreshReviews = useCallback(async (force = false) => {
     if (!inFlightFetch) {
       inFlightFetch = (async () => {
         try {
-          const res = await fetch(`/api/reviews?t=${Date.now()}`, {
-            cache: "no-store",
-            headers: {
-              Pragma: "no-cache",
-              "Cache-Control": "no-cache",
-            },
-          });
+          const url = force ? `/api/reviews?t=${Date.now()}` : "/api/reviews";
+          const res = await fetch(url);
           if (res.ok) {
             const json = await res.json();
             if (json && typeof json === "object") {

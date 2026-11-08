@@ -45,7 +45,7 @@ interface ProductStore {
   isLoading: boolean;
   hasLoaded: boolean;
   error: string | null;
-  fetchProducts: () => Promise<void>;
+  fetchProducts: (force?: boolean) => Promise<void>;
   addProduct: (product: Omit<Product, "id" | "createdAt" | "updatedAt">) => Promise<Product | null>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<Product | null>;
   deleteProduct: (id: string) => Promise<boolean>;
@@ -61,12 +61,13 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   hasLoaded: initial.hasLoaded,
   error: null,
 
-  fetchProducts: async () => {
+  fetchProducts: async (force = false) => {
     try {
       if (get().products.length === 0) {
         set({ isLoading: true });
       }
-      const res = await fetch(`/api/products?t=${Date.now()}`, { cache: "no-store" });
+      const url = force ? `/api/products?t=${Date.now()}` : "/api/products";
+      const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
       if (Array.isArray(data)) {

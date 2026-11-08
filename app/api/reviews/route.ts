@@ -9,9 +9,7 @@ export const runtime = "nodejs";
 const dataFilePath = path.join(process.cwd(), "data", "clientReviews.json");
 
 const CACHE_HEADERS = {
-  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-  Pragma: "no-cache",
-  Expires: "0",
+  "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
 };
 
 const NO_CACHE_HEADERS = {

@@ -400,7 +400,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchProducts();
+      fetchProducts(true);
       fetchReviewsAndVideos();
       fetchCategories();
 

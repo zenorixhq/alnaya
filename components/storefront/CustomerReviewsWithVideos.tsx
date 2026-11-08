@@ -139,78 +139,20 @@ function VideoCardPreview({
   products?: any[];
   onClick: () => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMuted, setIsMuted] = useState(true);
   const productInfo = useMemo(() => resolveReelProduct(reel, products), [reel, products]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      },
-      { threshold: 0.2 }
-    );
-
-    observer.observe(video);
-    video.play().catch(() => {});
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [reel.videoUrl]);
-
-  const toggleSound = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const isDirectVideo =
-    reel.videoUrl &&
-    (reel.videoUrl.includes(".mp4") ||
-      reel.videoUrl.includes(".webm") ||
-      reel.videoUrl.includes("blob.vercel-storage.com") ||
-      reel.videoUrl.startsWith("/uploads/") ||
-      reel.videoUrl.startsWith("data:video") ||
-      reel.videoUrl.includes("assets.mixkit.co"));
 
   return (
     <div
       onClick={onClick}
       className="group relative w-[calc((100vw-42px)/2)] sm:w-[calc((100vw-56px)/3)] md:w-[30vw] lg:w-[24vw] xl:w-[20vw] flex-shrink-0 aspect-[9/15] snap-start rounded-xl sm:rounded-2xl overflow-hidden bg-stone-900 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-[#7E22CE] transition-all duration-300 ease-out cursor-pointer border border-[#EADBBE] select-none"
     >
-      {/* Video / Poster Media */}
-      {isDirectVideo ? (
-        <video
-          ref={videoRef}
-          src={reel.videoUrl}
-          poster={reel.poster}
-          autoPlay
-          loop
-          muted={isMuted}
-          playsInline
-          preload="metadata"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-        />
-      ) : (
-        <img
-          src={reel.poster}
-          alt={reel.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-          loading="lazy"
-        />
-      )}
+      {/* High performance lightweight poster preview (Zero video data consumed until clicked) */}
+      <img
+        src={reel.poster}
+        alt={reel.title}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+        loading="lazy"
+      />
 
       {/* Top Floating Badges */}
       <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10 pointer-events-none">
@@ -218,23 +160,12 @@ function VideoCardPreview({
           <Sparkles className="w-3 h-3 text-purple-400" />
           <span>Video Reel</span>
         </span>
-
-        {isDirectVideo && (
-          <button
-            type="button"
-            onClick={toggleSound}
-            className="w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur flex items-center justify-center text-white transition-all shadow pointer-events-auto"
-            title={isMuted ? "Unmute sound" : "Mute sound"}
-          >
-            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-amber-400" />}
-          </button>
-        )}
       </div>
 
-      {/* Center Hover Action */}
+      {/* Center Luxury Play Action Button */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 text-stone-900 flex items-center justify-center shadow-xl">
-          <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5 text-stone-900" />
+        <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:bg-[#7E22CE] group-hover:border-purple-300 transition-all duration-300">
+          <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5 text-white" />
         </div>
       </div>
 
