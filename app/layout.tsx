@@ -8,6 +8,7 @@ import { CartDrawer } from "@/components/storefront/CartDrawer";
 import { QuickViewModal } from "@/components/storefront/QuickViewModal";
 import { WhatsAppFloat } from "@/components/storefront/WhatsAppFloat";
 import { SmoothScrollProvider } from "@/components/storefront/SmoothScrollProvider";
+import { WebsiteLoadingAnimation } from "@/components/storefront/WebsiteLoadingAnimation";
 
 export const metadata: Metadata = {
   title: {
@@ -40,6 +41,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth" style={dynamicThemeStyles} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col font-sans bg-background text-foreground" suppressHydrationWarning>
         <SmoothScrollProvider>
+          <WebsiteLoadingAnimation />
           <AnnouncementBar />
           <Header />
           <main className="flex-1">{children}</main>

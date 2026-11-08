@@ -65,14 +65,14 @@ export default function HomePage() {
                 <Link
                   key={cat.id}
                   href={`/products?category=${cat.slug}`}
-                  className="group relative bg-[#FFFDF9] border border-[#EADBBE]/80 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 shadow-2xs hover:shadow-lg hover:border-[#7E22CE]/60 hover:-translate-y-1 transition-all duration-300 ease-out flex flex-col justify-between"
+                  className="group relative bg-[#FFFDF9] border border-[#EADBBE]/80 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 shadow-2xs hover:shadow-xl hover:border-[#7E22CE]/60 hover:-translate-y-1.5 transition-all duration-500 ease-out flex flex-col justify-between card-shine"
                 >
                   {/* Arched Top Silhouette Image Frame with compact viewport height */}
-                  <div className="w-full h-36 xs:h-40 sm:h-48 md:h-52 lg:h-56 rounded-t-[1.3rem] sm:rounded-t-[1.8rem] rounded-b-xl overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100">
+                  <div className="w-full h-36 xs:h-40 sm:h-48 md:h-52 lg:h-56 rounded-t-[1.3rem] sm:rounded-t-[1.8rem] rounded-b-xl overflow-hidden bg-[#FAF7F2] relative flex items-center justify-center border border-stone-100/80 shadow-2xs group-hover:shadow-md transition-shadow duration-500">
                     <img
                       src={cat.image}
                       alt={cat.name}
-                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                     />
                     {idx === 0 && (
                       <span className="absolute top-2 right-2 text-[8px] sm:text-[9px] font-bold bg-[#7E22CE] text-white px-2 py-0.5 rounded-full shadow-xs uppercase tracking-wider font-glacial">
