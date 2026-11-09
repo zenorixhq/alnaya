@@ -39,3 +39,4 @@ prisma/dev.db
 prisma/dev.db-journal
 *.db
 *.db-journal
+data/neon_backup.json
