@@ -9,10 +9,13 @@ import { AboutUsSection } from "@/components/storefront/AboutUsSection";
 import { BrandValueBadges } from "@/components/storefront/BrandValueBadges";
 import { CustomerReviewsWithVideos } from "@/components/storefront/CustomerReviewsWithVideos";
 import { FollowTheHouseSection } from "@/components/storefront/FollowTheHouseSection";
+import { useProductStore } from "@/store/useProductStore";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function HomePage() {
   const [categoryList, setCategoryList] = useState<Category[]>(categories);
+  const fetchProducts = useProductStore((s) => s.fetchProducts);
+  const productsLoaded = useProductStore((s) => s.hasLoaded);
 
   useEffect(() => {
     fetch(`/api/categories?t=${Date.now()}`)
@@ -23,7 +26,16 @@ export default function HomePage() {
         }
       })
       .catch(() => {});
-  }, []);
+
+    // Non-blocking background preload after initial page render
+    if (!productsLoaded) {
+      if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+        window.requestIdleCallback(() => fetchProducts());
+      } else {
+        setTimeout(() => fetchProducts(), 800);
+      }
+    }
+  }, [fetchProducts, productsLoaded]);
   return (
     <div className="w-full bg-[#FAF7F2] overflow-x-hidden font-glacial">
       {/* 1. Hero Section (Enclosed within entire screen window, full scroll) */}

@@ -64,6 +64,11 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   error: null,
 
   fetchProducts: async (force = false) => {
+    // If products are already in memory and fresh, skip redundant network fetch unless force=true
+    if (get().hasLoaded && get().products.length > 0 && !force) {
+      return;
+    }
+
     try {
       if (get().products.length === 0) {
         set({ isLoading: true });
