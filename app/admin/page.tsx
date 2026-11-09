@@ -349,7 +349,7 @@ export default function AdminDashboardPage() {
   };
 
   const fetchCategories = () => {
-    fetch("/api/categories")
+    fetch(`/api/categories?t=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {

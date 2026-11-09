@@ -132,7 +132,7 @@ function ProductCatalogContent() {
   // Sync with database on mount
   useEffect(() => {
     fetchProducts();
-    fetch("/api/categories")
+    fetch(`/api/categories?t=${Date.now()}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {

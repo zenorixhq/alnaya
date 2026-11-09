@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const CACHE_HEADERS = {
-  "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
 };
 
 const NO_CACHE_HEADERS = {
@@ -48,9 +48,11 @@ async function saveCategories(categoriesList: Category[]): Promise<boolean> {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const isForce = url.searchParams.has("t") || url.searchParams.has("force");
   const categoriesList = await getStoredCategories();
-  return NextResponse.json(categoriesList, { headers: CACHE_HEADERS });
+  return NextResponse.json(categoriesList, { headers: isForce ? NO_CACHE_HEADERS : CACHE_HEADERS });
 }
 
 export async function POST(req: Request) {

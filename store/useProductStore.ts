@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { Product } from "@/types/store";
 
-const STORAGE_KEY = "alnaya_catalog_live_v5";
+const STORAGE_KEY = "alnaya_catalog_live_v6";
 
 // Auto-purge obsolete and legacy catalog cache keys from previous versions
 if (typeof window !== "undefined") {
@@ -12,6 +12,8 @@ if (typeof window !== "undefined") {
     sessionStorage.removeItem("alnaya_products_catalog");
     sessionStorage.removeItem("alnaya_products_catalog_v2");
     sessionStorage.removeItem("alnaya_products_catalog_v3");
+    sessionStorage.removeItem("alnaya_catalog_live_v5");
+    sessionStorage.removeItem("alnaya_categories");
   } catch (e) {}
 }
 

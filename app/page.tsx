@@ -15,7 +15,7 @@ export default function HomePage() {
   const [categoryList, setCategoryList] = useState<Category[]>(categories);
 
   useEffect(() => {
-    fetch("/api/categories")
+    fetch(`/api/categories?t=${Date.now()}`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {

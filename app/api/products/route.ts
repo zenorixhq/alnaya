@@ -42,10 +42,20 @@ function formatProduct(p: any) {
 }
 
 const CACHE_HEADERS = {
-  "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
 };
 
-export async function GET() {
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const isForce = url.searchParams.has("t") || url.searchParams.has("force");
+  const headers = isForce ? NO_CACHE_HEADERS : CACHE_HEADERS;
+
   try {
     const dbProducts = await prisma.product.findMany({
       orderBy: [
@@ -59,18 +69,18 @@ export async function GET() {
       const sortedFallback = [...fallbackProducts].sort(
         (a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0)
       );
-      return NextResponse.json(sortedFallback, { headers: CACHE_HEADERS });
+      return NextResponse.json(sortedFallback, { headers });
     }
 
     // Format DB products into application Product interface
     const formatted = dbProducts.map(formatProduct);
-    return NextResponse.json(formatted, { headers: CACHE_HEADERS });
+    return NextResponse.json(formatted, { headers });
   } catch (err) {
     console.error("GET /api/products error:", err);
     const sortedFallback = [...fallbackProducts].sort(
       (a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0)
     );
-    return NextResponse.json(sortedFallback, { headers: CACHE_HEADERS });
+    return NextResponse.json(sortedFallback, { headers });
   }
 }
 
