@@ -2159,16 +2159,15 @@ https://alnaya.in/products`;
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                <span>Admin Username or Email</span>
-                <span className="text-[10px] text-muted-foreground font-mono">admin@alnaya.in</span>
+              <label className="text-xs font-semibold text-foreground">
+                Admin Username or Email
               </label>
               <div className="relative">
                 <input
                   type="text"
                   required
                   autoFocus
-                  placeholder="admin@alnaya.in"
+                  placeholder="Enter username or email"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 pl-10 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -2178,15 +2177,14 @@ https://alnaya.in/products`;
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                <span>Secret Password</span>
-                <span className="text-[10px] text-muted-foreground font-mono">alnaya@2026</span>
+              <label className="text-xs font-semibold text-foreground">
+                Password
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  placeholder="••••••••••••"
+                  placeholder="Enter password"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   className="w-full px-3.5 py-2.5 pl-10 pr-10 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none transition-all font-mono"
@@ -2856,16 +2854,15 @@ https://alnaya.in/products`;
                 </div>
               </div>
 
-              {/* Admin Portal Access Credentials */}
+              {/* Admin Portal Security */}
               <div className="p-5 rounded-xl bg-muted/30 border border-border space-y-3">
                 <div className="flex items-center gap-2 text-foreground font-bold text-xs uppercase tracking-wider">
-                  <KeyRound className="w-4 h-4 text-amber-600" />
-                  <span>Admin Access Credentials</span>
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Admin Session Security</span>
                 </div>
                 <div className="text-xs space-y-1.5 text-muted-foreground">
                   <p>Portal URL: <strong className="text-foreground font-mono">/admin</strong></p>
-                  <p>Username / Email: <strong className="text-foreground font-mono">admin@alnaya.in</strong> (or <span className="font-mono">admin</span>)</p>
-                  <p>Default Password: <strong className="text-foreground font-mono">alnaya@2026</strong></p>
+                  <p>Authentication: <strong className="text-emerald-700">Protected Administrator Session</strong></p>
                   <p>Session Security: <strong className="text-emerald-700">Encrypted Local Storage Authentication</strong></p>
                 </div>
               </div>
