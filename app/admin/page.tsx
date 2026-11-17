@@ -2683,15 +2683,64 @@ https://alnaya.in/products`;
                           {fullDisplayAddress}
                         </p>
                         {order.items && order.items.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {order.items.map((item: any, i: number) => (
-                              <span
-                                key={i}
-                                className="text-[10px] bg-background border border-border px-2 py-0.5 rounded text-foreground font-medium"
-                              >
-                                {item.quantity || 1}x {item.title || item.name}
-                              </span>
-                            ))}
+                          <div className="pt-2 space-y-1.5">
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                              Ordered Items ({order.items.length})
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {order.items.map((item: any, i: number) => {
+                                const itemImg =
+                                  item.image ||
+                                  (item.images && item.images[0]) ||
+                                  products.find((p) => p.id === item.productId || p.id === item.id || p.slug === item.slug)?.images?.[0] ||
+                                  "/images/about-model-necklace.jpg";
+                                const variantText = item.selectedVariant
+                                  ? typeof item.selectedVariant.options === "object"
+                                    ? Object.values(item.selectedVariant.options).join(" / ")
+                                    : String(item.selectedVariant.name || item.selectedVariant)
+                                  : null;
+
+                                return (
+                                  <div
+                                    key={i}
+                                    className="flex items-center gap-2.5 p-2 rounded-xl bg-background border border-border/80 shadow-xs"
+                                  >
+                                    <a
+                                      href={itemImg}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      title="Click to view full image"
+                                      className="relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-stone-100 dark:bg-stone-900 shrink-0 aspect-square group/img hover:border-primary transition-all cursor-zoom-in"
+                                    >
+                                      <img
+                                        src={itemImg}
+                                        alt={item.title || item.name || "Ordered product"}
+                                        className="w-full h-full object-cover group-hover/img:scale-105 transition-transform"
+                                        onError={(e) => {
+                                          (e.currentTarget as HTMLImageElement).src = "/images/about-model-necklace.jpg";
+                                        }}
+                                      />
+                                      <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[9px] font-bold px-1 rounded shadow-xs">
+                                        ×{item.quantity || 1}
+                                      </span>
+                                    </a>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-bold text-foreground truncate" title={item.title || item.name}>
+                                        {item.title || item.name}
+                                      </p>
+                                      {variantText && (
+                                        <p className="text-[10px] text-muted-foreground truncate">
+                                          Variant: {variantText}
+                                        </p>
+                                      )}
+                                      <p className="text-[11px] font-mono font-semibold text-primary">
+                                        {formatPrice((item.price || 0) * (item.quantity || 1))}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>
