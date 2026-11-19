@@ -218,6 +218,14 @@ export const useCartStore = create<CartStore>()(
       },
 
       getShippingFee: (stateParam?: string) => {
+        // =========================================================================
+        // TEMPORARY TEST OVERRIDE: Delivery charges disabled for payment testing (₹0).
+        // Returns 0 so all orders have free delivery during checkout & payment tests.
+        // To re-enable delivery charges, remove 'return 0;' and uncomment below.
+        // =========================================================================
+        return 0;
+
+        /* --- UNCOMMENT BELOW TO RE-ENABLE STANDARD DELIVERY CHARGES ---
         const subtotal = get().getSubtotal();
         if (subtotal === 0) return 0;
         const threshold = storeConfig.commerce.freeShippingThreshold;
@@ -228,6 +236,7 @@ export const useCartStore = create<CartStore>()(
         return isKerala
           ? (storeConfig.commerce.shippingFeeKerala ?? 50)
           : (storeConfig.commerce.shippingFeeOutsideKerala ?? 60);
+        --- END OF DELIVERY CHARGE LOGIC --- */
       },
 
       getTaxAmount: () => {
