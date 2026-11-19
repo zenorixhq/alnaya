@@ -236,26 +236,28 @@ function AccountPageContent() {
           orderMap.set(o.orderNumber.toUpperCase(), o);
         });
 
-        // 2. Add local storage orders (overriding seeds with actual user session data)
+        // 2. Add local storage orders (strictly paid/confirmed)
         localOrders.forEach((o) => {
-          if (o?.orderNumber) {
+          if (o?.orderNumber && (o.paymentStatus === "paid" || o.paymentStatus === "completed")) {
             orderMap.set(o.orderNumber.toUpperCase(), o);
           }
         });
 
-        // 3. Add API orders from database
+        // 3. Add API orders from database (strictly paid/confirmed)
         apiOrders.forEach((o) => {
-          if (o?.orderNumber) {
+          if (o?.orderNumber && (o.paymentStatus === "paid" || o.paymentStatus === "completed")) {
             orderMap.set(o.orderNumber.toUpperCase(), {
               ...o,
-              paymentStatus: o.paymentStatus || "paid",
+              paymentStatus: "paid",
             });
           }
         });
 
-        const mergedOrders = Array.from(orderMap.values()).sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+        const mergedOrders = Array.from(orderMap.values())
+          .filter((o) => o.paymentStatus === "paid" || o.paymentStatus === "completed")
+          .sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
 
         setOrders(mergedOrders);
 
@@ -271,8 +273,9 @@ function AccountPageContent() {
       } catch (err) {
         console.error("Failed to load orders:", err);
         // Fall back to local orders or seed
-        if (localOrders.length > 0) {
-          setOrders(localOrders);
+        const paidLocal = localOrders.filter((o) => o.paymentStatus === "paid" || o.paymentStatus === "completed");
+        if (paidLocal.length > 0) {
+          setOrders(paidLocal);
         } else {
           setOrders(VERIFIED_TEST_ORDERS);
         }
@@ -319,10 +322,11 @@ function AccountPageContent() {
 
       if (res.ok) {
         const found = await res.json();
-        if (Array.isArray(found) && found.length > 0) {
-          const newOrders = [...found, ...orders.filter((o) => !found.some((f) => f.orderNumber === o.orderNumber))];
+        const paidFound = Array.isArray(found) ? found.filter((f: any) => f.paymentStatus === "paid" || f.paymentStatus === "completed") : [];
+        if (paidFound.length > 0) {
+          const newOrders = [...paidFound, ...orders.filter((o) => !paidFound.some((f) => f.orderNumber === o.orderNumber))];
           setOrders(newOrders);
-          setLookupMessage({ text: `Successfully retrieved ${found.length} order(s)` });
+          setLookupMessage({ text: `Successfully retrieved ${paidFound.length} order(s)` });
 
           // Persist found orders locally
           try {

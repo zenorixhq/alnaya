@@ -123,5 +123,8 @@ export interface Order {
   grandTotal: number;
   couponCode?: string;
   paymentMethod: "card" | "cod" | "paypal" | "razorpay";
+  paymentStatus?: "paid" | "pending" | "failed" | string;
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
   trackingNumber?: string;
 }

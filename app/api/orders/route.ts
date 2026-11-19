@@ -35,6 +35,7 @@ export async function GET(req: Request) {
         const existingOrder = await prisma.order.findFirst({
           where: {
             OR: orConditions,
+            paymentStatus: { in: ["paid", "completed"] },
           },
         });
         return NextResponse.json({ isFirstPurchase: !existingOrder });
@@ -137,7 +138,16 @@ export async function GET(req: Request) {
     }
 
     // 2. Query filter for customer account or admin lookup
+    const includePending = searchParams.get("includePending") === "true";
     const whereClause: any = {};
+
+    // Keep pending rows in Neon DB, but only return confirmed paid orders to the website
+    // (admin fulfillment queue & customer orders page) unless includePending=true is explicitly requested
+    if (!includePending) {
+      whereClause.paymentStatus = {
+        in: ["paid", "completed"],
+      };
+    }
 
     if (phone) {
       const cleanPhone = phone.replace(/[^0-9]/g, "");

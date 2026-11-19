@@ -426,9 +426,10 @@ export default function AdminDashboardPage() {
     }
   }, [isAuthenticated, fetchProducts, fetchOrders]);
 
-  // Calculate high-level KPIs
-  const totalRevenue = orders.reduce((sum, o) => sum + (o?.grandTotal || 0), 0);
-  const totalOrdersCount = orders.length;
+  // Calculate high-level KPIs (strictly based on confirmed paid orders)
+  const paidOrders = orders.filter((o) => o?.paymentStatus === "paid" || o?.paymentStatus === "completed");
+  const totalRevenue = paidOrders.reduce((sum, o) => sum + (o?.grandTotal || 0), 0);
+  const totalOrdersCount = paidOrders.length;
   const aov = totalRevenue / (totalOrdersCount || 1);
   const totalStockUnits = products.reduce((sum, p) => sum + p.stockCount, 0);
 
@@ -2689,7 +2690,7 @@ https://alnaya.in/products`;
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto">
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
-                  {orders.length} Total Orders
+                  {paidOrders.length} Paid Orders
                 </span>
                 <button
                   type="button"
@@ -2729,7 +2730,7 @@ https://alnaya.in/products`;
 
             <div className="space-y-4 pt-2">
               {(() => {
-                const displayedOrders = orders.filter((o) => {
+                const displayedOrders = paidOrders.filter((o) => {
                   if (!orderSearchQuery.trim()) return true;
                   const q = orderSearchQuery.toLowerCase();
                   const num = (o.orderNumber || o.id || "").toLowerCase();
