@@ -6,7 +6,7 @@ import { storeConfig } from "@/config/store.config";
 import { sampleOrders, categories as defaultCategories } from "@/data/mockData";
 import { useProductStore } from "@/store/useProductStore";
 import { formatPrice } from "@/lib/utils";
-import { Order, OrderStatus, Product, Category } from "@/types/store";
+import { Order, OrderStatus, Product, Category, CartItem } from "@/types/store";
 import { RING_SPECIFIC_SIZES, BANGLE_SPECIFIC_SIZES } from "@/lib/productSizes";
 import {
   TrendingUp,
@@ -444,6 +444,107 @@ export default function AdminDashboardPage() {
       });
     } catch (err) {
       console.error("Failed to persist order status:", err);
+    }
+  };
+
+  // Order Edit State & Handlers
+  const [editingOrder, setEditingOrder] = useState<any | null>(null);
+  const [editOrderForm, setEditOrderForm] = useState({
+    customerName: "",
+    customerPhone: "",
+    customerEmail: "",
+    shippingAddress: "",
+    itemsNote: "",
+  });
+  const [isUpdatingOrder, setIsUpdatingOrder] = useState(false);
+
+  const handleOpenEditOrder = (order: any) => {
+    setEditingOrder(order);
+    setEditOrderForm({
+      customerName: order.customer?.fullName || (order as any).customerName || "",
+      customerPhone: order.customer?.phone || (order as any).customerPhone || "",
+      customerEmail: order.customer?.email || (order as any).customerEmail || "",
+      shippingAddress: cleanDeliveryAddress(order),
+      itemsNote:
+        order.items?.map((it: any) => `${it.quantity || 1}x ${it.title || it.name}`).join("\n") || "",
+    });
+  };
+
+  const handleSaveOrderEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrder) return;
+    setIsUpdatingOrder(true);
+    try {
+      const lines = editOrderForm.itemsNote.split("\n").filter((l) => l.trim().length > 0);
+      const updatedItems: CartItem[] = lines.map((l, i) => {
+        const existing = editingOrder.items?.[i];
+        const match = l.match(/^(\d+)x\s*(.*)$/i);
+        const qty = match ? parseInt(match[1], 10) : 1;
+        const title = match ? match[2].trim() : l.trim();
+        return {
+          id: existing?.id || `item_${i + 1}`,
+          productId: existing?.productId || existing?.id || `prod_${i + 1}`,
+          slug: existing?.slug || "jewelry-piece",
+          title: title || existing?.title || "Jewelry Item",
+          quantity: qty,
+          price: existing?.price || (editingOrder.grandTotal ? Math.round((editingOrder.grandTotal / lines.length) * 100) / 100 : 0),
+          image: existing?.image || "/images/about-model-necklace.jpg",
+          selectedVariant: existing?.selectedVariant,
+        };
+      });
+
+      const res = await fetch("/api/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingOrder.id,
+          customerName: editOrderForm.customerName,
+          customerPhone: editOrderForm.customerPhone,
+          customerEmail: editOrderForm.customerEmail,
+          shippingAddress: editOrderForm.shippingAddress,
+          itemsJson: updatedItems.length > 0 ? updatedItems : editingOrder.items,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === editingOrder.id
+              ? ({
+                  ...o,
+                  customer: {
+                    ...o.customer,
+                    fullName: editOrderForm.customerName,
+                    name: editOrderForm.customerName,
+                    phone: editOrderForm.customerPhone,
+                    email: editOrderForm.customerEmail,
+                    address: {
+                      street: editOrderForm.shippingAddress,
+                      city: o.customer?.address?.city || "",
+                      state: o.customer?.address?.state || "",
+                      postalCode: o.customer?.address?.postalCode || "",
+                      country: o.customer?.address?.country || "India",
+                    },
+                  },
+                  customerName: editOrderForm.customerName,
+                  customerPhone: editOrderForm.customerPhone,
+                  customerEmail: editOrderForm.customerEmail,
+                  shippingAddress: editOrderForm.shippingAddress,
+                  items: (updatedItems.length > 0 ? updatedItems : o.items) as CartItem[],
+                } as Order)
+              : o
+          )
+        );
+        setEditingOrder(null);
+      } else {
+        alert(`Could not save order: ${data.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      console.error("Failed to update order:", err);
+      alert("Failed to update order details.");
+    } finally {
+      setIsUpdatingOrder(false);
     }
   };
 
@@ -2822,6 +2923,16 @@ https://alnaya.in/products`;
                             ) : (
                               <Copy className="w-3.5 h-3.5" />
                             )}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditOrder(order)}
+                            title="Edit customer address and order items"
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-semibold transition-all active:scale-95"
+                          >
+                            <Pencil className="w-3.5 h-3.5 text-primary" />
+                            <span className="hidden sm:inline">Edit Details</span>
                           </button>
                         </div>
                       </div>
@@ -5877,6 +5988,122 @@ https://alnaya.in/products`;
                 >
                   {isSavingItem && <Clock className="w-3.5 h-3.5 animate-spin" />}
                   <span>{isSavingItem ? "Saving..." : editingCategory ? "Update Card" : "Add Card"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Order Details Edit Modal */}
+      {editingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setEditingOrder(null)}
+          />
+
+          <div className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-10 my-8 animate-in fade-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-foreground">
+                  Edit Order #{editingOrder.orderNumber || editingOrder.id}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Update customer delivery address, contact information, and ordered items.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingOrder(null)}
+                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveOrderEdit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">Customer Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Raichel"
+                  value={editOrderForm.customerName}
+                  onChange={(e) => setEditOrderForm((prev) => ({ ...prev, customerName: e.target.value }))}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Customer Phone (WhatsApp) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. +91 6301109935"
+                    value={editOrderForm.customerPhone}
+                    onChange={(e) => setEditOrderForm((prev) => ({ ...prev, customerPhone: e.target.value }))}
+                    className="w-full px-3 py-2 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground">Customer Email</label>
+                  <input
+                    type="email"
+                    placeholder="e.g. raichel@gmail.com"
+                    value={editOrderForm.customerEmail}
+                    onChange={(e) => setEditOrderForm((prev) => ({ ...prev, customerEmail: e.target.value }))}
+                    className="w-full px-3 py-2 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">Complete Shipping / Delivery Address *</label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Street address, House / Flat number, Landmark, City, State, PIN code..."
+                  value={editOrderForm.shippingAddress}
+                  onChange={(e) => setEditOrderForm((prev) => ({ ...prev, shippingAddress: e.target.value }))}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">
+                  Ordered Items (1 item per line with quantity, e.g. &quot;1x Starfish Textured Ring&quot;)
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder={"1x Celestial star drop chain\n1x Minimal neck chain\n1x Cuff bangle"}
+                  value={editOrderForm.itemsNote}
+                  onChange={(e) => setEditOrderForm((prev) => ({ ...prev, itemsNote: e.target.value }))}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-mono"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Format: Quantity + &apos;x&apos; + Item Name. Example: &quot;2x Jhumkas&quot;
+                </p>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setEditingOrder(null)}
+                  disabled={isUpdatingOrder}
+                  className="px-4 py-2 rounded-xl border border-border text-xs font-semibold hover:bg-muted disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingOrder || !editOrderForm.customerName || !editOrderForm.shippingAddress}
+                  className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 shadow-md disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {isUpdatingOrder && <Clock className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isUpdatingOrder ? "Saving..." : "Save Order Details"}</span>
                 </button>
               </div>
             </form>

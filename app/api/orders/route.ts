@@ -261,7 +261,18 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const { id, orderStatus, paymentStatus } = await req.json();
+    const {
+      id,
+      orderStatus,
+      paymentStatus,
+      status,
+      customerName,
+      customerPhone,
+      customerEmail,
+      shippingAddress,
+      itemsJson,
+    } = await req.json();
+
     if (!id) {
       return NextResponse.json({ error: "Missing order ID" }, { status: 400 });
     }
@@ -269,8 +280,13 @@ export async function PATCH(req: Request) {
     const updated = await prisma.order.update({
       where: { id },
       data: {
-        ...(orderStatus && { orderStatus }),
+        ...((orderStatus || status) && { orderStatus: orderStatus || status }),
         ...(paymentStatus && { paymentStatus }),
+        ...(customerName !== undefined && { customerName }),
+        ...(customerPhone !== undefined && { customerPhone }),
+        ...(customerEmail !== undefined && { customerEmail }),
+        ...(shippingAddress !== undefined && { shippingAddress }),
+        ...(itemsJson !== undefined && { itemsJson: typeof itemsJson === "string" ? itemsJson : JSON.stringify(itemsJson) }),
       },
     });
 
