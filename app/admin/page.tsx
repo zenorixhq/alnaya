@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { storeConfig } from "@/config/store.config";
 import { sampleOrders, categories as defaultCategories } from "@/data/mockData";
@@ -44,6 +44,7 @@ import {
   MessageCircle,
   Copy,
   Check,
+  RefreshCw,
 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -398,23 +399,32 @@ export default function AdminDashboardPage() {
     setLoginPassword("");
   };
 
+  const [isSyncingOrders, setIsSyncingOrders] = useState(false);
+
+  const fetchOrders = useCallback(async (sync = false) => {
+    if (sync) setIsSyncingOrders(true);
+    try {
+      const res = await fetch(`/api/orders${sync ? "?sync=true" : ""}`, { cache: "no-store" });
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setOrders(data);
+        try { sessionStorage.setItem("alnaya_admin_orders", JSON.stringify(data)); } catch (e) {}
+      }
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    } finally {
+      if (sync) setIsSyncingOrders(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchProducts(true);
       fetchReviewsAndVideos();
       fetchCategories();
-
-      fetch("/api/orders")
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data) && data.length > 0) {
-            setOrders(data);
-            try { sessionStorage.setItem("alnaya_admin_orders", JSON.stringify(data)); } catch (e) {}
-          }
-        })
-        .catch((err) => console.error("Error fetching orders:", err));
+      fetchOrders(true);
     }
-  }, [isAuthenticated, fetchProducts]);
+  }, [isAuthenticated, fetchProducts, fetchOrders]);
 
   // Calculate high-level KPIs
   const totalRevenue = orders.reduce((sum, o) => sum + (o?.grandTotal || 0), 0);
@@ -2576,9 +2586,21 @@ https://alnaya.in/products`;
                   Manage incoming customer orders, review deliveries, and send 1-click WhatsApp confirmations.
                 </p>
               </div>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary self-start sm:self-auto">
-                {orders.length} Total Orders
-              </span>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                  {orders.length} Total Orders
+                </span>
+                <button
+                  type="button"
+                  onClick={() => fetchOrders(true)}
+                  disabled={isSyncingOrders}
+                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-muted text-foreground transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                  title="Sync captured payments directly from Razorpay"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncingOrders ? "animate-spin text-primary" : "text-muted-foreground"}`} />
+                  <span>{isSyncingOrders ? "Syncing..." : "Sync Razorpay"}</span>
+                </button>
+              </div>
             </div>
 
             {/* Search & Filter Orders */}

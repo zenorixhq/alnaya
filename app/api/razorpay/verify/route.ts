@@ -83,38 +83,64 @@ export async function POST(req: Request) {
 
     let savedOrder: any = null;
 
-    // Save confirmed order to Prisma database if connected
+    // Save or update confirmed order in Prisma database
     try {
-      savedOrder = await prisma.order.create({
-        data: {
-          orderNumber:
-            orderNumber ||
-            `ALN-${Math.floor(10000 + Math.random() * 90000)}`,
-          customerName:
-            customer.fullName ||
-            (customer.firstName
-              ? `${customer.firstName} ${customer.lastName || ""}`.trim()
-              : "Customer"),
-          customerEmail: customer.email || "customer@alnaya.in",
-          customerPhone: customer.phone || "",
-          shippingAddress: `${customer.address || ""}, ${customer.city || ""}, ${
-            customer.state || ""
-          } ${customer.postalCode || ""}, ${customer.country || "India"}`,
-          itemsJson: JSON.stringify(items || []),
-          subtotal: parseFloat(subtotal || 0),
-          discountTotal: parseFloat(discountTotal || 0),
-          shippingFee: parseFloat(shippingFee || 0),
-          taxTotal: parseFloat(taxTotal || 0),
-          grandTotal: parseFloat(grandTotal || 0),
-          paymentMethod: "razorpay",
-          paymentStatus: "paid",
-          orderStatus: "processing",
-          razorpayOrderId: razorpay_order_id,
-          razorpayPaymentId: razorpay_payment_id,
+      const fullAddress = `${customer.address || ""}, ${customer.city || ""}, ${
+        customer.state || ""
+      } ${customer.postalCode || ""}, ${customer.country || "India"}`.trim();
+
+      const existingOrder = await prisma.order.findFirst({
+        where: {
+          OR: [
+            { razorpayOrderId: razorpay_order_id },
+            ...(orderNumber ? [{ orderNumber }] : []),
+          ],
         },
       });
+
+      if (existingOrder) {
+        savedOrder = await prisma.order.update({
+          where: { id: existingOrder.id },
+          data: {
+            paymentStatus: "paid",
+            orderStatus: "processing",
+            razorpayPaymentId: razorpay_payment_id,
+            razorpayOrderId: razorpay_order_id,
+            ...(existingOrder.paymentStatus !== "paid" && grandTotal
+              ? { grandTotal: parseFloat(grandTotal || existingOrder.grandTotal) }
+              : {}),
+          },
+        });
+      } else {
+        savedOrder = await prisma.order.create({
+          data: {
+            orderNumber:
+              orderNumber ||
+              `ALN-${Math.floor(10000 + Math.random() * 90000)}`,
+            customerName:
+              customer.fullName ||
+              (customer.firstName
+                ? `${customer.firstName} ${customer.lastName || ""}`.trim()
+                : "Customer"),
+            customerEmail: customer.email || "customer@alnaya.in",
+            customerPhone: customer.phone || "",
+            shippingAddress: fullAddress || "Direct Delivery",
+            itemsJson: JSON.stringify(items || []),
+            subtotal: parseFloat(subtotal || 0),
+            discountTotal: parseFloat(discountTotal || 0),
+            shippingFee: parseFloat(shippingFee || 0),
+            taxTotal: parseFloat(taxTotal || 0),
+            grandTotal: parseFloat(grandTotal || 0),
+            paymentMethod: "razorpay",
+            paymentStatus: "paid",
+            orderStatus: "processing",
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
+          },
+        });
+      }
     } catch (dbErr) {
-      console.error("Prisma database fallback on order save:", dbErr);
+      console.error("Prisma database error on order save/update:", dbErr);
       savedOrder = {
         orderNumber: orderNumber || `ALN-${Date.now().toString().slice(-5)}`,
         paymentStatus: "paid",

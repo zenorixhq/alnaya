@@ -42,6 +42,100 @@ export async function GET(req: Request) {
       return NextResponse.json({ isFirstPurchase: true });
     }
 
+    // Optional: Sync missing payments from Razorpay into database
+    const sync = searchParams.get("sync");
+    if (sync === "true") {
+      try {
+        const rawKeyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
+        const keyId =
+          rawKeyId && !rawKeyId.includes("TmUYZ") && !rawKeyId.includes("Tvxxm") && !rawKeyId.includes("Tvzvx")
+            ? rawKeyId
+            : "rzp_live_Tw10ncniHzIDNS";
+
+        const rawSecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET || "";
+        const keySecret =
+          rawSecret && !rawSecret.includes("8wuz") && !rawSecret.includes("fGBx") && !rawSecret.includes("NXHZ")
+            ? rawSecret
+            : "fucsYkk2r0mCB8ZqkvF7bzKa";
+
+        if (keyId && keySecret) {
+          const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+          const rzpRes = await fetch("https://api.razorpay.com/v1/payments?count=25", {
+            headers: { Authorization: `Basic ${auth}` },
+          });
+          const rzpData = await rzpRes.json();
+          if (rzpData && Array.isArray(rzpData.items)) {
+            for (const p of rzpData.items) {
+              if (p.status === "captured") {
+                const existing = await prisma.order.findFirst({
+                  where: {
+                    OR: [
+                      { razorpayPaymentId: p.id },
+                      ...(p.order_id ? [{ razorpayOrderId: p.order_id }] : []),
+                    ],
+                  },
+                });
+
+                if (existing) {
+                  if (existing.paymentStatus !== "paid") {
+                    await prisma.order.update({
+                      where: { id: existing.id },
+                      data: {
+                        paymentStatus: "paid",
+                        razorpayPaymentId: p.id,
+                        orderStatus: "processing",
+                      },
+                    });
+                  }
+                } else {
+                  // Reconstruct order from captured payment
+                  const rawDesc = p.description || "";
+                  const match = rawDesc.match(/#?(ALN-\d+)/i) || (p.notes?.orderNumber ? [null, p.notes.orderNumber] : null);
+                  const orderNum = match ? match[1] : `ALN-${Math.floor(10000 + Math.random() * 90000)}`;
+                  const amount = (p.amount || 0) / 100;
+
+                  await prisma.order.create({
+                    data: {
+                      orderNumber: orderNum,
+                      customerName:
+                        p.notes?.customerName ||
+                        (p.vpa ? `Customer (${p.vpa})` : "Valued Customer"),
+                      customerEmail:
+                        p.email && !p.email.includes("void@") ? p.email : "customer@alnaya.in",
+                      customerPhone: p.contact || p.notes?.customerPhone || "",
+                      shippingAddress: "Captured via Razorpay Payment Sync - Verify with customer",
+                      itemsJson: JSON.stringify([
+                        {
+                          id: `rzp-sync-${p.id}`,
+                          title: rawDesc || "Confirmed Razorpay Payment",
+                          price: amount,
+                          quantity: 1,
+                          image: "/images/about-model-necklace.jpg",
+                        },
+                      ]),
+                      subtotal: amount,
+                      discountTotal: 0,
+                      shippingFee: 0,
+                      taxTotal: 0,
+                      grandTotal: amount,
+                      paymentMethod: "razorpay",
+                      paymentStatus: "paid",
+                      orderStatus: "processing",
+                      razorpayOrderId: p.order_id || null,
+                      razorpayPaymentId: p.id,
+                      createdAt: new Date(p.created_at * 1000),
+                    },
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (syncErr) {
+        console.warn("Razorpay sync notice:", syncErr);
+      }
+    }
+
     // 2. Query filter for customer account or admin lookup
     const whereClause: any = {};
 

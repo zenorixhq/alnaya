@@ -199,6 +199,13 @@ export default function CheckoutPage() {
           amount: grandTotal,
           currency: "INR",
           receipt: `rcpt_${Date.now()}`,
+          orderNumber,
+          customer: formData,
+          items,
+          subtotal,
+          discountTotal: discount,
+          shippingFee: shipping,
+          grandTotal,
         }),
       });
 

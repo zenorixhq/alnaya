@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    let { amount, currency = "INR", receipt } = body;
+    let {
+      amount,
+      currency = "INR",
+      receipt,
+      orderNumber,
+      customer,
+      items,
+      subtotal,
+      discountTotal,
+      shippingFee,
+      grandTotal,
+    } = body;
 
     if (!amount || typeof amount !== "number" || amount <= 0) {
       return NextResponse.json(
@@ -65,6 +77,11 @@ export async function POST(req: Request) {
         currency: currency || "INR",
         receipt: receipt || `rcpt_${Date.now()}`,
         payment_capture: 1,
+        notes: {
+          orderNumber: orderNumber || "",
+          customerPhone: customer?.phone || "",
+          customerName: customer?.fullName || "",
+        },
       }),
     });
 
@@ -82,6 +99,49 @@ export async function POST(req: Request) {
         },
         { status: statusCode }
       );
+    }
+
+    // Pre-create pending order in Prisma database so order is NEVER lost even if
+    // customer switches to a UPI app (Google Pay / PhonePe) and tab unloads
+    if (orderNumber && customer) {
+      try {
+        const fullAddress = `${customer.address || ""}, ${customer.city || ""}, ${
+          customer.state || ""
+        } ${customer.postalCode || ""}, ${customer.country || "India"}`.trim();
+
+        await prisma.order.upsert({
+          where: { orderNumber },
+          update: {
+            razorpayOrderId: orderData.id,
+            paymentStatus: "pending",
+            orderStatus: "pending",
+            grandTotal: parseFloat(grandTotal || amount || 0),
+          },
+          create: {
+            orderNumber,
+            customerName:
+              customer.fullName ||
+              (customer.firstName
+                ? `${customer.firstName} ${customer.lastName || ""}`.trim()
+                : "Customer"),
+            customerEmail: customer.email || "customer@alnaya.in",
+            customerPhone: customer.phone || "",
+            shippingAddress: fullAddress || "Direct Delivery",
+            itemsJson: JSON.stringify(items || []),
+            subtotal: parseFloat(subtotal || 0),
+            discountTotal: parseFloat(discountTotal || 0),
+            shippingFee: parseFloat(shippingFee || 0),
+            taxTotal: 0,
+            grandTotal: parseFloat(grandTotal || amount || 0),
+            paymentMethod: "razorpay",
+            paymentStatus: "pending",
+            orderStatus: "pending",
+            razorpayOrderId: orderData.id,
+          },
+        });
+      } catch (dbErr) {
+        console.warn("Pre-order creation notice (will fallback to verify/webhook):", dbErr);
+      }
     }
 
     return NextResponse.json({
