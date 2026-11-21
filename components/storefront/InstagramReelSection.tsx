@@ -88,29 +88,16 @@ function AutoPlayingInstaCard({
       onClick={onClick}
       className="group relative w-[240px] sm:w-[270px] md:w-[290px] shrink-0 snap-start aspect-[9/15] rounded-2xl overflow-hidden bg-stone-900 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 ease-out cursor-pointer border border-[#EADBBE]"
     >
-      {/* Active playing video directly in card */}
-      {isDirectVideo ? (
-        <video
-          ref={videoRef}
-          src={vid.videoUrl}
-          poster={vid.poster}
-          autoPlay
-          loop
-          muted={isMuted}
-          playsInline
-          preload="metadata"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-        />
-      ) : (
-        <img
-          src={
-            vid.poster ||
-            "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=700"
-          }
-          alt={vid.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-        />
-      )}
+      {/* High-performance lightweight poster preview (Zero video bandwidth until clicked) */}
+      <img
+        src={
+          vid.poster ||
+          "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=700"
+        }
+        alt={vid.title}
+        loading="lazy"
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+      />
 
       {/* Gradient Dark Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-black/35 flex flex-col justify-between p-3.5 sm:p-4 text-white pointer-events-none">

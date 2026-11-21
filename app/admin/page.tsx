@@ -3685,26 +3685,25 @@ https://alnaya.in/products`;
                               ? video.poster
                               : `/images/follow-house/panel-${(index % 5) + 1}.jpg`;
 
-                          return isDirectVideo ? (
-                            <video
-                              src={video.videoUrl}
-                              poster={posterSrc}
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
-                              preload="metadata"
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <img
-                              src={posterSrc}
-                              alt={video.title}
-                              onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = `/images/follow-house/panel-${(index % 5) + 1}.jpg`;
-                              }}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
+                          return (
+                            <div className="relative w-full h-full">
+                              <img
+                                src={posterSrc}
+                                alt={video.title}
+                                loading="lazy"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).src = `/images/follow-house/panel-${(index % 5) + 1}.jpg`;
+                                }}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              {isDirectVideo && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <div className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 text-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-[#7E22CE] transition-all">
+                                    <Play className="w-4 h-4 fill-white translate-x-0.5" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           );
                         })()}
 
@@ -5703,6 +5702,7 @@ https://alnaya.in/products`;
                           src={instaVideoForm.videoUrl}
                           controls
                           muted
+                          preload="none"
                           className="w-full h-full object-cover"
                         />
                       </div>
