@@ -13,16 +13,30 @@ import { useProductStore } from "@/store/useProductStore";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function HomePage() {
-  const [categoryList, setCategoryList] = useState<Category[]>(categories);
+  const [categoryList, setCategoryList] = useState<Category[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("alnaya_categories_v8");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return categories;
+  });
   const fetchProducts = useProductStore((s) => s.fetchProducts);
   const productsLoaded = useProductStore((s) => s.hasLoaded);
 
   useEffect(() => {
-    fetch(`/api/categories?t=${Date.now()}`)
+    fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setCategoryList(data);
+          try {
+            localStorage.setItem("alnaya_categories_v8", JSON.stringify(data));
+          } catch (e) {}
         }
       })
       .catch(() => {});

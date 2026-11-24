@@ -42,7 +42,7 @@ function formatProduct(p: any) {
 }
 
 const CACHE_HEADERS = {
-  "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
+  "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
 };
 
 const NO_CACHE_HEADERS = {

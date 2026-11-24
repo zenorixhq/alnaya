@@ -119,7 +119,7 @@ function ProductCatalogContent() {
   const [categoryList, setCategoryList] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_categories");
+        const cached = localStorage.getItem("alnaya_categories_v8");
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -132,13 +132,13 @@ function ProductCatalogContent() {
   // Sync with database on mount
   useEffect(() => {
     fetchProducts();
-    fetch(`/api/categories?t=${Date.now()}`)
+    fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setCategoryList(data);
           try {
-            sessionStorage.setItem("alnaya_categories", JSON.stringify(data));
+            localStorage.setItem("alnaya_categories_v8", JSON.stringify(data));
           } catch (e) {}
         }
       })

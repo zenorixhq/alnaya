@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { Product } from "@/types/store";
 
-const STORAGE_KEY = "alnaya_catalog_live_v6";
+const STORAGE_KEY = "alnaya_catalog_persistent_v8";
+const STORAGE_TIME_KEY = "alnaya_catalog_time_v8";
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours persistent cache
 
 // Auto-purge obsolete and legacy catalog cache keys from previous versions
 if (typeof window !== "undefined") {
@@ -13,6 +15,7 @@ if (typeof window !== "undefined") {
     sessionStorage.removeItem("alnaya_products_catalog_v2");
     sessionStorage.removeItem("alnaya_products_catalog_v3");
     sessionStorage.removeItem("alnaya_catalog_live_v5");
+    sessionStorage.removeItem("alnaya_catalog_live_v6");
     sessionStorage.removeItem("alnaya_categories");
   } catch (e) {}
 }
@@ -20,7 +23,7 @@ if (typeof window !== "undefined") {
 function getInitialProducts(): { products: Product[]; hasLoaded: boolean } {
   if (typeof window !== "undefined") {
     try {
-      const cached = sessionStorage.getItem(STORAGE_KEY);
+      const cached = localStorage.getItem(STORAGE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -37,7 +40,8 @@ function getInitialProducts(): { products: Product[]; hasLoaded: boolean } {
 function persistProducts(prods: Product[]) {
   if (typeof window !== "undefined") {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(prods));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prods));
+      localStorage.setItem(STORAGE_TIME_KEY, String(Date.now()));
     } catch (e) {}
   }
 }
@@ -64,9 +68,16 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   error: null,
 
   fetchProducts: async (force = false) => {
-    // If products are already in memory and fresh, skip redundant network fetch unless force=true
+    // 1. If products are already in memory and cache is still fresh (< 2 hours), skip redundant network fetch completely
     if (get().hasLoaded && get().products.length > 0 && !force) {
-      return;
+      if (typeof window !== "undefined") {
+        try {
+          const cachedTime = parseInt(localStorage.getItem(STORAGE_TIME_KEY) || "0", 10);
+          if (cachedTime > 0 && Date.now() - cachedTime < CACHE_TTL_MS) {
+            return; // 100% cache hit: 0 bytes transferred
+          }
+        } catch (e) {}
+      }
     }
 
     try {
