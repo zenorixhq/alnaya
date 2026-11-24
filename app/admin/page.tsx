@@ -45,6 +45,7 @@ import {
   Copy,
   Check,
   RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -400,6 +401,18 @@ export default function AdminDashboardPage() {
   };
 
   const [isSyncingOrders, setIsSyncingOrders] = useState(false);
+  const [isBlobStoreBlocked, setIsBlobStoreBlocked] = useState(false);
+
+  useEffect(() => {
+    // Check if Vercel Blob store is blocked due to 10GB data transfer limit
+    fetch("https://yeif7vmf4ju7p5dt.public.blob.vercel-storage.com/images/1794227115695-IMG_3846.jpg", { method: "HEAD" })
+      .then((r) => {
+        if (r.status === 403) {
+          setIsBlobStoreBlocked(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const fetchOrders = useCallback(async (sync = false) => {
     if (sync) setIsSyncingOrders(true);
@@ -2548,15 +2561,30 @@ https://alnaya.in/products`;
                     <tr key={product.id} className="hover:bg-muted/30">
                       <td className="py-3">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={product.images && product.images.length > 0 ? product.images[0] : "/images/about-model-necklace.jpg"}
-                            alt={product.title || "Product"}
-                            loading="lazy"
-                            onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = "/images/about-model-necklace.jpg";
-                            }}
-                            className="w-10 h-12 object-cover rounded-md border border-border"
-                          />
+                          <div className="relative w-10 h-12 rounded-md overflow-hidden border border-border bg-stone-100 dark:bg-stone-900 shrink-0 flex items-center justify-center">
+                            {product.images && product.images.length > 0 && !product.images[0].includes("about-model-necklace.jpg") ? (
+                              <img
+                                src={product.images[0]}
+                                alt={product.title || "Product"}
+                                loading="lazy"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLElement).style.display = "none";
+                                  const fb = e.currentTarget.parentElement?.querySelector(".inv-fallback-badge") as HTMLElement;
+                                  if (fb) fb.style.display = "flex";
+                                }}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : null}
+                            <div
+                              className="inv-fallback-badge w-full h-full flex flex-col items-center justify-center text-muted-foreground bg-muted/40 p-1 text-center"
+                              style={{ display: product.images && product.images.length > 0 && !product.images[0].includes("about-model-necklace.jpg") ? "none" : "flex" }}
+                            >
+                              <Package className="w-3.5 h-3.5 text-primary/70 mb-0.5" />
+                              <span className="text-[7px] font-bold uppercase truncate max-w-full font-mono text-muted-foreground">
+                                {(product.title || "PROD").slice(0, 5)}
+                              </span>
+                            </div>
+                          </div>
                           <div>
                             <span className="font-bold text-foreground block">{product.title}</span>
                             <span className="text-[10px] text-muted-foreground font-mono">/{product.slug}</span>
@@ -2728,6 +2756,30 @@ https://alnaya.in/products`;
               )}
             </div>
 
+            {isBlobStoreBlocked && (
+              <div className="p-3.5 sm:p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-xs">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-sm">Vercel Blob Storage is Blocked (10 GB Monthly Transfer Limit Reached)</p>
+                    <p className="mt-0.5 text-muted-foreground leading-relaxed">
+                      Your Vercel Blob store (<code className="font-mono text-[11px] font-bold text-foreground">alnaya-blob</code>) reached its 10 GB limit and was paused by Vercel, returning HTTP 403 on images.
+                      To restore all product photos instantly, open your Vercel Dashboard to unblock the store or upgrade to Pro.
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="https://vercel.com/dashboard"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-colors shadow-xs inline-flex items-center gap-1"
+                >
+                  <span>Open Vercel</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            )}
+
             <div className="space-y-4 pt-2">
               {(() => {
                 const displayedOrders = paidOrders.filter((o) => {
@@ -2830,21 +2882,34 @@ https://alnaya.in/products`;
                                     className="flex items-center gap-2.5 p-2 rounded-xl bg-background border border-border/80 shadow-xs"
                                   >
                                     <a
-                                      href={itemImg}
+                                      href={itemImg && !itemImg.includes("about-model-necklace.jpg") ? itemImg : undefined}
                                       target="_blank"
                                       rel="noreferrer"
-                                      title="Click to view full image"
-                                      className="relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-stone-100 dark:bg-stone-900 shrink-0 aspect-square group/img hover:border-primary transition-all cursor-zoom-in"
+                                      title={item.title || item.name || "Ordered product"}
+                                      className="relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-stone-100 dark:bg-stone-900 shrink-0 aspect-square group/img hover:border-primary transition-all flex items-center justify-center cursor-pointer"
                                     >
-                                      <img
-                                        src={itemImg}
-                                        alt={item.title || item.name || "Ordered product"}
-                                        className="w-full h-full object-cover group-hover/img:scale-105 transition-transform"
-                                        onError={(e) => {
-                                          (e.currentTarget as HTMLImageElement).src = "/images/about-model-necklace.jpg";
-                                        }}
-                                      />
-                                      <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[9px] font-bold px-1 rounded shadow-xs">
+                                      {itemImg && !itemImg.includes("about-model-necklace.jpg") ? (
+                                        <img
+                                          src={itemImg}
+                                          alt={item.title || item.name || "Ordered product"}
+                                          className="w-full h-full object-cover group-hover/img:scale-105 transition-transform"
+                                          onError={(e) => {
+                                            (e.currentTarget as HTMLElement).style.display = "none";
+                                            const fb = e.currentTarget.parentElement?.querySelector(".img-fallback-badge") as HTMLElement;
+                                            if (fb) fb.style.display = "flex";
+                                          }}
+                                        />
+                                      ) : null}
+                                      <div
+                                        className="img-fallback-badge w-full h-full flex flex-col items-center justify-center text-muted-foreground bg-muted/40 p-1 text-center"
+                                        style={{ display: itemImg && !itemImg.includes("about-model-necklace.jpg") ? "none" : "flex" }}
+                                      >
+                                        <Package className="w-4 h-4 text-primary/70 mb-0.5" />
+                                        <span className="text-[7.5px] font-bold uppercase truncate max-w-full font-mono text-muted-foreground">
+                                          {(item.title || item.name || "PIECE").slice(0, 6)}
+                                        </span>
+                                      </div>
+                                      <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[9px] font-bold px-1 rounded shadow-xs z-10 pointer-events-none">
                                         ×{item.quantity || 1}
                                       </span>
                                     </a>
