@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { storeConfig } from "@/config/store.config";
 import { sampleOrders, categories as defaultCategories } from "@/data/mockData";
@@ -8,6 +8,7 @@ import { useProductStore } from "@/store/useProductStore";
 import { formatPrice } from "@/lib/utils";
 import { Order, OrderStatus, Product, Category, CartItem } from "@/types/store";
 import { RING_SPECIFIC_SIZES, BANGLE_SPECIFIC_SIZES } from "@/lib/productSizes";
+import { matchesCategory, normalizeCategorySlug, isRingCategory, isBangleCategory } from "@/lib/categoryMatching";
 import {
   TrendingUp,
   ShoppingBag,
@@ -46,6 +47,7 @@ import {
   Check,
   RefreshCw,
   AlertTriangle,
+  Filter,
 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { useSiteImages } from "@/hooks/useSiteImages";
@@ -145,23 +147,35 @@ export default function AdminDashboardPage() {
   const [categoriesList, setCategoriesList] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = sessionStorage.getItem("alnaya_categories");
+        const cached = sessionStorage.getItem("alnaya_categories") || localStorage.getItem("alnaya_categories_v8");
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            parsed.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
+            return parsed;
+          }
         }
       } catch (e) {}
     }
     return defaultCategories;
   });
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryForm, setCategoryForm] = useState({
+  const [categoryForm, setCategoryForm] = useState<{
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    image: string;
+    order?: number | "";
+  }>({
     id: "",
     name: "",
     slug: "",
     description: "",
     image: "",
+    order: 1,
   });
   const [updatingCatId, setUpdatingCatId] = useState<string | null>(null);
 
@@ -355,8 +369,12 @@ export default function AdminDashboardPage() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
+          data.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
           setCategoriesList(data);
-          try { sessionStorage.setItem("alnaya_categories", JSON.stringify(data)); } catch (e) {}
+          try {
+            sessionStorage.setItem("alnaya_categories", JSON.stringify(data));
+            localStorage.setItem("alnaya_categories_v8", JSON.stringify(data));
+          } catch (e) {}
         }
       })
       .catch((err) => console.error("Error fetching categories:", err));
@@ -1763,9 +1781,12 @@ https://alnaya.in/products`;
       if (!imageUrl) throw new Error("Image upload failed");
 
       // Update state immediately
-      setCategoriesList((prev) =>
-        prev.map((c) => (c.id === catId ? { ...c, image: imageUrl } : c))
-      );
+      const updated = categoriesList.map((c) => (c.id === catId ? { ...c, image: imageUrl } : c));
+      setCategoriesList(updated);
+      try {
+        sessionStorage.setItem("alnaya_categories", JSON.stringify(updated));
+        localStorage.setItem("alnaya_categories_v8", JSON.stringify(updated));
+      } catch (e) {}
 
       // Persist to Neon PostgreSQL via PUT /api/categories
       const catToUpdate = categoriesList.find((c) => c.id === catId);
@@ -1781,7 +1802,12 @@ https://alnaya.in/products`;
 
       const data = await res.json();
       if (Array.isArray(data.categories)) {
+        data.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
         setCategoriesList(data.categories);
+        try {
+          sessionStorage.setItem("alnaya_categories", JSON.stringify(data.categories));
+          localStorage.setItem("alnaya_categories_v8", JSON.stringify(data.categories));
+        } catch (e) {}
       }
     } catch (err: any) {
       console.error("Failed to update category card image:", err);
@@ -1793,12 +1819,14 @@ https://alnaya.in/products`;
 
   const handleOpenEditCategory = (cat: Category) => {
     setEditingCategory(cat);
+    const sortedIdx = sortedCategories.findIndex((c) => c.id === cat.id || c.slug === cat.slug);
     setCategoryForm({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
       description: cat.description || "",
       image: cat.image,
+      order: cat.order !== undefined ? cat.order : (sortedIdx >= 0 ? sortedIdx + 1 : ""),
     });
     setIsCategoryModalOpen(true);
   };
@@ -1811,8 +1839,58 @@ https://alnaya.in/products`;
       slug: "",
       description: "",
       image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800",
+      order: sortedCategories.length + 1,
     });
     setIsCategoryModalOpen(true);
+  };
+
+  const handleUpdateCategoryOrder = async (catId: string, newOrder: number) => {
+    const validOrder = Math.max(1, newOrder);
+    const updated = categoriesList.map((c) => {
+      if (c.id === catId || c.slug === catId) {
+        return { ...c, order: validOrder };
+      }
+      return c;
+    });
+    updated.sort((a, b) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
+    setCategoriesList(updated);
+    try {
+      sessionStorage.setItem("alnaya_categories", JSON.stringify(updated));
+      localStorage.setItem("alnaya_categories_v8", JSON.stringify(updated));
+      await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categories: updated }),
+      });
+    } catch (e) {
+      console.error("Failed to save reordered categories:", e);
+    }
+  };
+
+  const handleMoveCategory = async (catId: string, direction: "up" | "down") => {
+    const list = [...sortedCategories];
+    const idx = list.findIndex((c) => c.id === catId || c.slug === catId);
+    if (idx < 0) return;
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= list.length) return;
+
+    const temp = list[idx];
+    list[idx] = list[targetIdx];
+    list[targetIdx] = temp;
+
+    const reordered = list.map((c, i) => ({ ...c, order: i + 1 }));
+    setCategoriesList(reordered);
+    try {
+      sessionStorage.setItem("alnaya_categories", JSON.stringify(reordered));
+      localStorage.setItem("alnaya_categories_v8", JSON.stringify(reordered));
+      await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categories: reordered }),
+      });
+    } catch (e) {
+      console.error("Failed to save swapped categories:", e);
+    }
   };
 
   const handleCategoryModalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1836,32 +1914,62 @@ https://alnaya.in/products`;
     }
     setIsSavingItem(true);
     try {
+      const payload = {
+        ...categoryForm,
+        order: categoryForm.order !== "" && categoryForm.order !== undefined ? Number(categoryForm.order) : undefined,
+      };
       if (editingCategory) {
         const res = await fetch("/api/categories", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(categoryForm),
+          body: JSON.stringify(payload),
         });
         const data = await res.json();
         if (Array.isArray(data.categories)) {
+          data.categories.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
           setCategoriesList(data.categories);
+          try {
+            sessionStorage.setItem("alnaya_categories", JSON.stringify(data.categories));
+            localStorage.setItem("alnaya_categories_v8", JSON.stringify(data.categories));
+          } catch (e) {}
         } else {
-          setCategoriesList((prev) =>
-            prev.map((c) => (c.id === categoryForm.id ? { ...c, ...categoryForm } : c))
-          );
+          setCategoriesList((prev) => {
+            const updated = prev.map((c) => (c.id === categoryForm.id ? { ...c, ...payload } : c));
+            updated.sort((a, b) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
+            try {
+              sessionStorage.setItem("alnaya_categories", JSON.stringify(updated));
+              localStorage.setItem("alnaya_categories_v8", JSON.stringify(updated));
+            } catch (e) {}
+            return updated;
+          });
         }
       } else {
         const res = await fetch("/api/categories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(categoryForm),
+          body: JSON.stringify(payload),
         });
         const data = await res.json();
         if (Array.isArray(data.categories)) {
+          data.categories.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
           setCategoriesList(data.categories);
+          try {
+            sessionStorage.setItem("alnaya_categories", JSON.stringify(data.categories));
+            localStorage.setItem("alnaya_categories_v8", JSON.stringify(data.categories));
+          } catch (e) {}
         } else {
-          setCategoriesList((prev) => [...prev, { ...categoryForm, productCount: 0 }]);
+          setCategoriesList((prev) => {
+            const updated = [...prev, { ...payload, productCount: 0 }];
+            updated.sort((a, b) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
+            try {
+              sessionStorage.setItem("alnaya_categories", JSON.stringify(updated));
+              localStorage.setItem("alnaya_categories_v8", JSON.stringify(updated));
+            } catch (e) {}
+            return updated;
+          });
         }
+        // Auto-select newly created category in product form if open
+        setFormState((prev) => ({ ...prev, category: categoryForm.slug }));
       }
       setIsCategoryModalOpen(false);
     } catch (err: any) {
@@ -1873,19 +1981,38 @@ https://alnaya.in/products`;
   };
 
   const handleDeleteCategory = async (catId: string) => {
-    if (!confirm("Are you sure you want to remove this category card from the homepage?")) return;
+    if (!confirm("Are you sure you want to delete this category? Products in this category will remain in the catalog.")) return;
     try {
       const res = await fetch(`/api/categories?id=${encodeURIComponent(catId)}`, {
         method: "DELETE",
       });
       const data = await res.json();
       if (Array.isArray(data.categories)) {
+        data.categories.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
         setCategoriesList(data.categories);
+        try {
+          sessionStorage.setItem("alnaya_categories", JSON.stringify(data.categories));
+          localStorage.setItem("alnaya_categories_v8", JSON.stringify(data.categories));
+        } catch (e) {}
+        if (formState.category === catId && data.categories.length > 0) {
+          setFormState((prev) => ({ ...prev, category: data.categories[0].slug }));
+        }
       } else {
-        setCategoriesList((prev) => prev.filter((c) => c.id !== catId));
+        setCategoriesList((prev) => {
+          const updated = prev.filter((c) => c.id !== catId && c.slug !== catId);
+          try {
+            sessionStorage.setItem("alnaya_categories", JSON.stringify(updated));
+            localStorage.setItem("alnaya_categories_v8", JSON.stringify(updated));
+          } catch (e) {}
+          if (formState.category === catId && updated.length > 0) {
+            setFormState((p) => ({ ...p, category: updated[0].slug }));
+          }
+          return updated;
+        });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting category:", err);
+      alert("Failed to delete category: " + (err?.message || "Unknown error"));
     }
   };
 
@@ -2239,11 +2366,57 @@ https://alnaya.in/products`;
     }
   };
 
-  const filteredInventory = products.filter(
-    (p) =>
+  // Dynamically extract categories sorted by display order
+  const sortedCategories = useMemo(() => {
+    const list = [...categoriesList];
+    list.sort((a, b) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
+    return list;
+  }, [categoriesList]);
+
+  // Dynamically extract categories with live product counts
+  const categoryFilterOptions = useMemo(() => {
+    const list: { slug: string; name: string; count: number }[] = [];
+    const seenSlugs = new Set<string>();
+
+    sortedCategories.forEach((c) => {
+      const slug = (c.slug || "").trim();
+      const norm = normalizeCategorySlug(slug);
+      if (!norm || seenSlugs.has(norm)) return;
+      seenSlugs.add(norm);
+      const count = products.filter((p) => matchesCategory(p, slug)).length;
+      list.push({ slug, name: c.name, count });
+    });
+
+    // Also include any categories found on products that aren't in categoriesList
+    products.forEach((p) => {
+      const slug = (p.category || "").trim();
+      const norm = normalizeCategorySlug(slug);
+      if (norm && !seenSlugs.has(norm)) {
+        seenSlugs.add(norm);
+        const count = products.filter((prod) => matchesCategory(prod, slug)).length;
+        list.push({
+          slug,
+          name: slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, " "),
+          count,
+        });
+      }
+    });
+
+    return list;
+  }, [sortedCategories, products]);
+
+  const filteredInventory = products.filter((p) => {
+    const matchesSearch =
+      !searchQuery ||
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.tags && p.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())));
+
+    const matchesCat =
+      selectedCategoryFilter === "all" || matchesCategory(p, selectedCategoryFilter);
+
+    return matchesSearch && matchesCat;
+  });
 
   if (isAuthenticated === null) {
     return (
@@ -2372,6 +2545,13 @@ https://alnaya.in/products`;
             >
               <Plus className="w-4 h-4" />
               <span>Add New Product</span>
+            </button>
+            <button
+              onClick={handleOpenAddCategory}
+              className="px-4 py-2.5 rounded-xl border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold flex items-center gap-2 shadow-sm transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add New Category</span>
             </button>
             <Link
               href="/"
@@ -2512,17 +2692,99 @@ https://alnaya.in/products`;
                 </p>
               </div>
 
-              {/* Search filter in catalog */}
-              <div className="relative w-full sm:w-72">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Filter products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-muted/40 border border-border focus:ring-1 focus:ring-primary outline-none"
-                />
+              <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                {/* Search filter in catalog */}
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Filter products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-8 pr-7 py-1.5 text-xs rounded-lg bg-muted/40 border border-border focus:ring-1 focus:ring-primary outline-none"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+                      title="Clear search query"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleOpenAddCategory}
+                  className="px-3.5 py-1.5 rounded-lg border border-border hover:border-primary/50 text-xs font-semibold text-foreground hover:bg-muted flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
+                  title="Add a new jewelry category"
+                >
+                  <Plus className="w-3.5 h-3.5 text-primary" />
+                  <span>Add Category</span>
+                </button>
               </div>
+            </div>
+
+            {/* Quick-Filter Category Pills Bar */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-2 no-scrollbar border-t border-border/50">
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+                <Filter className="w-3 h-3" />
+                <span>Category:</span>
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setSelectedCategoryFilter("all")}
+                className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
+                  selectedCategoryFilter === "all"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-muted/50 hover:bg-muted text-stone-600 dark:text-stone-300 hover:text-foreground border border-border/60"
+                }`}
+              >
+                <span>All Pieces</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${selectedCategoryFilter === "all" ? "bg-white/20 text-white" : "bg-black/5 text-stone-500 dark:bg-white/10 dark:text-stone-400"}`}>
+                  {products.length}
+                </span>
+              </button>
+
+              {categoryFilterOptions.map((cat) => {
+                const isActive = selectedCategoryFilter === cat.slug;
+                return (
+                  <button
+                    key={cat.slug}
+                    type="button"
+                    onClick={() => setSelectedCategoryFilter(cat.slug)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "bg-muted/50 hover:bg-muted text-stone-600 dark:text-stone-300 hover:text-foreground border border-border/60"
+                    }`}
+                  >
+                    <span>{cat.name}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? "bg-white/20 text-white" : "bg-black/5 text-stone-500 dark:bg-white/10 dark:text-stone-400"}`}>
+                      {cat.count}
+                    </span>
+                  </button>
+                );
+              })}
+
+              {/* Reset Filter Button */}
+              {(selectedCategoryFilter !== "all" || searchQuery.trim()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategoryFilter("all");
+                    setSearchQuery("");
+                  }}
+                  className="px-2.5 py-1 rounded-full text-xs font-medium text-stone-500 hover:text-destructive hover:bg-destructive/10 transition-colors whitespace-nowrap flex items-center gap-1 ml-auto shrink-0"
+                  title="Reset all filters"
+                >
+                  <X className="w-3 h-3" />
+                  <span>Reset Filter</span>
+                </button>
+              )}
             </div>
 
             {!hasLoaded && products.length === 0 ? (
@@ -2537,11 +2799,27 @@ https://alnaya.in/products`;
               <div className="py-16 text-center space-y-2 bg-muted/10 rounded-2xl border border-dashed border-border p-8">
                 <Package className="w-8 h-8 text-muted-foreground mx-auto" />
                 <p className="text-xs font-bold text-foreground">No products found</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {searchQuery
+                <p className="text-[11px] text-muted-foreground max-w-md mx-auto">
+                  {selectedCategoryFilter !== "all" && searchQuery
+                    ? `No pieces found in category "${categoryFilterOptions.find((c) => c.slug === selectedCategoryFilter)?.name || selectedCategoryFilter}" matching "${searchQuery}".`
+                    : selectedCategoryFilter !== "all"
+                    ? `No pieces currently listed under category "${categoryFilterOptions.find((c) => c.slug === selectedCategoryFilter)?.name || selectedCategoryFilter}". Click 'Add New Product' to add one.`
+                    : searchQuery
                     ? `No pieces match "${searchQuery}". Try a different search query.`
                     : "Your live catalog is currently empty. Click 'Add New Product' to get started."}
                 </p>
+                {(selectedCategoryFilter !== "all" || searchQuery) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategoryFilter("all");
+                      setSearchQuery("");
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg border border-border text-xs font-semibold hover:bg-muted mt-2 transition-colors"
+                  >
+                    Clear Active Filters
+                  </button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -3550,7 +3828,7 @@ https://alnaya.in/products`;
 
             {/* Grid of Homepage Category Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {categoriesList.map((cat, index) => (
+              {sortedCategories.map((cat, index) => (
                 <div
                   key={cat.id || cat.slug || index}
                   className="group relative rounded-xl border border-border/80 bg-background overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col"
@@ -3570,7 +3848,7 @@ https://alnaya.in/products`;
 
                     {/* Order Index Badge */}
                     <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-semibold text-white/90 border border-white/10">
-                      Card #{index + 1}
+                      Card #{cat.order ?? index + 1}
                     </div>
 
                     {/* Quick Direct Upload Overlay / Button */}
@@ -3625,42 +3903,80 @@ https://alnaya.in/products`;
                   </div>
 
                   {/* Card Actions & Info Bar */}
-                  <div className="p-3 bg-card border-t border-border flex items-center justify-between gap-2 mt-auto">
-                    <div className="min-w-0 flex-1">
-                      <span className="font-bold text-xs text-foreground block truncate">
-                        {cat.name}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-mono block truncate">
-                        /{cat.slug}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEditCategory(cat)}
-                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                        title="Edit title & description"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
+                  <div className="p-3 bg-card border-t border-border flex flex-col gap-2.5 mt-auto">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <span className="font-bold text-sm text-foreground block truncate">
+                          {cat.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground font-mono block truncate">
+                          /{cat.slug}
+                        </span>
+                      </div>
 
                       <Link
                         href={`/products?category=${cat.slug}`}
                         target="_blank"
-                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                         title="View collection on storefront"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
+                    </div>
+
+                    {/* Category Order Numbering Control */}
+                    <div className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg bg-muted/40 border border-border/60">
+                      <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5">
+                        <span>Display Order:</span>
+                        <span className="font-bold text-primary">#{cat.order ?? index + 1}</span>
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-muted-foreground font-medium">Rank:</span>
+                        <input
+                          type="number"
+                          min={1}
+                          defaultValue={cat.order ?? index + 1}
+                          key={`cat-order-input-${cat.id}-${cat.order ?? index + 1}`}
+                          onBlur={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            if (!isNaN(val) && val > 0 && val !== (cat.order ?? index + 1)) {
+                              handleUpdateCategoryOrder(cat.id || cat.slug, val);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              const val = parseInt((e.target as HTMLInputElement).value, 10);
+                              if (!isNaN(val) && val > 0 && val !== (cat.order ?? index + 1)) {
+                                handleUpdateCategoryOrder(cat.id || cat.slug, val);
+                              }
+                            }
+                          }}
+                          className="w-12 h-6 text-center text-xs font-bold rounded border border-border bg-background focus:ring-1 focus:ring-primary outline-none"
+                          title="Type order number (1 = first) and hit Enter or click outside"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Prominent Edit & Remove Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/50">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditCategory(cat)}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                        title="Edit category details and order"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
 
                       <button
                         type="button"
-                        onClick={() => handleDeleteCategory(cat.id)}
-                        className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 dark:border-red-900/50 dark:hover:bg-red-950/40 transition-colors"
-                        title="Remove collection card"
+                        onClick={() => handleDeleteCategory(cat.id || cat.slug)}
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 dark:border-red-900/50 dark:hover:bg-red-950/40 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                        title="Remove this category"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3 h-3" />
+                        <span>Remove</span>
                       </button>
                     </div>
                   </div>
@@ -4470,45 +4786,74 @@ https://alnaya.in/products`;
               {/* Category & Stock */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Category *</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-foreground">Category *</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const currentCat = categoriesList.find((c) => c.slug === formState.category);
+                          if (currentCat) {
+                            handleOpenEditCategory(currentCat);
+                          } else {
+                            handleOpenAddCategory();
+                          }
+                        }}
+                        className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
+                        title="Edit currently selected category"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
+                      <span className="text-muted-foreground text-xs">•</span>
+                      <button
+                        type="button"
+                        onClick={handleOpenAddCategory}
+                        className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+                        title="Create a new jewelry category"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>New</span>
+                      </button>
+                    </div>
+                  </div>
                   <select
                     value={formState.category}
-                    onChange={(e) => setFormState({ ...formState, category: e.target.value })}
+                    onChange={(e) => {
+                      const newCat = e.target.value;
+                      const isRing = isRingCategory(newCat);
+                      const isBangle = isBangleCategory(newCat);
+                      let newSizes = formState.selectedSizes;
+                      const newSizeStock = { ...formState.sizeStock };
+                      if (isRing && !formState.selectedSizes.some((s) => RING_SPECIFIC_SIZES.includes(s))) {
+                        newSizes = [...RING_SPECIFIC_SIZES];
+                        RING_SPECIFIC_SIZES.forEach((s) => {
+                          if (newSizeStock[s] === undefined) newSizeStock[s] = 1;
+                        });
+                      } else if (isBangle && !formState.selectedSizes.some((s) => BANGLE_SPECIFIC_SIZES.includes(s))) {
+                        newSizes = [...BANGLE_SPECIFIC_SIZES];
+                        BANGLE_SPECIFIC_SIZES.forEach((s) => {
+                          if (newSizeStock[s] === undefined) newSizeStock[s] = 1;
+                        });
+                      }
+                      setFormState({
+                        ...formState,
+                        category: newCat,
+                        selectedSizes: newSizes,
+                        sizeStock: newSizeStock,
+                      });
+                    }}
                     className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
                   >
-                    <optgroup label="Alnaya Core Collections">
-                      <option value="jhumkas">Jhumkas</option>
-                      <option value="minimal-chains">Minimal Chains</option>
-                      <option value="hanging-chains">Hanging Chains</option>
-                      <option value="traditional-sets">Traditional Sets</option>
-                      <option value="stud-and-hoops">Stud & Hoops</option>
-                      <option value="traditional-earrings">Traditional Earrings</option>
-                      <option value="bangles">Bangles</option>
-                      <option value="bangles-kada">Bangles / Kada</option>
-                      <option value="bracelet">Bracelet</option>
-                      <option value="bracelets">Bracelets</option>
-                      <option value="ring">Ring</option>
-                      <option value="rings">Rings</option>
-                      <option value="anklets">Anklets</option>
-                      <option value="nosepin">Nosepin</option>
-                      <option value="offer-products">Offer Products</option>
-                    </optgroup>
-                    {categoriesList.filter(c => ![
-                      "jhumkas", "minimal-chains", "hanging-chains", "traditional-sets", 
-                      "stud-and-hoops", "traditional-earrings", "bangles", "bangles-kada", 
-                      "bracelet", "bracelets", "ring", "rings", "anklets", "nosepin", "offer-products"
-                    ].includes(c.slug)).length > 0 && (
-                      <optgroup label="Other Collections">
-                        {categoriesList
-                          .filter(c => ![
-                            "jhumkas", "minimal-chains", "hanging-chains", "traditional-sets", 
-                            "stud-and-hoops", "traditional-earrings", "bangles", "bangles-kada", 
-                            "bracelet", "bracelets", "ring", "rings", "anklets", "nosepin", "offer-products"
-                          ].includes(c.slug))
-                          .map((c) => (
-                            <option key={c.slug} value={c.slug}>{c.name}</option>
-                          ))}
-                      </optgroup>
+                    {sortedCategories.map((c) => (
+                      <option key={c.id || c.slug} value={c.slug}>
+                        {c.name}
+                      </option>
+                    ))}
+                    {!sortedCategories.some((c) => c.slug === formState.category) && formState.category && (
+                      <option value={formState.category}>
+                        {formState.category.charAt(0).toUpperCase() + formState.category.slice(1).replace(/-/g, " ")}
+                      </option>
                     )}
                   </select>
                 </div>
@@ -5910,10 +6255,10 @@ https://alnaya.in/products`;
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-foreground">
-                  {editingCategory ? "Edit Curated Collection Card" : "Add New Collection Card"}
+                  {editingCategory ? "Edit Category" : "Add New Category"}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Customize the title, photo, and URL slug shown on the homepage grid.
+                  Create or edit a jewelry category for the Homepage grid, Catalog filters, and Product setup.
                 </p>
               </div>
               <button
@@ -5927,7 +6272,7 @@ https://alnaya.in/products`;
 
             <form onSubmit={handleSaveCategoryModal} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-foreground">Collection Name *</label>
+                <label className="text-xs font-semibold text-foreground">Category Name *</label>
                 <input
                   type="text"
                   required
@@ -5967,6 +6312,25 @@ https://alnaya.in/products`;
                   value={categoryForm.description}
                   onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
                   className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground">Display Order / Numbering *</label>
+                  <span className="text-[10px] text-muted-foreground">Order position (1 = first, 2 = second, etc.)</span>
+                </div>
+                <input
+                  type="number"
+                  min={1}
+                  required
+                  placeholder="1"
+                  value={categoryForm.order ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value === "" ? "" : parseInt(e.target.value, 10);
+                    setCategoryForm({ ...categoryForm, order: isNaN(val as number) ? "" : val });
+                  }}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-background border border-border focus:ring-1 focus:ring-primary outline-none font-semibold"
                 />
               </div>
 
@@ -6038,23 +6402,41 @@ https://alnaya.in/products`;
                 )}
               </div>
 
-              <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsCategoryModalOpen(false)}
-                  disabled={isSavingItem || isUploading}
-                  className="px-4 py-2 rounded-xl border border-border text-xs font-semibold hover:bg-muted disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingItem || isUploading || !categoryForm.name}
-                  className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 shadow-md disabled:opacity-50 flex items-center gap-1.5"
-                >
-                  {isSavingItem && <Clock className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{isSavingItem ? "Saving..." : editingCategory ? "Update Card" : "Add Card"}</span>
-                </button>
+              <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+                {editingCategory ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCategoryModalOpen(false);
+                      handleDeleteCategory(editingCategory.id || editingCategory.slug);
+                    }}
+                    className="px-3.5 py-2 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 dark:border-red-900/50 dark:bg-red-950/30 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Category</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCategoryModalOpen(false)}
+                    disabled={isSavingItem || isUploading}
+                    className="px-4 py-2 rounded-xl border border-border text-xs font-semibold hover:bg-muted disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingItem || isUploading || !categoryForm.name}
+                    className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 shadow-md disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    {isSavingItem && <Clock className="w-3.5 h-3.5 animate-spin" />}
+                    <span>{isSavingItem ? "Saving..." : editingCategory ? "Update Category" : "Add Category"}</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>

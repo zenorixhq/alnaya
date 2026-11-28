@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { storeConfig } from "@/config/store.config";
@@ -44,6 +44,24 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [customCategories, setCustomCategories] = useState<{ label: string; href: string }[]>([]);
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem("alnaya_categories_v8");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setCustomCategories(
+            parsed.map((c: any) => ({
+              label: c.name,
+              href: `/products?category=${c.slug}`,
+            }))
+          );
+        }
+      }
+    } catch (e) {}
+  }, []);
+
   const searchResults = searchQuery.trim()
     ? products
         .filter(
@@ -68,7 +86,7 @@ export function Header() {
     { label: "Offer Products", href: "/products?category=offer-products", highlight: true },
   ];
 
-  const allCategoryLinks = [
+  const defaultCategoryLinks = [
     { label: "Shop All", href: "/products" },
     { label: "Jhumkas", href: "/products?category=jhumkas" },
     { label: "Minimal Chains", href: "/products?category=minimal-chains" },
@@ -83,6 +101,13 @@ export function Header() {
     { label: "Nosepin", href: "/products?category=nosepin" },
     { label: "Offer Products", href: "/products?category=offer-products" },
   ];
+
+  const allCategoryLinks = useMemo(() => {
+    if (customCategories.length > 0) {
+      return [{ label: "Shop All", href: "/products" }, ...customCategories];
+    }
+    return defaultCategoryLinks;
+  }, [customCategories]);
 
   return (
     <>

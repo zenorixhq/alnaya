@@ -59,7 +59,8 @@ export interface Category {
   name: string;
   description: string;
   image: string;
-  productCount: number;
+  productCount?: number;
+  order?: number;
 }
 
 export interface CartItem {

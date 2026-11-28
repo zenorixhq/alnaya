@@ -24,6 +24,7 @@ async function getStoredCategories(): Promise<Category[]> {
     if (row?.value) {
       const parsed = JSON.parse(row.value);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        parsed.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
         return parsed;
       }
     }
@@ -61,11 +62,13 @@ export async function POST(req: Request) {
 
     // If whole list is passed: { categories: [...] }
     if (Array.isArray(body.categories)) {
-      const success = await saveCategories(body.categories);
+      const sorted = [...body.categories];
+      sorted.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
+      const success = await saveCategories(sorted);
       if (!success) {
         return NextResponse.json({ error: "Failed to persist categories to database" }, { status: 500 });
       }
-      return NextResponse.json({ success: true, categories: body.categories }, { headers: NO_CACHE_HEADERS });
+      return NextResponse.json({ success: true, categories: sorted }, { headers: NO_CACHE_HEADERS });
     }
 
     // Adding a single new category
@@ -84,9 +87,11 @@ export async function POST(req: Request) {
       description: body.description || "",
       image: body.image || "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800",
       productCount: typeof body.productCount === "number" ? body.productCount : 0,
+      order: typeof body.order === "number" ? body.order : currentList.length + 1,
     };
 
     const updated = [...currentList, newCategory];
+    updated.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
     await saveCategories(updated);
     return NextResponse.json({ success: true, item: newCategory, categories: updated }, { headers: NO_CACHE_HEADERS });
   } catch (err: any) {
@@ -98,7 +103,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { id, image, name, description, slug } = body;
+    const { id, image, name, description, slug, order } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Category ID is required" }, { status: 400 });
@@ -116,6 +121,7 @@ export async function PUT(req: Request) {
           name: name !== undefined ? name : cat.name,
           description: description !== undefined ? description : cat.description,
           slug: slug !== undefined ? slug : cat.slug,
+          order: order !== undefined ? Number(order) : cat.order,
         };
       }
       return cat;
@@ -130,9 +136,11 @@ export async function PUT(req: Request) {
         description: description || "",
         image: image || "",
         productCount: 0,
+        order: order !== undefined ? Number(order) : currentList.length + 1,
       });
     }
 
+    updated.sort((a: Category, b: Category) => (Number(a.order ?? 999)) - (Number(b.order ?? 999)));
     const success = await saveCategories(updated);
     if (!success) {
       return NextResponse.json({ error: "Failed to update category in database" }, { status: 500 });
